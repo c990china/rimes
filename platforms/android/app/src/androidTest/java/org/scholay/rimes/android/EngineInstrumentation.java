@@ -11,6 +11,9 @@ public final class EngineInstrumentation extends Instrumentation {
     @Override public void onStart() {
         Bundle result=new Bundle();
         try {
+            if(arguments!=null && "feedback-engine".equals(arguments.getString("mode"))) {
+                result.putString("stream",EngineFeedbackContract.run(this)); finish(-1,result); return;
+            }
             if(arguments!=null && "community-prepare".equals(arguments.getString("mode"))) {
                 CommunitySettingsContract.prepare(this);
                 result.putString("stream","PASS community test preferences backed up; learning and remote AI disabled\n"); finish(-1,result); return;
