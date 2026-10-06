@@ -1,0 +1,94 @@
+{
+  "product": "RIMES",
+  "version": "1.1.0-preview.1",
+  "nativeVersion": "1.1.0",
+  "commit": "f5057d3ba467ec9a04a67e5e0664b1d8c5224741",
+  "sourceSnapshot": "5bb0b6a84b6fd7c3a41faefb1489de1d9253336bbbd022c0423a3139f70516b3",
+  "channel": "internal-candidate",
+  "signed": false,
+  "installed": false,
+  "publicRelease": false,
+  "architectures": [
+    "x64",
+    "x86"
+  ],
+  "brokerArchitecture": "x64",
+  "acceptance": {
+    "path": "D:\\AI\\rimes-windows-feedback-20261007\\final-reports\\build-result.json",
+    "sha256": "1f1cc408acfcf0b560d3742a111090ecf8bb12e793dfbea8fc55365753ab24e3",
+    "status": "passed"
+  },
+  "sourceManifestSHA256": "5bb0b6a84b6fd7c3a41faefb1489de1d9253336bbbd022c0423a3139f70516b3",
+  "dependencies": {
+    "packageCommit": "26635fc90ee5a64fb559ceb8c70c868385060d58",
+    "packageManifestSHA256": "5b522ffed4ddd302936a4a7cb1b011f5fca09cc98e483d86fa697b502727a0c4",
+    "rimeDLLSHA256": "86b4c7357d4c6d293ce5589b234d8859ca2ac30923a03bedfa3926eeaf97fb0b",
+    "sharedData": "D:\\AI\\rimes-1.1.0-20261004\\product-shared-final"
+  },
+  "binaries": [
+    {
+      "architecture": "x64",
+      "name": "RimesTsf.dll",
+      "bytes": 388096,
+      "sha256": "600399c8092958800a74aceeebc75e4ff67b20ac781ffb3a05365e7ef2dd3ad1"
+    },
+    {
+      "architecture": "x64",
+      "name": "RimesRegistrar.exe",
+      "bytes": 160256,
+      "sha256": "ad37d517edc29c43f0ffe08e3147674158661f4b2dd131a49b815ee063060aa2"
+    },
+    {
+      "architecture": "x64",
+      "name": "RimesTsfTestHost.exe",
+      "bytes": 114688,
+      "sha256": "8f5cc96f11b5b2857f7f4db303ef81e503ddfbea53bbac3ae22ba81a8307dbdd"
+    },
+    {
+      "architecture": "x64",
+      "name": "RimesBroker.exe",
+      "bytes": 834048,
+      "sha256": "94110bcfb6442706bb85f42ca956621fd60cb7c137686ff39b0cf69d99c375fd"
+    },
+    {
+      "architecture": "x86",
+      "name": "RimesTsf.dll",
+      "bytes": 347648,
+      "sha256": "0242853405faa7b24ab80bdc74f2d7174f8c5232d4190a5b658e29ed37411290"
+    },
+    {
+      "architecture": "x86",
+      "name": "RimesRegistrar.exe",
+      "bytes": 154112,
+      "sha256": "ba6d41012ab31b4950e60030f07bb6b1dfa19c5e35ced94f117dc57d9300ef0e"
+    },
+    {
+      "architecture": "x86",
+      "name": "RimesTsfTestHost.exe",
+      "bytes": 112640,
+      "sha256": "a86d7a4b14d773e226956e1da7e5daf789fb43c63661215f30570503c31fd0b5"
+    }
+  ],
+  "assets": [
+    {
+      "name": "RIMES-Windows-1.1.0-preview.1.zip",
+      "bytes": 49021718,
+      "sha256": "f8f87ea41ddd2ddf95d71dfca44c3fdbb60f7dee1906ec3b443f333ac46ccd75"
+    },
+    {
+      "name": "RIMES-Windows-1.1.0-preview.1-Setup.exe",
+      "bytes": 49143296,
+      "sha256": "16a7491913306524f0c0404ea0e32e53c3fe295e889fb8bb64e1b26a5f453219"
+    }
+  ],
+  "setupVerification": {
+    "verified": true,
+    "installed": false,
+    "version": "1.1.0-preview.1",
+    "commit": "f5057d3ba467ec9a04a67e5e0664b1d8c5224741",
+    "signing": "unsigned",
+    "files": 109,
+    "setupSHA256": "16a7491913306524f0c0404ea0e32e53c3fe295e889fb8bb64e1b26a5f453219",
+    "payloadSHA256": "f8f87ea41ddd2ddf95d71dfca44c3fdbb60f7dee1906ec3b443f333ac46ccd75"
+  }
+}

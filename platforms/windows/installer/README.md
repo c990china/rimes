@@ -27,4 +27,6 @@ Windows 11 x64；包括 x64/x86 TSF 和一个 x64 Broker。采用未签名 EXE �
 
 安装器将“安装的应用”记录、开始菜单入口与两架构注册作为同一次操作处理。任一步失败都会尝试恢复之前的注册、启动项、卸载记录与入口；恢复失败会明确报错，不显示安装或卸载成功。同版本重装会修复缺失的系统入口。回退到没有图形卸载脚本的早期包时，继续使用保留版本目录中已校验的新版卸载器。
 
+回退到早期包后请继续从 Windows“安装的应用”卸载，或运行卸载记录指向的新版 `Uninstall-App.ps1`；不要手工调用旧版目录中的原始 `Uninstall.ps1`，旧脚本无法清理新增的系统入口。
+
 维护者可在源码仓库运行 `platforms/windows/tests/Test-InstalledAppsLifecycle.ps1 -OutputDirectory 新临时目录`，在管理员 64 位 PowerShell 中验证全新安装、升级、回退、部分失败和卸载规则。该测试只写临时文件及 `HKLM\SOFTWARE\Scholay\RIMES-Installer-Tests\随机ID`，使用假 TSF/Broker，不注册、停止或卸载正在使用的输入法。
