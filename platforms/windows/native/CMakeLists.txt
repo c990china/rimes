@@ -112,6 +112,7 @@ add_executable(RimesBroker
     src/broker/main.cpp
     src/broker/named_pipe_server.cpp
     src/broker/single_instance.cpp
+    src/broker/ui_command.cpp
     src/broker/win32_security.cpp
 )
 target_include_directories(RimesBroker PRIVATE
@@ -173,7 +174,7 @@ rimes_harden_target(RimesRegistrar)
 rimes_use_unicode_console_entrypoint(RimesRegistrar)
 
 if(RIMES_BUILD_TESTS)
-    add_executable(RimesProductProbe src/engine/product_probe.cpp)
+    add_executable(RimesProductProbe src/engine/product_probe.cpp src/broker/key_translation.cpp)
     target_link_libraries(RimesProductProbe PRIVATE RimesEngine)
     rimes_harden_target(RimesProductProbe)
     rimes_use_unicode_console_entrypoint(RimesProductProbe)
@@ -241,6 +242,17 @@ if(RIMES_BUILD_TESTS)
     target_link_libraries(RimesBrokerOptionsTests PRIVATE RimesCore)
     rimes_harden_target(RimesBrokerOptionsTests)
     rimes_use_unicode_console_entrypoint(RimesBrokerOptionsTests)
+    add_executable(RimesUiCommandTests
+        src/broker/ui_command_tests.cpp
+        src/broker/broker_connection.cpp
+        src/broker/key_translation.cpp
+        src/broker/autostart.cpp
+        src/broker/default_paths.cpp
+    )
+    target_link_libraries(RimesUiCommandTests PRIVATE RimesEngine RimesWorkbench)
+    rimes_harden_target(RimesUiCommandTests)
+    add_test(NAME RimesUiCommand COMMAND RimesUiCommandTests)
+    set_tests_properties(RimesUiCommand PROPERTIES TIMEOUT 10)
 
     add_executable(RimesCandidateLayoutTests
         src/tsf/candidate_layout_tests.cpp

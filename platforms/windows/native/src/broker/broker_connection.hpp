@@ -7,6 +7,7 @@
 
 #include <bitset>
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <unordered_map>
 
@@ -23,7 +24,8 @@ namespace rimes::windows::broker {
 class BrokerConnection final {
  public:
   BrokerConnection(DWORD broker_session_id, engine::RimeEngine* engine,
-                   workbench::Runtime* runtime = nullptr) noexcept;
+                   workbench::Runtime* runtime = nullptr,
+                   std::function<bool()> open_settings = {}) noexcept;
   ~BrokerConnection();
 
   BrokerConnection(const BrokerConnection&) = delete;
@@ -76,6 +78,7 @@ class BrokerConnection final {
   engine::RimeEngine* engine_;
   bool hello_received_ = false;
   workbench::Runtime* runtime_;
+  std::function<bool()> open_settings_;
   DWORD peer_process_ = 0;
   std::uint64_t next_session_id_ = 1;
   std::unordered_map<std::uint64_t, SessionState> sessions_;

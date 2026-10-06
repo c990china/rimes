@@ -107,6 +107,12 @@ bool ParseBrokerOptions(int argc, wchar_t** argv, BrokerOptions* options,
         }
         saw_paths = true;
         parsed.print_paths = true;
+      } else if (argument == L"--settings") {
+        if (parsed.open_settings) {
+          SetError(error, L"duplicate option: --settings");
+          return false;
+        }
+        parsed.open_settings = true;
       } else if (argument == L"--install-autostart") {
         if (saw_install_autostart) {
           SetError(error, L"duplicate option: --install-autostart");
@@ -181,6 +187,13 @@ bool ParseBrokerOptions(int argc, wchar_t** argv, BrokerOptions* options,
     const bool has_any_engine_option = saw_dll || saw_shared || saw_user ||
                                        saw_log || saw_full_maintenance ||
                                        parsed.deploy_only;
+    if (parsed.open_settings &&
+        (parsed.serve_once || parsed.print_endpoint || parsed.print_paths ||
+         parsed.install_autostart || parsed.remove_autostart ||
+         parsed.deploy_only)) {
+      SetError(error, L"--settings cannot be combined with headless or diagnostic commands");
+      return false;
+    }
     if (parsed.print_endpoint) {
       if (parsed.serve_once || parsed.print_paths || parsed.install_autostart ||
           parsed.remove_autostart || has_any_engine_option) {

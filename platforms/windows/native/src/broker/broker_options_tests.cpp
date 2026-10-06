@@ -163,6 +163,29 @@ void TestAmbiguousOrRelativeConfigurationFails() {
   }
 }
 
+void TestSettingsLaunchAndConflictingCommands() {
+  Arguments launch{L"RimesBroker.exe", L"--settings", L"--rime-dll", kDllPath,
+                   L"--shared-data-dir", kSharedPath, L"--user-data-dir",
+                   kUserPath, L"--log-dir", kLogPath};
+  BrokerOptions options;
+  std::wstring error;
+  EXPECT(Parse(&launch, &options, &error));
+  EXPECT(options.open_settings && !options.serve_once && !options.deploy_only);
+  for (const auto* conflicting : {L"--settings", L"--once", L"--deploy-only",
+                                 L"--print-endpoint", L"--print-paths",
+                                 L"--install-autostart", L"--remove-autostart",
+                                 L"--help"}) {
+    Arguments arguments{L"RimesBroker.exe", L"--settings", conflicting};
+    EXPECT(!Parse(&arguments, &options, &error));
+    EXPECT(!error.empty());
+  }
+#if defined(_WIN32)
+  Arguments defaults{L"RimesBroker.exe", L"--settings"};
+  EXPECT(Parse(&defaults, &options, &error));
+  EXPECT(options.open_settings && options.used_default_paths);
+#endif
+}
+
 }  // namespace
 
 int RunBrokerOptionsTests() {
@@ -170,6 +193,7 @@ int RunBrokerOptionsTests() {
   TestDiagnosticsNeedNoEngine();
   TestExplicitEngineConfiguration();
   TestAmbiguousOrRelativeConfigurationFails();
+  TestSettingsLaunchAndConflictingCommands();
   return g_failures == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

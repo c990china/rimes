@@ -110,6 +110,8 @@ void TestOwnedClicksAndTransientDetails() {
         "closing unsaved settings restores the original theme");
 }
 void TestPluginManagementAndChordSelection() {
+  Check(std::wstring(ui::kSettingsSchemeTitles[5]) == L"isaac2026",
+        "chord scheme uses its current product name");
   int changes = 0;
   std::string saved_schema;
   workbench::PluginView fixture{"builtin.apple-translation", "Translation", "1.1.0", "grant", true, true, true};

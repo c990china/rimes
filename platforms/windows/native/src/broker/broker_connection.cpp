@@ -42,10 +42,12 @@ void LogEngineFailure(std::string_view operation,
 
 BrokerConnection::BrokerConnection(DWORD broker_session_id,
                                    engine::RimeEngine* engine,
-                                   workbench::Runtime* runtime) noexcept
+                                   workbench::Runtime* runtime,
+                                   std::function<bool()> open_settings) noexcept
     : broker_session_id_(broker_session_id),
       engine_(engine),
-      runtime_(runtime) {}
+      runtime_(runtime),
+      open_settings_(std::move(open_settings)) {}
 
 BrokerConnection::~BrokerConnection() { CloseAllSessions(); }
 
@@ -78,6 +80,22 @@ ClientAction BrokerConnection::Handle(const core::Frame& request,
       return ClientAction::kCloseAfterResponse;
     }
     try {
+      if (message->value("op", "") == "open_settings") {
+        // The named-pipe server verifies SID/logon identity, and the Hello
+        // above verifies the peer PID. A UI command does not own an input
+        // context: never manufacture a Rime session or publish a focus target.
+        if (verified_client_process_id != peer_process_ ||
+            message->size() != 1 || !open_settings_) {
+          MakeError(request, core::BrokerErrorCode::kUnsupportedMessage,
+                    "settings require the authenticated interactive Broker",
+                    response);
+          return ClientAction::kCloseAfterResponse;
+        }
+        MakeResponse(request, core::MessageType::kControlState,
+                     core::EncodeControl({{"kind", open_settings_() ? "ok" : "starting"}}),
+                     response);
+        return ClientAction::kContinue;
+      }
       if (message->value("op", "") == "candidate_guard") {
         const auto session = sessions_.find(message->value("session", 0ULL));
         const bool valid =
