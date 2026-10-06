@@ -1,0 +1,91 @@
+{
+  "format_version": 1,
+  "completed_utc": "2026-10-06T18:21:40.799229+00:00",
+  "result": "PASS",
+  "container_exit_code": 0,
+  "scope": "x86_64 Linux container on ARM macOS development host; prebuilt static Android engine probe plus actual Android JNI shared library dlopen with pinned AOSP Bionic. No phone or Android framework/UI involved.",
+  "environment": {
+    "image": "debian:bookworm-slim",
+    "image_platform": "linux/amd64",
+    "image_digest": "sha256:7c7b2c966bc9ee8cedfeef67e0e279108992c77681fa595db4a9d65c06ccc587",
+    "image_id": "sha256:d4c45f66efc59f89b0597d343a9bd72808493c0eacecde5285961743252cee23",
+    "reported_machine": "x86_64",
+    "runtime_page_size_bytes": 4096,
+    "aosp_revision": "070571b455076f77a01c7b07154a15e545d2b428",
+    "runtime_apex_sha256": "11c91be1e1f1fe19af790a0c3a6f9db6e8e36d0ab74e403aabb3b81bbe31bdd9"
+  },
+  "input_hashes": {
+    "scripts/test-linux-native.py": "688d9d6a6e4cf25a0e184360a623962025868dfc0d69ffe45908f68fe5874390",
+    ".native/x86_64/bridge/engine_contract": "62efd18acfd6bf282cb88e2aece49e6ef0f28ee4059f5cd29bc1750a98ab2076",
+    ".native/x86_64/bridge/library_contract": "10207e4183f82b9e063e7304eb0bdca8beeab119c1db8e69d73b4355d88356ab",
+    "app/build/generated/rime/jniLibs/x86_64/librimes_jni.so": "35cfe8dd33ab3841140da148e5e2acba25d2d7163855d2f98d77c137c729e7fe",
+    "app/build/generated/rime/assets/rime/manifest.json": "29a450f2284f6e2acb0b8bcb595adf387f02c2185366a4c942ecfbc19e4fc20e"
+  },
+  "static_engine_probe": {
+    "normal_and_private_schemas": [
+      "rimes_pinyin",
+      "rimes_pinyin9",
+      "rimes_ziranma",
+      "rimes_wubi"
+    ],
+    "cases": {
+      "nihao": "你好",
+      "64426": "你好",
+      "nihk": "你好",
+      "wq": "你"
+    },
+    "nine_candidates_per_page": true,
+    "nonfirst_second_page_selection": true,
+    "chinese_comma": true,
+    "backspace_and_clear_composition": true,
+    "learning_export_after_first_process": {
+      "pinyin_simp": 2,
+      "wubi86": 1
+    },
+    "learning_export_after_restart": {
+      "pinyin_simp": 2,
+      "wubi86": 1
+    },
+    "private_existing_exports_unchanged": true,
+    "fresh_private": {
+      "pinyin_simp_exported_entries": 0,
+      "wubi86_export_return": -1,
+      "wubi86_userdb_did_not_preexist": true
+    }
+  },
+  "dynamic_android_library_probe": {
+    "dlopen": true,
+    "required_jni_symbol_present": true,
+    "private_schemas": {
+      "rimes_pinyin_private": {
+        "input": "nihao",
+        "commit": "你好"
+      },
+      "rimes_ziranma_private": {
+        "input": "nihk",
+        "commit": "你好"
+      },
+      "rimes_wubi_private": {
+        "input": "wq",
+        "commit": "你"
+      }
+    },
+    "jni_Java_calls_exercised": false,
+    "persistent_learning_exercised_in_dlopen_probe": false
+  },
+  "warnings": [
+    "AOSP linker reports missing /linkerconfig/ld.config.txt in generic Linux container; explicit LD_LIBRARY_PATH resolves pinned runtime libraries, checks still pass."
+  ],
+  "boundaries": [
+    "No Android emulator/framework/UI acceptance",
+    "No 16 KB page-size runtime acceptance; actual Linux kernel page size was 4096",
+    "No old Android or other OEM device acceptance",
+    "No real user dictionary or private preferences accessed",
+    "No host source/build receipt edits",
+    "One task-owned --rm container completed; no running containers remained; Docker daemon left running for parent restoration"
+  ],
+  "log_file": "x86-linux-contract.txt",
+  "log_sha256": "4484ed890ab56ed65ead6f9f0836646df270676ffb0aeabed54ba5fa66a99664",
+  "command": "docker run --rm --platform linux/amd64 --name rimes-android-x86-contract-20261007 [isolated checkout mounted read-only] debian:bookworm-slim /bin/bash /evidence/container-x86-contract.sh",
+  "container_setup": "apt-get install --no-install-recommends python3 e2fsprogs; copy only script, engine/library probes, pinned runtime.apex, current Android x86_64 .so and packaged synthetic system resources to ephemeral /work; run test-linux-native.py"
+}
