@@ -38,6 +38,7 @@ public final class InputContractInstrumentation extends Instrumentation {
             if("community".equals(arguments.getString("mode"))) communityContract();
             else if("chord".equals(arguments.getString("mode"))) chordContract();
             else if("touch".equals(arguments.getString("mode"))) nativeTouchContract();
+            else if("password".equals(arguments.getString("mode"))) { focus(host.first); pinyin(); passwordContract(); }
             else if("benchmark".equals(arguments.getString("mode"))) benchmark();
             else if("layout".equals(arguments.getString("mode"))) layoutContract();
             else if("plugins".equals(arguments.getString("mode"))) pluginsContract();
@@ -450,6 +451,46 @@ public final class InputContractInstrumentation extends Instrumentation {
         do { check(find("Buffer 插件：快问",false)==null,"password field exposes no online AI action"); SystemClock.sleep(50); } while(SystemClock.uptimeMillis()<until);
         expect(host.password,"","password editor unchanged by AI");
     }
+    /** Never skip a secure-IME substitution: diagnose the live state and retain the assertions. */
+    private void passwordContract() {
+        runOnMainSync(() -> {host.password.setText("");host.focus(host.password);host.getSystemService(InputMethodManager.class).restartInput(host.password);});
+        SystemClock.sleep(700); passwordDiagnostics("before-input");
+        AtomicReference<Boolean> focused=new AtomicReference<>(false);
+        runOnMainSync(() -> focused.set(host.password.hasFocus() && host.getCurrentFocus()==host.password));
+        check(focused.get(),"the actual native password editor has exclusive focus");
+        try {
+            type("nihao"); expect(host.password,"nihao","password direct input");
+            check(find("›",false)==null,"password has no candidates");
+            check(find("Buffer off",false)!=null && !find("Buffer off",false).isEnabled(),"password Buffer denied");
+            check(find("Buffer 插件：快问",false)==null,"password exposes no AI action");
+            passwordDiagnostics("passed"); report("PASS native password direct input, no candidates, Buffer/AI denied; no screenshot required");
+        } catch(RuntimeException | AssertionError error) {passwordDiagnostics("failed");throw error;}
+    }
+    /** Only focus/IME/window metadata; never editor text, labels or secure screenshots. */
+    private void passwordDiagnostics(String phase) {
+        AtomicReference<String> editor=new AtomicReference<>();
+        runOnMainSync(() -> {
+            InputMethodManager manager=host.getSystemService(InputMethodManager.class);
+            String current="unavailable-before-API34";
+            if(android.os.Build.VERSION.SDK_INT>=34) {
+                android.view.inputmethod.InputMethodInfo info=manager.getCurrentInputMethodInfo(); current=info==null?"null":info.getId();
+            }
+            android.view.WindowInsets insets=host.content.getRootWindowInsets();
+            String imeVisible=android.os.Build.VERSION.SDK_INT>=30?String.valueOf(insets!=null && insets.isVisible(android.view.WindowInsets.Type.ime())):"unavailable-before-API30";
+            editor.set("editorFocused="+host.password.hasFocus()+" currentFocusIsPassword="+(host.getCurrentFocus()==host.password)
+                    +" windowFocused="+host.password.hasWindowFocus()+" inputType=0x"+Integer.toHexString(host.password.getInputType())
+                    +" immActiveEditor="+manager.isActive(host.password)+" acceptingText="+manager.isAcceptingText()
+                    +" imeInsetsVisible="+imeVisible+" currentIme="+current+" configuredDefaultIme="
+                    +android.provider.Settings.Secure.getString(host.getContentResolver(),android.provider.Settings.Secure.DEFAULT_INPUT_METHOD));
+        });
+        report("PASSWORD_DIAGNOSTIC phase="+phase+" "+editor.get());
+        for(AccessibilityWindowInfo window:getUiAutomation().getWindows()) {
+            AccessibilityNodeInfo root=window.getRoot(); android.graphics.Rect rect=new android.graphics.Rect();window.getBoundsInScreen(rect);
+            report("PASSWORD_WINDOW phase="+phase+" id="+window.getId()+" type="+window.getType()+" active="+window.isActive()
+                    +" focused="+window.isFocused()+" bounds="+rect.toShortString()+" rootPackage="+(root==null?"null":root.getPackageName()));
+        }
+        report("PASSWORD_AX phase="+phase+" rimesQ="+(find("q",false)!=null)+" rimesN="+(find("n",false)!=null));
+    }
     private void contract() throws Exception {
         focus(host.first); pinyin(); type("nihao");
         check(find("Buffer off",false)!=null && !find("Buffer off",false).isEnabled(),"Buffer toggle locked during composition");
@@ -500,9 +541,7 @@ public final class InputContractInstrumentation extends Instrumentation {
         focus(host.privateInput); type("nihao"); tap("Space"); expect(host.privateInput,"你好","private Chinese");
         check(find("Buffer off",false)!=null && !find("Buffer off",false).isEnabled(),"private Buffer denied");
         if(!"true".equals(arguments.getString("skipPassword"))) {
-        focus(host.password); type("nihao"); expect(host.password,"nihao","password direct input");
-        check(find("›",false)==null,"password has no candidates");
-        check(find("Buffer off",false)!=null && !find("Buffer off",false).isEnabled(),"password Buffer denied");
+        passwordContract();
         } else report("PENDING password keyboard automation");
         focus(host.first); pinyin(); type("ni");
         runOnMainSync(() -> host.getSystemService(InputMethodManager.class).hideSoftInputFromWindow(host.first.getWindowToken(),0));
