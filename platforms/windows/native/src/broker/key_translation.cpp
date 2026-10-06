@@ -289,6 +289,45 @@ bool IsPrintableBaseKey(std::int32_t keycode) noexcept {
   return keycode >= 0x20 && keycode <= 0x7e;
 }
 
+std::int32_t TranslatePrintableModifiers(
+    std::int32_t keycode, const core::KeyEvent& event) noexcept {
+  // Rime expects the printable symbol, not the unshifted physical key. Its
+  // punctuator maps slash and question separately. Keep command bindings in
+  // their existing base-key form; those keys are not ordinary text input.
+  constexpr std::uint32_t command_modifiers =
+      Flag(core::KeyModifiers::kControl) | Flag(core::KeyModifiers::kAlt) |
+      Flag(core::KeyModifiers::kWindows);
+  if ((event.modifiers & command_modifiers) != 0) return keycode;
+
+  const bool shift = HasFlag(event.modifiers, Flag(core::KeyModifiers::kShift));
+  const bool caps = HasFlag(event.modifiers, Flag(core::KeyModifiers::kCapsLock));
+  if (keycode >= 'a' && keycode <= 'z')
+    return shift != caps ? keycode - 'a' + 'A' : keycode;
+  if (!shift) return keycode;
+
+  // The wire's virtual-key mapping is the existing US/Chinese ASCII layout.
+  // AltGr is rejected before this path; resolving arbitrary layouts requires
+  // text produced by the host's keyboard layout, which this protocol lacks.
+  if (keycode >= '0' && keycode <= '9') {
+    constexpr char shifted_digits[] = ")!@#$%^&*(";
+    return shifted_digits[keycode - '0'];
+  }
+  switch (keycode) {
+    case ';': return ':';
+    case '=': return '+';
+    case ',': return '<';
+    case '-': return '_';
+    case '.': return '>';
+    case '/': return '?';
+    case '`': return '~';
+    case '[': return '{';
+    case '\\': return '|';
+    case ']': return '}';
+    case '\'': return '"';
+    default: return keycode;
+  }
+}
+
 bool IsCompositionEditingKey(std::int32_t keycode) noexcept {
   switch (keycode) {
     case kBackspace:
@@ -325,7 +364,8 @@ std::optional<RimeKeyEvent> TranslateWindowsKey(
       *keycode > std::numeric_limits<std::int32_t>::max()) {
     return std::nullopt;
   }
-  return RimeKeyEvent{*keycode, TranslateModifiers(event)};
+  return RimeKeyEvent{TranslatePrintableModifiers(*keycode, event),
+                      TranslateModifiers(event)};
 }
 
 bool IsLikelyHandledForTest(const core::KeyEvent& event,
@@ -349,7 +389,8 @@ bool IsLikelyHandledForTest(const core::KeyEvent& event,
     return false;
   }
 
-  if (translated->keycode >= 'a' && translated->keycode <= 'z') {
+  if ((translated->keycode >= 'a' && translated->keycode <= 'z') ||
+      (translated->keycode >= 'A' && translated->keycode <= 'Z')) {
     return true;
   }
   return session_is_composing &&
