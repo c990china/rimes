@@ -35,7 +35,8 @@ public final class InputContractInstrumentation extends Instrumentation {
             }
             removeMonitor(monitor); check(host!=null,"validation host launch within 15 seconds");
             waitForIdleSync(); report("START contract");
-            if("chord".equals(arguments.getString("mode"))) chordContract();
+            if("community".equals(arguments.getString("mode"))) communityContract();
+            else if("chord".equals(arguments.getString("mode"))) chordContract();
             else if("touch".equals(arguments.getString("mode"))) nativeTouchContract();
             else if("benchmark".equals(arguments.getString("mode"))) benchmark();
             else if("layout".equals(arguments.getString("mode"))) layoutContract();
@@ -173,13 +174,17 @@ public final class InputContractInstrumentation extends Instrumentation {
             check(send.isEnabled() && send.performAction(AccessibilityNodeInfo.ACTION_LONG_CLICK),"long click Insert next sends all");
             SystemClock.sleep(120); return;
         }
-        // Idle candidate space is now the plugin bar. QWERTY punctuation lives on 123;
-        // nine-key has its explicit selector, while the chord comma remains a direct key.
+        // Match the visible glyph: current QWERTY has permanent marks, while older
+        // layouts and nine-key route through their number page or punctuation selector.
         if((value.equals(",") || value.equals(".")) && modern() && find(value,false)==null) {
+            String chinese=value.equals(",")?"，":"。";
+            if(find(chinese,false)!=null) { click(chinese); return; }
             if(find("q",false)!=null) {
-                click("123"); click(value); click("ABC"); return;
+                click("123"); click(find(value,false)==null && find(chinese,false)!=null?chinese:value); click("ABC"); return;
             }
-            if(find("中文标点",false)!=null) { click("中文标点"); click(value); return; }
+            if(find("中文标点",false)!=null) {
+                click("中文标点"); click(find(value,false)==null && find(chinese,false)!=null?chinese:value); return;
+            }
         }
         if(value.startsWith("Buffer 插件：")) {
             for(int action:new int[]{AccessibilityNodeInfo.ACTION_SCROLL_FORWARD,AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD}) {
@@ -581,7 +586,8 @@ public final class InputContractInstrumentation extends Instrumentation {
             check(key.left>=0 && key.right<=host.getResources().getDisplayMetrics().widthPixels,"key within display: "+c);
         }
         check(a.left>q.left && z.left>a.left,"staggered equal-width rows");
-        check(space.width()>q.width()*4,"wide Space");
+        check(space.width()>=q.width()*3,"seven-key footer keeps Space at least three letter cells wide");
+        check(Math.abs(space.exactCenterX()-(q.left+bounds("p").right)/2f)<=host.getResources().getDisplayMetrics().density,"Space is centered within the QWERTY letter range");
         check(Math.abs(shift.top-z.top)<=1 && Math.abs(del.top-z.top)<=1,"Shift and Delete flank third row");
         check(bounds("Enter").bottom<=host.getResources().getDisplayMetrics().heightPixels,"Return above system navigation");
     }
@@ -651,6 +657,276 @@ public final class InputContractInstrumentation extends Instrumentation {
         finalRightUp(down,right);
     }
     private void chooseChord(boolean split) { tap("键位布局"); tap(split?"布局 分体并击":"布局 正交并击"); tap("键位布局"); waitButton("D"); }
+    /** New community feedback contract; existing modes retain their independent assertions. */
+    private void communityContract() throws Exception {
+        touchHostField(); focusAny(host.first); layout("26"); pinyin();
+        int start=assertions;
+        type("nihao"); waitButton("你好"); touch("，"); expect(host.first,"你好，","footer comma confirms current Chinese before punctuation");
+        type("nihao"); waitButton("你好"); touch("。"); expect(host.first,"你好，你好。","footer period confirms current Chinese before punctuation");
+        report("COMMUNITY native punctuation checks="+(assertions-start)); start=assertions;
+
+        focusAny(host.first); layout("9");
+        android.graphics.Rect abc=bounds("九键 2 ABC"),space=bounds("Space"),del=bounds("Delete"),enter=bounds("Enter");
+        check(Math.abs(space.height()-abc.height())<=2,"nine-key Space has one full row");
+        check(space.width()>=abc.width()*2.8,"nine-key Space spans the central three columns");
+        check(Math.abs(space.exactCenterX()-(abc.left+abc.width()/2f))<=abc.width()*0.55,"nine-key Space is centered on the numeric grid");
+        check(del.height()>=abc.height()*1.9 && Math.abs(del.height()-enter.height())<=2,"nine-key Delete and Return each span two rows");
+        check(Math.abs(del.top-abc.top)<=2 && del.bottom<=enter.top+2,"nine-key Delete owns the upper two right-hand rows");
+        nine("64426"); expect(host.first,"ni'hao","nine-key host composing text is phonetic, not keypad digits");
+        communityScreenshot("native-nine-key");
+        touch("你好"); expect(host.first,"你好","nine-key real candidate touch commits Chinese");
+        report("COMMUNITY nine-key geometry/composition checks="+(assertions-start)); start=assertions;
+
+        focusAny(host.first); layout("26"); pinyin(); tap("Buffer off");
+        type("nihao"); tap("Space"); type("ni"); waitLabel("Buffer 你好ni",true);
+        expect(host.first,"","Buffer composing and confirmed text remain isolated");
+        touch("清空 Buffer"); waitLabel("Buffer ",true); expectStable(host.first,"","permanent Clear never mutates the host");
+        check(pluginSendButton()!=null && !pluginSendButton().isEnabled(),"Clear disables delivery of discarded blocks");
+        check(find("你好",false)==null,"Clear removes stale composition candidates");
+        type("nihao"); tap("Space"); touch("Insert"); expect(host.first,"你好","fresh Buffer sends without discarded old content");
+        waitLabel("Buffer ",true); tap("Enter"); expectStable(host.first,"你好","empty Buffer Return cannot replay cleared content");
+        report("COMMUNITY permanent Buffer clear checks="+(assertions-start)); start=assertions;
+
+        communityHeldDelete(); communityBufferDelete(); communityHeldTarget();
+        report("COMMUNITY held native/codepoint/Buffer/target checks="+(assertions-start)); start=assertions;
+
+        focusAny(host.first); pinyin(); type("nihao"); waitButton("你好"); communitySwipeNumber("q");
+        expect(host.first,"你好1","hold/up number confirms Chinese and inserts a literal digit rather than candidate selection");
+        focusAny(host.first); tap("Buffer off"); type("nihao"); waitButton("你好"); communitySwipeNumber("q");
+        waitLabel("Buffer 你好1",true); expect(host.first,"","literal swipe number remains in Buffer");
+        touch("Insert"); expect(host.first,"你好1","Buffer delivers the literal swipe result once");
+        report("COMMUNITY real QWERTY swipe checks="+(assertions-start)); start=assertions;
+
+        focusAny(host.first); pinyin(); communityFooter(); communityScreenshot("portrait");
+        runOnMainSync(() -> host.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)); SystemClock.sleep(800);
+        check(host.getResources().getConfiguration().orientation==android.content.res.Configuration.ORIENTATION_LANDSCAPE,"community landscape configuration applied");
+        focusAny(host.first); pinyin(); communityFooter(); communityScreenshot("landscape");
+        runOnMainSync(() -> host.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)); SystemClock.sleep(700);
+        check(host.getResources().getConfiguration().orientation==android.content.res.Configuration.ORIENTATION_PORTRAIT,"community portrait restored");
+        focusAny(host.first); pinyin(); communityIdleShortcuts(); communityScreenshot("idle-shortcuts");
+        report("COMMUNITY visible footer/idle shortcut checks="+(assertions-start)); start=assertions;
+
+        communityWeb();
+        report("COMMUNITY WebView checks="+(assertions-start));
+        chooseChord(false); communityScreenshot("orthogonal-chord");
+        chooseChord(true); communityScreenshot("split-chord"); layout("26");
+        report("PASS COMMUNITY real native/WebView composition, fixed punctuation, nine-key phonetics/geometry, Clear, held deletion, literal swipe, footer pixels/touches, sampled stable idle plugin pixels");
+    }
+    private long communityDown(android.graphics.Rect rect) {
+        long down=SystemClock.uptimeMillis(); inject(down,android.view.MotionEvent.ACTION_DOWN,rect); return down;
+    }
+    private void communityUp(long down,android.graphics.Rect rect) { inject(down,android.view.MotionEvent.ACTION_UP,rect); SystemClock.sleep(200); }
+    private long communityHoldMillis() { return android.view.ViewConfiguration.getLongPressTimeout()+300L; }
+    private void communitySwipeNumber(String label) {
+        android.graphics.Rect origin=bounds(label),end=new android.graphics.Rect(origin);
+        end.offset(0,-Math.round(24*host.getResources().getDisplayMetrics().density));
+        long down=communityDown(origin); SystemClock.sleep(400);
+        inject(down,android.view.MotionEvent.ACTION_MOVE,end); communityUp(down,end);
+    }
+    private static boolean wellFormedUtf16(CharSequence text) {
+        for(int i=0;i<text.length();i++) {
+            char value=text.charAt(i);
+            if(Character.isHighSurrogate(value)) { if(++i>=text.length() || !Character.isLowSurrogate(text.charAt(i))) return false; }
+            else if(Character.isLowSurrogate(value)) return false;
+        }
+        return true;
+    }
+    private void communityHeldDelete() {
+        focusAny(host.first); pinyin();
+        String original="abcdefghijklmnopqrstuvwx😀𠮷Z";
+        runOnMainSync(() -> { host.first.setText(original); host.first.setSelection(original.length()); }); SystemClock.sleep(250);
+        java.util.concurrent.atomic.AtomicBoolean valid=new java.util.concurrent.atomic.AtomicBoolean(true);
+        java.util.concurrent.atomic.AtomicInteger mutations=new java.util.concurrent.atomic.AtomicInteger();
+        android.text.TextWatcher watcher=new android.text.TextWatcher() {
+            public void beforeTextChanged(CharSequence s,int start,int count,int after) {}
+            public void onTextChanged(CharSequence s,int start,int before,int count) { mutations.incrementAndGet(); if(!wellFormedUtf16(s)) valid.set(false); }
+            public void afterTextChanged(android.text.Editable value) {}
+        };
+        runOnMainSync(() -> host.first.addTextChangedListener(watcher));
+        try {
+            android.graphics.Rect key=bounds("Delete"); long down=communityDown(key);
+            SystemClock.sleep(communityHoldMillis()); communityUp(down,key);
+            String after=read(host.first);
+            check(mutations.get()>=3 && after.length()<original.length(),"real held Delete performs repeated host mutations");
+            check(valid.get() && wellFormedUtf16(after),"every native host deletion keeps non-BMP surrogate pairs intact");
+            check(original.startsWith(after),"held deletion only removes a suffix");
+            expectStable(host.first,after,"held Delete stops after release without late extra deletion");
+        } finally { runOnMainSync(() -> host.first.removeTextChangedListener(watcher)); }
+    }
+    private void communityBufferDelete() {
+        focusAny(host.first); pinyin(); tap("Buffer off"); type("nihao"); tap("Space"); waitLabel("Buffer 你好",true);
+        touch("Delete"); waitLabel("Buffer ",true); expect(host.first,"","short Delete removes one complete Chinese Buffer block");
+        for(int i=0;i<3;i++) { type("nihao"); tap("Space"); }
+        waitLabel("Buffer 你好你好你好",true); android.graphics.Rect key=bounds("Delete"); long down=communityDown(key);
+        SystemClock.sleep(communityHoldMillis()); communityUp(down,key); waitLabel("Buffer ",true);
+        expectStable(host.first,"","held empty Buffer deletion never falls through to host deletion");
+        check(pluginSendButton()!=null && !pluginSendButton().isEnabled(),"held Buffer deletion consumes complete blocks");
+    }
+    private void communityHeldTarget() {
+        focusAny(host.first); pinyin(); String original="abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz";
+        runOnMainSync(() -> {host.first.setText(original);host.first.setSelection(original.length());host.second.setText("fresh😀");}); SystemClock.sleep(250);
+        android.graphics.Rect key=bounds("Delete"); long down=communityDown(key); SystemClock.sleep(communityHoldMillis());
+        check(read(host.first).length()<original.length(),"old target receives authorized held deletions before switching");
+        runOnMainSync(() -> {host.focus(host.second);host.second.setSelection(host.second.getText().length());}); SystemClock.sleep(400);
+        expect(host.second,"fresh😀","target switch does not adopt old delete timer");
+        allowStaleRejection=true;
+        try { communityUp(down,key); } finally { allowStaleRejection=false; }
+        expectStable(host.second,"fresh😀","held Delete and late UP cannot delete the new target");
+        touch("Delete"); expect(host.second,"fresh","a fresh Delete still removes the new target's whole emoji");
+    }
+    private android.graphics.Rect communityImeBounds() {
+        for(AccessibilityWindowInfo window:getUiAutomation().getWindows()) if(window.getType()==AccessibilityWindowInfo.TYPE_INPUT_METHOD) {
+            android.graphics.Rect rect=new android.graphics.Rect(); window.getBoundsInScreen(rect); if(!rect.isEmpty()) return rect;
+        }
+        throw new AssertionError("Community footer requires a visible IME window");
+    }
+    private void communityFooter() {
+        String[] labels={"数字与字母","表情","，","Space","。","中英切换","Enter"};
+        android.graphics.Rect window=communityImeBounds(); android.graphics.Bitmap bitmap=getUiAutomation().takeScreenshot();
+        check(bitmap!=null,"footer has an actual screen raster");
+        try {
+            android.graphics.Rect screen=new android.graphics.Rect(0,0,bitmap.getWidth(),bitmap.getHeight());
+            float density=host.getResources().getDisplayMetrics().density; int top=-1,bottom=-1,last=-1;
+            for(String label:labels) {
+                android.graphics.Rect rect=bounds(label);
+                check(!rect.isEmpty() && window.contains(rect) && screen.contains(rect),"whole footer cell is inside the visible IME/display: "+label);
+                check(top<0 || Math.abs(rect.top-top)<=2 && Math.abs(rect.bottom-bottom)<=2,"footer shares one visible row: "+label);
+                check(last<0 || rect.left>=last-2,"footer semantic order: "+label); top=rect.top; bottom=rect.bottom; last=rect.right;
+                // OEM display/dark-mode transforms can change an accent swatch (the
+                // verified phone renders Apple's blue as #3B82F7). Require the same
+                // opaque blue fill in the upper and lower cap, rather than accepting
+                // an arbitrary background or adding device-specific colors to a list.
+                int accent=label.equals("Enter")?communityAccentFill(bitmap,rect):0;
+                int painted=0;
+                for(int offset:new int[]{5,7,9}) {
+                    int y=Math.max(rect.top,rect.bottom-Math.round(offset*density));
+                    for(float fraction:new float[]{0.2f,0.3f,0.7f,0.8f}) {
+                        int x=Math.min(rect.right-1,rect.left+Math.round(rect.width()*fraction));
+                        int color=bitmap.getPixel(x,y);
+                        if(label.equals("Enter")?color==accent:color==0xffffffff || color==0xffabb0ba
+                                || color==0xff6e6e6e || color==0xff404040) painted++;
+                    }
+                }
+                check(painted>=6,"footer lower cap is actually painted rather than cropped/covered: "+label);
+            }
+        } finally { bitmap.recycle(); }
+        touch("数字与字母"); waitButton("1"); touch("数字与字母"); waitButton("q");
+        touch("表情"); waitButton("😀"); touch("表情"); waitButton("q");
+        touch("，"); touch("Space"); touch("。"); expect(host.first,"， 。","footer mark/space centers deliver their visible values");
+        touch("中英切换"); touch("q"); expect(host.first,"， 。q","language center switches to direct English"); touch("中英切换");
+        java.util.concurrent.atomic.AtomicBoolean returnSeen=new java.util.concurrent.atomic.AtomicBoolean();
+        runOnMainSync(() -> host.first.setOnEditorActionListener((view,action,event) -> {returnSeen.set(true);return false;}));
+        try { touch("Enter"); check(returnSeen.get() || !"， 。q".equals(read(host.first)),"Return center reaches the real editor action/text path"); }
+        finally { runOnMainSync(() -> host.first.setOnEditorActionListener(null)); }
+    }
+    private int communityAccentFill(android.graphics.Bitmap bitmap,android.graphics.Rect rect) {
+        java.util.HashMap<Integer,Integer> counts=new java.util.HashMap<>();
+        for(float vertical:new float[]{0.2f,0.25f,0.3f}) for(float horizontal:new float[]{0.2f,0.3f,0.7f,0.8f}) {
+            int x=Math.min(rect.right-1,rect.left+Math.round(rect.width()*horizontal));
+            int y=Math.min(rect.bottom-1,rect.top+Math.round(rect.height()*vertical));
+            int color=bitmap.getPixel(x,y); counts.put(color,counts.getOrDefault(color,0)+1);
+        }
+        int color=0,count=0;
+        for(java.util.Map.Entry<Integer,Integer> sample:counts.entrySet()) if(sample.getValue()>count) {color=sample.getKey();count=sample.getValue();}
+        float[] expected=new float[3],actual=new float[3];
+        boolean dark=(host.getResources().getConfiguration().uiMode&android.content.res.Configuration.UI_MODE_NIGHT_MASK)==android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        android.graphics.Color.colorToHSV(dark?0xff0a84ff:0xff007aff,expected); android.graphics.Color.colorToHSV(color,actual);
+        float hue=Math.abs(expected[0]-actual[0]); hue=Math.min(hue,360-hue);
+        check(count>=6 && android.graphics.Color.alpha(color)==255 && hue<=15 && actual[1]>=0.65f && actual[2]>=0.7f,
+                "Return upper cap matches the opaque blue accent family before lower-edge comparison");
+        return color;
+    }
+    /** Delivery evidence contains only the IME window and synthetic keyboard state. */
+    private void communityScreenshot(String name) throws Exception {
+        android.graphics.Bitmap full=getUiAutomation().takeScreenshot(); check(full!=null,"community keyboard screenshot available");
+        android.graphics.Bitmap keyboard=null;
+        try {
+            android.graphics.Rect rect=communityImeBounds();
+            check(new android.graphics.Rect(0,0,full.getWidth(),full.getHeight()).contains(rect),"community screenshot contains the complete keyboard window");
+            keyboard=android.graphics.Bitmap.createBitmap(full,rect.left,rect.top,rect.width(),rect.height());
+            try(java.io.FileOutputStream out=getTargetContext().openFileOutput("community-"+name+".png",0)) {
+                check(keyboard.compress(android.graphics.Bitmap.CompressFormat.PNG,100,out),"community keyboard screenshot saved: "+name);
+            }
+        } finally { if(keyboard!=null && keyboard!=full) keyboard.recycle();full.recycle(); }
+    }
+    private long communityPluginRaster(android.graphics.Rect rect) {
+        android.graphics.Bitmap bitmap=getUiAutomation().takeScreenshot(); check(bitmap!=null,"idle shortcut raster available");
+        try {
+            check(new android.graphics.Rect(0,0,bitmap.getWidth(),bitmap.getHeight()).contains(rect),"shortcut ROI contains only visible keyboard pixels");
+            int[] pixels=new int[rect.width()*rect.height()]; bitmap.getPixels(pixels,0,rect.width(),rect.left,rect.top,rect.width(),rect.height());
+            java.util.zip.CRC32 crc=new java.util.zip.CRC32();
+            for(int pixel:pixels) {crc.update(pixel>>>24);crc.update(pixel>>>16);crc.update(pixel>>>8);crc.update(pixel);}
+            return crc.getValue();
+        } finally {bitmap.recycle();}
+    }
+    private void communityIdleShortcuts() {
+        runOnMainSync(() -> {host.first.setText("abcdefghijklmnopqrst");host.first.setSelection(20);}); SystemClock.sleep(250);
+        String[] labels={"Buffer 插件：翻译","Buffer 插件：快问","Buffer 插件：润色"};
+        for(int attempt=0;find(labels[0],false)==null && attempt<8;attempt++) {
+            for(AccessibilityWindowInfo window:getUiAutomation().getWindows()) if(scrollPluginBar(window.getRoot(),labels[0],AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD)) break;
+            SystemClock.sleep(80);
+        }
+        android.graphics.Rect[] rectangles=new android.graphics.Rect[labels.length]; android.graphics.Rect roi=new android.graphics.Rect();
+        for(int i=0;i<labels.length;i++) {rectangles[i]=bounds(labels[i]);roi.union(rectangles[i]);}
+        long baseline=communityPluginRaster(roi);
+        for(int step=0;step<8;step++) {
+            touch("Delete");
+            for(int i=0;i<labels.length;i++) {
+                AccessibilityNodeInfo chip=find(labels[i],false); android.graphics.Rect current=new android.graphics.Rect();
+                check(chip!=null && chip.isEnabled() && chip.isVisibleToUser(),"idle delete preserves enabled visible shortcut: "+labels[i]);
+                chip.getBoundsInScreen(current); check(rectangles[i].equals(current),"idle delete keeps shortcut frame stable: "+labels[i]);
+            }
+            check(communityPluginRaster(roi)==baseline,"sampled idle plugin pixels/alpha remain unchanged after delete");
+        }
+        report("COMMUNITY_IDLE_PIXELS samples=9 stable=true scope=plugin-shortcut-ROI-only; no host/body screenshots saved");
+    }
+    private String communityWebValue(String id) throws Exception {
+        Object decoded=new org.json.JSONTokener(js("document.getElementById('"+id+"').value")).nextValue();
+        check(decoded instanceof String,"WebView value is a JSON string"); return (String)decoded;
+    }
+    private void communityWebExpect(String id,String wanted,String label) throws Exception {
+        long deadline=SystemClock.uptimeMillis()+4000; String actual;
+        do {actual=communityWebValue(id);if(wanted.equals(actual)){check(true,label);return;}SystemClock.sleep(25);} while(SystemClock.uptimeMillis()<deadline);
+        throw new AssertionError(label+" expected=["+wanted+"] actual=["+actual+"]");
+    }
+    private void communityWebReset(String id) throws Exception {
+        js("document.getElementById('first').blur();document.getElementById('second').blur();var e=document.getElementById('"+id+"');e.value='';e.focus();");
+        runOnMainSync(() -> {host.getSystemService(InputMethodManager.class).restartInput(host.web);host.getSystemService(InputMethodManager.class).showSoftInput(host.web,InputMethodManager.SHOW_IMPLICIT);});
+        waitButton("q"); SystemClock.sleep(350); pinyin();
+    }
+    private void communityWeb() throws Exception {
+        runOnMainSync(() -> {host.first.setVisibility(android.view.View.GONE);host.second.setVisibility(android.view.View.GONE);host.password.setVisibility(android.view.View.GONE);host.privateInput.setVisibility(android.view.View.GONE);host.web.requestFocus();});
+        SystemClock.sleep(300); communityWebReset("first"); type("nihao"); waitButton("你好"); touch("，");
+        communityWebExpect("first","你好，","WebView footer comma confirms Chinese");
+        type("nihao"); waitButton("你好"); touch("。"); communityWebExpect("first","你好，你好。","WebView footer period confirms Chinese");
+        communityWebReset("first"); type("nihao"); waitButton("你好"); communitySwipeNumber("q");
+        communityWebExpect("first","你好1","WebView upward digit is literal and confirms Chinese");
+        communityWebReset("first"); tap("Buffer off"); type("nihao"); tap("Space"); type("ni"); waitLabel("Buffer 你好ni",true);
+        touch("清空 Buffer"); waitLabel("Buffer ",true); communityWebExpect("first","","WebView Clear preserves untouched host");
+        type("nihao"); tap("Space"); touch("Insert"); communityWebExpect("first","你好","WebView fresh Send cannot resurrect cleared blocks");
+        type("nihao"); tap("Space"); touch("Delete"); waitLabel("Buffer ",true);
+        communityWebExpect("first","你好","WebView short Buffer Delete removes a whole Chinese block without touching host");
+        communityWebReset("first"); String original="abcdefghijklmnopqrstuvwx😀𠮷Z";
+        js("var e=document.getElementById('first');e.value="+org.json.JSONObject.quote(original)+";e.setSelectionRange(e.value.length,e.value.length);"); SystemClock.sleep(250);
+        android.graphics.Rect key=bounds("Delete"); long down=communityDown(key); SystemClock.sleep(communityHoldMillis()); communityUp(down,key);
+        String after=communityWebValue("first");
+        check(after.codePointCount(0,after.length())<=original.codePointCount(0,original.length())-3 && original.startsWith(after),"WebView held Delete removes multiple complete codepoints");
+        check(wellFormedUtf16(after),"WebView held Delete preserves non-BMP integrity"); SystemClock.sleep(600);
+        communityWebExpect("first",after,"WebView held Delete stops after release");
+        js("var e=document.getElementById('first');e.value='abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz';e.setSelectionRange(e.value.length,e.value.length);"); SystemClock.sleep(250);
+        key=bounds("Delete"); down=communityDown(key); SystemClock.sleep(communityHoldMillis());
+        check(communityWebValue("first").length()<52,"WebView old field receives authorized held deletions");
+        js("var e=document.getElementById('second');e.value='fresh😀';e.focus();e.setSelectionRange(e.value.length,e.value.length);"); SystemClock.sleep(400);
+        communityWebExpect("second","fresh😀","WebView focus change retires old held Delete");
+        allowStaleRejection=true;
+        try {communityUp(down,key);} finally {allowStaleRejection=false;}
+        SystemClock.sleep(600); communityWebExpect("second","fresh😀","WebView new field rejects old repeated deletion and late UP");
+        touch("Delete"); communityWebExpect("second","fresh","WebView new target accepts a fresh whole-emoji Delete");
+        communityWebReset("first"); layout("9"); nine("64426"); communityWebExpect("first","ni'hao","WebView nine-key composition shows phonetic syllables");
+        communityScreenshot("webview-nine-key");
+        touch("你好"); communityWebExpect("first","你好","WebView nine-key candidate commits actual Chinese");
+        layout("26");
+    }
     private void nativeTouchContract() throws Exception {
         focusAny(host.first); layout("26"); pinyin();
         runOnMainSync(() -> host.traceConnections=true);

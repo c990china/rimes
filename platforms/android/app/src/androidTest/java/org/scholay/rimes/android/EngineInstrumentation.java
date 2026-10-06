@@ -11,6 +11,20 @@ public final class EngineInstrumentation extends Instrumentation {
     @Override public void onStart() {
         Bundle result=new Bundle();
         try {
+            if(arguments!=null && "community-prepare".equals(arguments.getString("mode"))) {
+                CommunitySettingsContract.prepare(this);
+                result.putString("stream","PASS community test preferences backed up; learning and remote AI disabled\n"); finish(-1,result); return;
+            }
+            if(arguments!=null && "community-restore".equals(arguments.getString("mode"))) {
+                CommunitySettingsContract.restore(this);
+                result.putString("stream","PASS original community test preferences restored\n"); finish(-1,result); return;
+            }
+            if(arguments!=null && "delete-repeat".equals(arguments.getString("mode"))) {
+                result.putString("stream","PASS native delete repeat checks="+DeleteRepeatContract.run(this)+"\n"); finish(-1,result); return;
+            }
+            if(arguments!=null && "upward-number".equals(arguments.getString("mode"))) {
+                result.putString("stream","PASS upward number checks="+UpwardNumberContract.run(this)+"\n"); finish(-1,result); return;
+            }
             if(arguments!=null && "comet-diagnostics".equals(arguments.getString("mode"))) {
                 NetworkAiContract.foreground(this);
                 StringBuilder diagnostic=new StringBuilder();
@@ -65,7 +79,8 @@ public final class EngineInstrumentation extends Instrumentation {
             touchChecks=NativeTouchContract.run(this);
             java.util.concurrent.atomic.AtomicReference<Throwable> renderingError=new java.util.concurrent.atomic.AtomicReference<>();
             runOnMainSync(() -> {
-                try { iconChecks=KeyboardIconContract.run(getTargetContext()); keycapRendering(); chordChecks=ChordSurfaceContract.run(getTargetContext()); chordReadoutRetirement(); renderBufferRail(); }
+                try { iconChecks=KeyboardIconContract.run(getTargetContext()); keycapRendering(); chordChecks=ChordSurfaceContract.run(getTargetContext()); chordReadoutRetirement(); renderBufferRail();
+                    bufferRenderingResult+="HEIGHT_FIT checks="+KeyboardHeightContract.run(getTargetContext())+"\n"; }
                 catch(Throwable error) { renderingError.set(error); }
             });
             if(renderingError.get()!=null) throw renderingError.get();
@@ -81,7 +96,9 @@ public final class EngineInstrumentation extends Instrumentation {
             EngineWorker.QUEUE.submit(() -> {
                 NativeRimeEngine engine=new NativeRimeEngine();
                 try {
-                    engine.initialize(data.getAbsolutePath(),EngineResources.userDirectory(getTargetContext()).getAbsolutePath());
+                    java.io.File user=new java.io.File(getTargetContext().getNoBackupFilesDir(),"engine-contract-user-"+java.util.UUID.randomUUID());
+                    if(!user.mkdirs()) throw new java.io.IOException("Cannot create isolated engine contract directory");
+                    engine.initialize(data.getAbsolutePath(),user.getAbsolutePath());
                     long session=engine.createSession();
                     if(!engine.selectSchema(session,"rimes_pinyin_private")) throw new AssertionError("private schema");
                     for(char key:"nihao".toCharArray()) engine.processKey(session,key);

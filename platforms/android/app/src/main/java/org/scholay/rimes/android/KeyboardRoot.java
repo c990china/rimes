@@ -4,14 +4,63 @@ import android.content.Context;
 import android.os.SystemClock;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 /** Retires the raw keyboard touch stream before a ViewGroup can split it onto a new key. */
 final class KeyboardRoot extends LinearLayout {
     private boolean activeStream;
     private long streamDownTime=-1,retiredDownTime=-1;
+    private View inputSurface;
+    private int naturalHeight,availableHeight,surfaceBudget;
+    private int warnedAvailable=-1,warnedChrome=-1;
+    private boolean chromeTooTall;
 
     KeyboardRoot(Context context) { super(context); }
+
+    /** The flexible keys/panel region; candidate, Buffer and safe padding keep their sizes. */
+    void setInputSurface(View surface) {
+        if(inputSurface==surface) return;
+        inputSurface=surface; requestLayout();
+    }
+    int naturalHeight() { return naturalHeight; }
+    int availableHeight() { return availableHeight; }
+    int surfaceBudget() { return surfaceBudget; }
+    boolean chromeTooTall() { return chromeTooTall; }
+
+    @Override protected void onMeasure(int widthSpec,int heightSpec) {
+        int mode=MeasureSpec.getMode(heightSpec),maximum=MeasureSpec.getSize(heightSpec);
+        if(getOrientation()!=VERTICAL || inputSurface==null || inputSurface.getParent()!=this
+                || inputSurface.getVisibility()==GONE) {
+            super.onMeasure(widthSpec,heightSpec);
+            naturalHeight=getMeasuredHeight(); availableHeight=getMeasuredHeight(); surfaceBudget=0; chromeTooTall=false;
+            return;
+        }
+        // Find the complete preferred stack before an OEM/window constraint clamps the root.
+        super.onMeasure(widthSpec,MeasureSpec.makeMeasureSpec(0,MeasureSpec.UNSPECIFIED));
+        naturalHeight=getMeasuredHeight();
+        availableHeight=mode==MeasureSpec.UNSPECIFIED?naturalHeight:maximum;
+        int preferredSurface=inputSurface.getMeasuredHeight();
+        int chrome=naturalHeight-preferredSurface;
+        surfaceBudget=preferredSurface; chromeTooTall=false;
+        if(mode!=MeasureSpec.UNSPECIFIED && maximum<naturalHeight) {
+            surfaceBudget=Math.max(0,maximum-chrome);
+            chromeTooTall=chrome>maximum;
+            ViewGroup.LayoutParams params=inputSurface.getLayoutParams(); int preferred=params.height;
+            params.height=surfaceBudget;
+            try { super.onMeasure(widthSpec,heightSpec); }
+            finally { params.height=preferred; }
+            // No input contents are logged. A zero key budget cannot make oversized chrome fit.
+            if(chromeTooTall && (warnedAvailable!=maximum || warnedChrome!=chrome)) {
+                android.util.Log.w("RIMES","Keyboard chrome exceeds available height: available="+maximum+", chrome="+chrome);
+                warnedAvailable=maximum; warnedChrome=chrome;
+            }
+        } else if(mode==MeasureSpec.EXACTLY) {
+            // Honor a larger exact parent without stretching the preferred key caps.
+            super.onMeasure(widthSpec,heightSpec);
+        }
+    }
 
     @Override public boolean dispatchTouchEvent(MotionEvent event) {
         int action=event.getActionMasked();

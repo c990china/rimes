@@ -1,0 +1,79 @@
+package org.scholay.rimes.android;
+
+import android.os.Handler;
+import android.os.Looper;
+import android.view.MotionEvent;
+
+/** Native short click and long-press recognition, with cancellable held backspace repeats. */
+final class DeleteRepeatTouch {
+    static final long REPEAT_MILLIS=75;
+    private final KeyButton button;
+    private final Handler main=new Handler(Looper.getMainLooper());
+    private boolean active,repeating;
+    private int pointer=-1;
+    private long downTime=-1,generation;
+    private Runnable pending;
+
+    DeleteRepeatTouch(KeyButton button) {
+        this.button=button;
+        button.setOnTouchListener((view,event) -> observe(event));
+        button.setOnLongClickListener(view -> beginRepeating());
+    }
+    /** Retire both scheduled repeats and the native click belonging to this held press. */
+    void cancel() {
+        stop();
+        button.cancelPendingInputEvents();
+    }
+    private void stop() {
+        generation++; active=false; repeating=false; pointer=-1; downTime=-1;
+        if(pending!=null) { main.removeCallbacks(pending); pending=null; }
+    }
+    private boolean observe(MotionEvent event) {
+        int action=event.getActionMasked();
+        if(action==MotionEvent.ACTION_DOWN) {
+            // A completed prior tap can still have a legitimate native click in the queue.
+            // Only an unfinished press needs native cancellation before a new stream starts.
+            if(active) cancel(); else stop();
+            active=true; pointer=event.getPointerId(0); downTime=event.getDownTime();
+        } else if(active && downTime==event.getDownTime()) {
+            if(action==MotionEvent.ACTION_MOVE) {
+                int index=event.findPointerIndex(pointer);
+                if(index<0 || !inside(event.getX(index),event.getY(index))) cancel();
+            } else if(action==MotionEvent.ACTION_POINTER_DOWN || action==MotionEvent.ACTION_CANCEL
+                    || action==MotionEvent.ACTION_POINTER_UP && event.getPointerId(event.getActionIndex())==pointer) {
+                cancel();
+            } else if(action==MotionEvent.ACTION_UP) {
+                // Keep native Button's long-click flag intact: it suppresses the release click.
+                stop();
+            }
+        }
+        // Button still owns press feedback, tap clicks, accessibility and its long-press delay.
+        return false;
+    }
+    private boolean inside(float x,float y) {
+        return x>=0 && y>=0 && x<button.getWidth() && y<button.getHeight();
+    }
+    private boolean valid(long ticket) {
+        return active && repeating && generation==ticket && button.isPressed() && button.isEnabled()
+                && button.isShown() && button.isAttachedToWindow();
+    }
+    private boolean beginRepeating() {
+        // An accessibility long-click without a held touch must not start a repeating task.
+        if(!active || !button.isPressed() || !button.isEnabled() || !button.isShown()
+                || !button.isAttachedToWindow()) return false;
+        repeating=true; long ticket=generation;
+        button.performClick();
+        if(valid(ticket)) {
+            pending=new Runnable() {
+                @Override public void run() {
+                    if(!valid(ticket)) { if(generation==ticket) stop(); return; }
+                    button.performClick();
+                    // The action can synchronously retire a target or replace this surface.
+                    if(valid(ticket)) main.postDelayed(this,REPEAT_MILLIS);
+                }
+            };
+            main.postDelayed(pending,REPEAT_MILLIS);
+        }
+        return true;
+    }
+}
