@@ -29,6 +29,16 @@ ui::SettingsLayout Layout(HWND window, const ui::SettingsDraft& draft) {
                              static_cast<float>(client.bottom) * scale, draft);
 }
 
+bool IsVisibleWithinFixture(HWND control, HWND fixture) {
+  if (!control || !fixture) return false;
+  for (HWND ancestor = control; ancestor; ancestor = GetParent(ancestor)) {
+    if ((GetWindowLongPtrW(ancestor, GWL_STYLE) & WS_VISIBLE) == 0)
+      return false;
+    if (ancestor == fixture) return true;
+  }
+  return false;
+}
+
 void TestNestedHitTargets() {
   ui::SettingsDraft draft;
   draft.page = ui::SettingsPage::kAppearance;
@@ -138,11 +148,44 @@ void TestPluginManagementAndChordSelection() {
   Check(layout.nav.size() == 6, "six settings pages");
   Click(window, layout.nav[4]);
   const HWND toggle = GetDlgItem(window, 5101);
-  Check(toggle && IsWindowVisible(toggle) && IsWindowEnabled(toggle), "installed plugin exposes its switch");
+  // SSH/CTest's Session 0 desktop can be hidden even when these owned windows
+  // have WS_VISIBLE. Verify every owned ancestor and the child's full native
+  // visibility relative to its shown parent. On a visible desktop this also
+  // requires IsWindowVisible(toggle); Session 0 cannot prove actual rendering.
+  const bool exposed = IsVisibleWithinFixture(toggle, window) &&
+                       IsWindowEnabled(toggle) &&
+                       IsWindowVisible(toggle) == IsWindowVisible(window);
+  if (!exposed) {
+    STARTUPINFOW startup{};
+    startup.cb = sizeof(startup);
+    GetStartupInfoW(&startup);
+    RECT client{}, button{};
+    GetClientRect(window, &client);
+    GetWindowRect(toggle, &button);
+    std::cerr << "Plugin fixture state: parent-visible=" << IsWindowVisible(window)
+              << " parent-style=" << GetWindowLongPtrW(window, GWL_STYLE)
+              << " toggle-exists=" << (toggle != nullptr)
+              << " toggle-visible=" << IsWindowVisible(toggle)
+              << " toggle-style=" << GetWindowLongPtrW(toggle, GWL_STYLE)
+              << " toggle-enabled=" << IsWindowEnabled(toggle)
+              << " client=" << client.right << 'x' << client.bottom
+              << " toggle-size=" << button.right - button.left << 'x'
+              << button.bottom - button.top
+              << " dpi=" << GetDpiForWindow(window)
+              << " startup-flags=" << startup.dwFlags
+              << " startup-show=" << startup.wShowWindow
+              << " desktop-visible=" << IsWindowVisible(GetDesktopWindow())
+              << " desktop-style=" << GetWindowLongPtrW(GetDesktopWindow(), GWL_STYLE)
+              << '\n';
+  }
+  Check(exposed, "installed plugin exposes its switch");
   SendMessageW(toggle, BM_CLICK, 0, 0);
   Check(changes == 1 && !fixture.enabled, "switch callback occurs exactly once");
   Click(window, layout.nav[0]);
-  Check(!IsWindowVisible(toggle), "plugin controls leave other pages clear");
+  Check(IsVisibleWithinFixture(window, window), "navigation keeps the fixture parent shown");
+  Check((GetWindowLongPtrW(toggle, GWL_STYLE) & WS_VISIBLE) == 0 &&
+            !IsWindowVisible(toggle),
+        "plugin controls leave other pages clear");
   layout = Layout(window, draft);
   Check(layout.scheme_cards.size() == 6, "chording is the sixth input schema");
   Click(window, layout.scheme_cards[5]);
