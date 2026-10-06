@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "rime_engine.hpp"
+#include "../broker/key_translation.hpp"
 using namespace rimes::windows::engine;
 int wmain(int argc, wchar_t** argv) {
   if (argc != 5) return 2;
@@ -87,6 +88,51 @@ int wmain(int argc, wchar_t** argv) {
     std::cerr << "Chord space release duplicated commit"; return 1;
   }
   std::cout << "Product scheme passed: my_combo chord down/up and commit\n";
+  // Exercise the actual Windows-to-Rime boundary, not only hand-written
+  // keysyms. A shifted slash previously remained '/' on this path (#59).
+  using namespace rimes::windows;
+  constexpr auto shift = static_cast<std::uint32_t>(core::KeyModifiers::kShift);
+  constexpr auto caps = static_cast<std::uint32_t>(core::KeyModifiers::kCapsLock);
+  auto windows_key = [&](std::uint32_t vk, std::uint32_t modifiers,
+                         bool down, EngineSnapshot* snapshot) {
+    core::KeyEvent event;
+    event.virtual_key = vk;
+    event.modifiers = modifiers;
+    event.event_flags = down ? static_cast<std::uint32_t>(core::KeyEventFlags::kKeyDown) : 0;
+    const auto translated = broker::TranslateWindowsKey(event);
+    return translated && engine.ProcessKey(session, translated->keycode,
+                                          translated->modifiers, snapshot, &error);
+  };
+  for (const bool ascii_punctuation : {false, true}) {
+    if (!engine.Configure(session, "rime_ice", false, false, ascii_punctuation, &error)) return 1;
+    EngineSnapshot punctuation;
+    if (!windows_key(0xbf, shift, true, &punctuation) ||
+        punctuation.commit_text != (ascii_punctuation ? "?" : "？")) {
+      std::cerr << "Shift+/ did not commit the configured question mark"; return 1;
+    }
+    // Releasing Shift first must not cause a slash or a duplicate commit.
+    if (!windows_key(0xbf, 0, false, &punctuation) || !punctuation.commit_text.empty()) {
+      std::cerr << "Question mark key-up duplicated text"; return 1;
+    }
+    if (!windows_key(0xbf, 0, true, &punctuation) || punctuation.commit_text != "/") {
+      std::cerr << "Unshifted slash changed"; return 1;
+    }
+    if (!windows_key(0xbf, 0, false, &punctuation) || !punctuation.commit_text.empty()) return 1;
+  }
+  if (!engine.Configure(session, "english", false, false, false, &error)) return 1;
+  EngineSnapshot english;
+  for (const auto& [vk, modifiers] : std::vector<std::pair<std::uint32_t, std::uint32_t>>{
+           {'H', shift}, {'E', 0}, {'L', caps}, {'L', shift | caps}, {'O', 0}}) {
+    if (!windows_key(vk, modifiers, true, &english) ||
+        !windows_key(vk, 0, false, &english)) return 1;
+  }
+  bool exact_case = english.composition == "HeLlo";
+  for (const auto& candidate : english.candidates)
+    exact_case = exact_case || candidate.text == "HeLlo";
+  if (!exact_case) {
+    std::cerr << "English discarded Shift/Caps capitalization"; return 1;
+  }
+  std::cout << "Windows printable keys passed: question/slash, Shift release, English case\n";
   engine.DestroySession(session);
   return 0;
 }
