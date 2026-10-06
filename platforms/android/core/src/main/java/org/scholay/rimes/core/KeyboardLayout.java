@@ -23,22 +23,22 @@ public final class KeyboardLayout {
     }
     private KeyboardLayout() {}
     public static int height(boolean landscape) { return landscape?143:206; }
-    public static List<Key> keys(float width,boolean landscape,Mode mode) {
+    public static List<Key> keys(float width,boolean landscape,Mode mode) { return keys(width,landscape,mode,false); }
+    /** Chinese input swaps the number and symbol rows for the marks they type; other modes ignore it. */
+    public static List<Key> keys(float width,boolean landscape,Mode mode,boolean chinese) {
         if(width<=0) throw new IllegalArgumentException("Keyboard width must be positive");
         List<Key> result=new ArrayList<>(); float row=height(landscape)/4f;
         float gap=landscape?5:6,rowGap=landscape?5:10,capHeight=(height(landscape)-3*rowGap)/4f;
         if(mode==Mode.NINE_KEY) {
             float unit=width/5,capUnit=(width-4*gap)/5;
-            nine(result,Action.NUMBERS,"",0,0,1,1,unit,row,capUnit,capHeight,gap,rowGap);
-            nine(result,Action.PUNCTUATION,"",1,0,1,1,unit,row,capUnit,capHeight,gap,rowGap);
-            nine(result,Action.DELETE,"",4,0,1,1,unit,row,capUnit,capHeight,gap,rowGap);
-            nine(result,Action.SYMBOLS,"",0,1,1,1,unit,row,capUnit,capHeight,gap,rowGap);
-            nine(result,Action.SEPARATOR,"",4,1,1,1,unit,row,capUnit,capHeight,gap,rowGap);
-            nine(result,Action.LANGUAGE,"",0,2,1,1,unit,row,capUnit,capHeight,gap,rowGap);
+            nine(result,Action.PUNCTUATION,"",0,0,1,1,unit,row,capUnit,capHeight,gap,rowGap);
+            nine(result,Action.SEPARATOR,"",1,0,1,1,unit,row,capUnit,capHeight,gap,rowGap);
+            nine(result,Action.DELETE,"",4,0,1,2,unit,row,capUnit,capHeight,gap,rowGap);
+            nine(result,Action.NUMBERS,"",0,1,1,1,unit,row,capUnit,capHeight,gap,rowGap);
+            nine(result,Action.SPELLING,"",0,2,1,1,unit,row,capUnit,capHeight,gap,rowGap);
             nine(result,Action.RETURN,"",4,2,1,2,unit,row,capUnit,capHeight,gap,rowGap);
-            nine(result,Action.EMOJI,"",0,3,1,1,unit,row,capUnit,capHeight,gap,rowGap);
-            nine(result,Action.SPELLING,"",1,3,1,1,unit,row,capUnit,capHeight,gap,rowGap);
-            nine(result,Action.SPACE,"",2,3,2,1,unit,row,capUnit,capHeight,gap,rowGap);
+            nine(result,Action.LANGUAGE,"",0,3,1,1,unit,row,capUnit,capHeight,gap,rowGap);
+            nine(result,Action.SPACE,"",1,3,3,1,unit,row,capUnit,capHeight,gap,rowGap);
             for(int digit=2;digit<=9;digit++) nine(result,Action.TEXT,String.valueOf(digit),
                     (digit-1)%3+1,(digit-1)/3,1,1,unit,row,capUnit,capHeight,gap,rowGap);
         } else {
@@ -47,8 +47,7 @@ public final class KeyboardLayout {
                 for(int i=0;i<EMOJIS.length;i++) letter(result,EMOJIS[i],i%10,i/10,unit,row,capUnit,capHeight,gap,rowGap);
             } else {
                 String[] rows=mode==Mode.QWERTY?new String[]{"qwertyuiop","asdfghjkl","zxcvbnm"}
-                        :mode==Mode.NUMERIC?new String[]{"1234567890","-/:;()$&@\"",".,?!'"}
-                        :new String[]{"[]{}#%^*+=","_\\|~<>€£¥•",".,?!'"};
+                        :PunctuationLayout.rows(mode==Mode.SYMBOLS,chinese);
                 for(int r=0;r<3;r++) {
                     String letters=rows[r]; float start=(10-letters.length())/2f;
                     for(int i=0;i<letters.length();i++) letter(result,letters.substring(i,i+1),start+i,r,unit,row,capUnit,capHeight,gap,rowGap);
@@ -56,17 +55,21 @@ public final class KeyboardLayout {
                 float sideWidth=Math.max(capUnit,width*0.115f);
                 add(result,mode==Mode.QWERTY?Action.SHIFT:Action.SYMBOLS,"",0,2*row,1.3f*unit,row,
                         0,2*(capHeight+rowGap),sideWidth,capHeight);
-                add(result,Action.DELETE,"",8.7f*unit,2*row,1.3f*unit,row,
-                        width-sideWidth,2*(capHeight+rowGap),sideWidth,capHeight);
+                float deleteWidth=Math.max(sideWidth,width*0.14f);
+                add(result,Action.DELETE,"",8.5f*unit,2*row,1.5f*unit,row,
+                        width-deleteWidth,2*(capHeight+rowGap),deleteWidth,capHeight);
             }
             Action[] footer=mode==Mode.EMOJI
                     ?new Action[]{Action.NUMBERS,Action.EMOJI,Action.LANGUAGE,Action.SPACE,Action.DELETE}
+                    :mode==Mode.QWERTY?new Action[]{Action.NUMBERS,Action.EMOJI,Action.PUNCTUATION,Action.SPACE,Action.PUNCTUATION,Action.LANGUAGE,Action.RETURN}
                     :new Action[]{Action.NUMBERS,Action.EMOJI,Action.LANGUAGE,Action.SPACE,Action.RETURN};
-            float[] weights={1,1,1,4.8f,2.2f}; float x=0,footerUnit=(width-4*gap)/10;
+            float[] weights=mode==Mode.QWERTY?new float[]{1.2f,1,1,3.6f,1,1,1.2f}:new float[]{1,1,1,4.8f,2.2f};
+            float x=0,footerUnit=(width-(footer.length-1)*gap)/10;
             for(int i=0;i<footer.length;i++) {
                 float w=footerUnit*weights[i];
                 float left=i==0?0:x-gap/2,right=i==footer.length-1?width:x+w+gap/2;
-                add(result,footer[i],"",left,3*row,right-left,row,x,3*(capHeight+rowGap),w,capHeight);
+                String text=footer[i]==Action.PUNCTUATION?(i==2?",":"."):"";
+                add(result,footer[i],text,left,3*row,right-left,row,x,3*(capHeight+rowGap),w,capHeight);
                 x+=w+gap;
             }
         }

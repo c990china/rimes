@@ -24,6 +24,57 @@ public final class NineKeyPinyin {
         }
         return out.toString();
     }
+    /**
+     * Displays only the typed prefix of a compatible first candidate's reading.
+     * This is a presentation value: raw input, candidate selection and Return stay unchanged.
+     * A missing, annotated or incompatible reading leaves the engine's preedit intact.
+     */
+    public static String displayPreedit(String raw,String preedit,String firstCandidateReading) {
+        if(preedit==null) return "";
+        if(preedit.isEmpty() || raw==null || firstCandidateReading==null || firstCandidateReading.isEmpty()) return preedit;
+        StringBuilder letters=new StringBuilder(firstCandidateReading.length());
+        boolean[] boundaries=new boolean[firstCandidateReading.length()+1];
+        boolean separated=false;
+        for(int i=0;i<firstCandidateReading.length();i++) {
+            char c=firstCandidateReading.charAt(i);
+            if(c>='a' && c<='z') { letters.append(c); separated=false; }
+            else if(c==' ' || c=='\'') {
+                if(letters.length()==0 || separated || i==firstCandidateReading.length()-1) return preedit;
+                boundaries[letters.length()]=true; separated=true;
+            } else return preedit;
+        }
+        if(letters.length()==0) return preedit;
+        String readingCode=digits(letters.toString()),rawCode=numericCode(raw);
+        if(rawCode.isEmpty() || !readingCode.startsWith(rawCode)) return preedit;
+        int position=0; separated=false;
+        for(int i=0;i<raw.length();i++) {
+            char c=raw.charAt(i);
+            if(c==' ' || c=='\'') {
+                if(position==0 || separated || !boundaries[position] && position!=letters.length()) return preedit;
+                separated=true;
+            } else {
+                if(position>=letters.length()) return preedit;
+                if(digit(c)) {
+                    if(c!=readingCode.charAt(position)) return preedit;
+                } else if(c>='a' && c<='z' || c>='A' && c<='Z') {
+                    if(Character.toLowerCase(c)!=letters.charAt(position)) return preedit;
+                } else return preedit;
+                position++; separated=false;
+            }
+        }
+        StringBuilder display=new StringBuilder(position+4);
+        for(int i=0;i<position;i++) {
+            if(boundaries[i]) display.append('\'');
+            display.append(letters.charAt(i));
+        }
+        if(separated) display.append('\'');
+        return display.toString();
+    }
+    private static String numericCode(String spelling) {
+        String encoded=digits(spelling); StringBuilder result=new StringBuilder(encoded.length());
+        for(int i=0;i<encoded.length();i++) if(digit(encoded.charAt(i))) result.append(encoded.charAt(i));
+        return result.toString();
+    }
     private static int start(String raw) { for(int i=0;i<raw.length();i++) if(digit(raw.charAt(i))) return i; return -1; }
     private static boolean digit(char c) { return c>='2' && c<='9'; }
     public List<String> choices(String raw) {
