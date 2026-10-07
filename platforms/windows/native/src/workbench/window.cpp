@@ -206,7 +206,9 @@ void Window::EnsureSettings() {
 }
 
 void Window::OpenSettings() {
-  runtime.Close();
+  // Settings revoke the old host's capture authority. They do not hide the
+  // Buffer, consume its blocks, or cancel its source/configuration-frozen job.
+  runtime.PauseCapture();
   EnsureSettings();
   settings->Open(window);
 }

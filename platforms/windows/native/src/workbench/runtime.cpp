@@ -267,6 +267,14 @@ void Runtime::Toggle(std::uint32_t foreground_process) {
   CaptureChanged();
   Changed();
 }
+void Runtime::PauseCapture() {
+  std::lock_guard lock(mutex_);
+  if (!model_.capture) return;
+  model_.capture = false;
+  model_.preedit.clear();
+  CaptureChanged();
+  Changed();
+}
 void Runtime::Close() {
   std::lock_guard lock(mutex_);
   model_.Close();

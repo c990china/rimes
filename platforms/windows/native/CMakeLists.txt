@@ -285,10 +285,15 @@ if(RIMES_BUILD_TESTS)
     rimes_harden_target(RimesSettingsTests)
     add_test(NAME RimesSettings COMMAND RimesSettingsTests)
 
-    add_executable(RimesSettingsUiTests src/workbench/settings_ui_tests.cpp)
+    add_executable(RimesSettingsUiTests
+        src/workbench/settings_ui_tests.cpp
+        src/broker/autostart.cpp
+        src/broker/default_paths.cpp
+    )
     target_link_libraries(RimesSettingsUiTests PRIVATE RimesWorkbench)
     rimes_harden_target(RimesSettingsUiTests)
     add_test(NAME RimesSettingsUi COMMAND RimesSettingsUiTests)
+    set_tests_properties(RimesSettingsUi PROPERTIES TIMEOUT 45)
 
     # Fail-open contract for a disconnected BrokerClient. Does not launch a
     # Broker or touch Session 1; safe as a default CTest.

@@ -32,6 +32,9 @@ class Runtime {
                  std::string* error);
   void Toggle(std::uint32_t foreground_process);
   void Bind(std::uint32_t foreground_process);
+  // A settings window takes keyboard focus without closing the workbench or
+  // invalidating a request frozen against the unchanged source/configuration.
+  void PauseCapture();
   void Close();
   void Protect();
   void Paste(std::string text);

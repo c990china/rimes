@@ -1,7 +1,11 @@
 #include "settings_ui.hpp"
+#include "window.hpp"
 
+#include <atomic>
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
+#include <thread>
 
 namespace {
 using namespace rimes::windows;
@@ -37,6 +41,35 @@ bool IsVisibleWithinFixture(HWND control, HWND fixture) {
     if (ancestor == fixture) return true;
   }
   return false;
+}
+
+template <typename Predicate>
+bool WaitUntil(Predicate predicate, const char* message) {
+  const auto start = GetTickCount64();
+  bool ready = predicate();
+  while (!ready && GetTickCount64() - start < 3000) {
+    Sleep(2);
+    ready = predicate();
+  }
+  Check(ready, message);
+  return ready;
+}
+
+struct FixtureWindows {
+  HWND buffer = nullptr, settings = nullptr;
+};
+FixtureWindows WindowsOnFixtureThread(DWORD thread) {
+  FixtureWindows windows;
+  if (!thread) return windows;
+  EnumThreadWindows(thread, [](HWND window, LPARAM context) -> BOOL {
+    auto& found = *reinterpret_cast<FixtureWindows*>(context);
+    wchar_t kind[64]{};
+    GetClassNameW(window, kind, 64);
+    if (std::wstring(kind) == L"Rimes.Workbench") found.buffer = window;
+    if (std::wstring(kind) == L"Rimes.SettingsHost") found.settings = window;
+    return TRUE;
+  }, reinterpret_cast<LPARAM>(&windows));
+  return windows;
 }
 
 void TestNestedHitTargets() {
@@ -193,13 +226,156 @@ void TestPluginManagementAndChordSelection() {
   Check(saved_schema == "my_combo", "schema control saves chording identity");
   host.Close(false);
 }
+
+void TestSettingsPreserveRuntimeAndStreaming() {
+  const DWORD original_size = GetEnvironmentVariableW(L"LOCALAPPDATA", nullptr, 0);
+  std::wstring original(original_size, L'\0');
+  if (original_size) {
+    GetEnvironmentVariableW(L"LOCALAPPDATA", original.data(), original_size);
+    original.resize(wcslen(original.c_str()));
+  }
+  const auto root = std::filesystem::temp_directory_path() /
+      (L"rimes-settings-ui-test-" + std::to_wstring(GetCurrentProcessId()) +
+       L"-" + std::to_wstring(GetTickCount64()));
+  std::filesystem::create_directories(root);
+  if (!SetEnvironmentVariableW(L"LOCALAPPDATA", root.c_str())) {
+    Check(false, "runtime fixture isolates its preferences and plugin state");
+    std::filesystem::remove_all(root);
+    return;
+  }
+  {
+    std::atomic<unsigned> calls{0}, completed{0};
+    std::atomic<bool> release{false}, cancelled_request{false}, accepted{false};
+    // Real Runtime and the production window/dispatcher; only the network
+    // transport is synthetic. No credentials, input registration or host text.
+    workbench::Runtime runtime([&](const workbench::Settings&,
+        const workbench::Generation&, const std::function<bool(const std::string&)>& chunk,
+        const std::function<bool()>& cancelled, std::string*) {
+      const bool initial = chunk("Stream");
+      ++calls;
+      const auto start = GetTickCount64();
+      while (!release && !cancelled() && GetTickCount64() - start < 15000)
+        Sleep(2);
+      cancelled_request = cancelled();
+      accepted = initial && release && !cancelled_request && chunk(" done.");
+      ++completed;
+      return accepted.load();
+    });
+    workbench::UiCommands commands;
+    std::atomic<DWORD> ui_thread{0};
+    std::jthread ui([&] {
+      ui_thread = GetCurrentThreadId();
+      workbench::RunWindow(runtime, [] {}, [] {}, &commands);
+    });
+    const auto windows = [&] { return WindowsOnFixtureThread(ui_thread.load()); };
+    WaitUntil([&] { return commands.RequestSettings(); }, "production settings dispatcher becomes ready");
+    WaitUntil([&] { return windows().settings != nullptr; }, "settings command opens the production settings host");
+    Check(!runtime.Snapshot().value("visible", true), "settings do not open a closed Buffer");
+    if (const HWND settings = windows().settings) PostMessageW(settings, WM_CLOSE, 0, 0);
+    WaitUntil([&] { return windows().settings == nullptr; }, "closing settings retires its own window");
+
+    const auto peer = GetCurrentProcessId() + 1;
+    const auto target = runtime.Register(peer, 9001, 9001);
+    runtime.Focus(target);
+    runtime.Bind(peer);
+    runtime.Paste("Fixture source.");
+    runtime.Generate(true);
+    WaitUntil([&] { return calls == 1 && runtime.Snapshot().value("busy", false); },
+              "synthetic streaming request is held in flight");
+    const auto before = runtime.Snapshot();
+    const auto revision = runtime.Configuration().revision;
+    Check(before.value("visible", false) && before.value("capture", false) &&
+              before.value("preview", std::string()) == "Stream",
+          "real Runtime fixture has visible captured source and a stream preview");
+    Check(commands.RequestSettings(), "settings request posts while Buffer is active");
+    WaitUntil([&] { return windows().settings && !runtime.Capturing(target); },
+              "settings opens and pauses the previous host capture");
+    auto after = runtime.Snapshot();
+    Check(after["visible"] == before["visible"] &&
+              after["source_blocks"] == before["source_blocks"] &&
+              after["result_blocks"] == before["result_blocks"] &&
+              after["busy"] == before["busy"] && after["preview"] == before["preview"] &&
+              after["translate"] == before["translate"] && after["status"] == before["status"],
+          "opening settings preserves Buffer visibility, block identities and active request state");
+    Check(!after.value("capture", true) && after.value("target_pid", 1U) == 0 &&
+              runtime.Configuration().revision == revision,
+          "settings pause delivery authority without applying configuration");
+    WaitUntil([&] { return IsVisibleWithinFixture(windows().buffer, windows().buffer); },
+              "production Buffer window remains shown while settings are open");
+
+    runtime.Focus({});  // The real host can report focus loss after activation.
+    Check(runtime.Snapshot().value("busy", false) &&
+              runtime.Snapshot().value("preview", std::string()) == "Stream",
+          "following host focus loss preserves the already-paused request");
+    const HWND first_settings = windows().settings;
+    Check(commands.RequestSettings(), "repeated settings command posts");
+    WaitUntil([&] { return windows().settings == first_settings; },
+              "repeated settings request reuses the existing host");
+    if (first_settings) PostMessageW(first_settings, WM_CLOSE, 0, 0);
+    WaitUntil([&] { return windows().settings == nullptr; }, "settings can dismiss while streaming continues");
+    Check(runtime.Snapshot().value("visible", false) &&
+              runtime.Snapshot().value("busy", false) &&
+              runtime.Snapshot()["source_blocks"] == before["source_blocks"],
+          "dismissing settings preserves source and the active request");
+    release = true;
+    WaitUntil([&] { return completed == 1 && !runtime.Snapshot().value("busy", true); },
+              "original stream finishes after settings is dismissed");
+    Check(accepted && !cancelled_request && calls == 1 &&
+              runtime.Snapshot().value("result", std::string()) == "Stream done.",
+          "original callback remains authorized and completes exactly once");
+    runtime.Focus(target);
+    runtime.Send(false);
+    Check(!runtime.Capturing(target) && runtime.Snapshot().value("target_pid", 1U) == 0 &&
+              runtime.Snapshot().value("result", std::string()) == "Stream done.",
+          "returning to the old input field does not revive capture or consume output");
+    runtime.Bind(peer);
+    Check(runtime.Capturing(target), "explicit binding is required to resume host capture");
+
+    engine::EngineSnapshot preedit;
+    preedit.composition = "pending preedit";
+    runtime.Capture(target, &preedit);
+    Check(commands.RequestSettings(), "settings request posts while composing");
+    WaitUntil([&] { return windows().settings && !runtime.Capturing(target); },
+              "settings pauses an explicitly rebound input context");
+    Check(runtime.Snapshot().value("preedit", std::string()) == "" &&
+              runtime.Snapshot().value("result", std::string()) == "Stream done." &&
+              runtime.Snapshot()["source_blocks"] == before["source_blocks"],
+          "capture pause clears only transient preedit and retains committed work");
+
+    release = false;
+    cancelled_request = false;
+    runtime.Paste("Next source.");
+    runtime.Generate(true);
+    WaitUntil([&] { return calls == 2 && runtime.Snapshot().value("busy", false); },
+              "second synthetic request starts for the appended source");
+    auto changed = runtime.Configuration();
+    changed.theme = "day";
+    std::string error;
+    Check(runtime.Configure(changed, L"", false, &error), "explicit settings Apply writes isolated preferences");
+    WaitUntil([&] { return completed == 2; }, "configuration change retires the old request");
+    Check(cancelled_request && !accepted &&
+              !runtime.Snapshot().value("busy", true) &&
+              runtime.Snapshot().value("preview", std::string()) == "" &&
+              runtime.Snapshot().value("result", std::string()) == "" &&
+              runtime.Snapshot().value("source", std::string()) == "Fixture source.Next source.",
+          "actual configuration changes still invalidate old API results and retain source");
+    release = true;
+    runtime.Stop();
+    if (const HWND buffer = windows().buffer) PostMessageW(buffer, WM_CLOSE, 0, 0);
+    ui.join();
+  }
+  Check(SetEnvironmentVariableW(L"LOCALAPPDATA", original_size ? original.c_str() : nullptr) != 0,
+        "runtime fixture restores the original preferences path after joining its workers");
+  std::filesystem::remove_all(root);
+}
 }  // namespace
 
 int main() {
   TestNestedHitTargets();
   TestOwnedClicksAndTransientDetails();
   TestPluginManagementAndChordSelection();
+  TestSettingsPreserveRuntimeAndStreaming();
   if (failures) return EXIT_FAILURE;
-  std::cout << "Settings transient-details and mouse-ownership tests passed\n";
+  std::cout << "Settings details, mouse ownership and Runtime preservation tests passed\n";
   return EXIT_SUCCESS;
 }
