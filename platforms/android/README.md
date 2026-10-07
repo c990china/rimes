@@ -90,7 +90,9 @@ independent of their hit areas. Nine-key Return spans two visible rows (98 / 69 
   use QWERTY; returning to Pinyin restores the chosen nine-key preference.
   `64426` offers `你好` through librime. “选拼音” opens a separate spelling row
   without replacing the candidate row; deleting a pinned syllable's separator
-  returns it to its digit spelling.
+  returns it to its digit spelling. The punctuation key lists
+  `，。？！、：；…“”（）` in the candidate row; a mark confirms the first
+  candidate of any composition before it, and any other key closes the list.
 - **Orthogonal / split orthogonal chord** uses the iOS built-in 427 mappings and
   Natural Code encoding through the existing `rimes_ziranma` engine, including
   private/off-learning variants. The split surface has a 12 dp hand gap. Its
@@ -100,8 +102,14 @@ independent of their hit areas. Nine-key Return spans two visible rows (98 / 69 
   Shift uses ordinary literal letters on the same surface. Choosing another
   Chinese schema returns to QWERTY. Mapping provenance and all 427 independently
   generated iOS encoding fixtures are in [resources/chord-provenance.md](resources/chord-provenance.md).
-- **Numbers / symbols / emoji** have dedicated pages. Numeric/symbol rows keep
-  the letter-key width; the emoji page offers 30 fixed choices without recording
+- **Numbers / symbols / emoji** have dedicated pages. In Chinese input the 123
+  and #+= pages show and type Chinese marks (`，。、？！：；（）“”` and
+  `【】《》—…·‘’「」〈〉`), keeping a half-width `.` for decimals; English and
+  password/numeric fields keep the half-width pages. A sentence mark
+  (`，。？！、：；`) typed as the first key after opening 123 returns to letters;
+  digits and other marks stay on the page. iOS uses the same table, checked on
+  both sides against `Shared/Tests/RimesCoreTests/Fixtures/punctuation-layout.tsv`.
+  Numeric/symbol rows keep the letter-key width; the emoji page offers 30 fixed choices without recording
   recents. Emoji are committed through the existing native input route.
 - **18 palettes** mirror iOS: native, Rhino, hermit crab, kitten, puppy, piglet,
   dog, poodle, pig, rabbit, crab, penguin, fox, panda, turtle, octopus, frog and

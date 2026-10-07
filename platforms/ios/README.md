@@ -23,6 +23,13 @@ See `CI_RELEASE.md` for the upload workflow.
   in the app's keyboard-layout page or the keyboard's Settings menu; hold for
   320 ms, slide up and release. Q–P insert 1–0; other letters and nine-key groups
   insert their labeled punctuation. Chord layouts retain their own gestures.
+- With built-in Chinese input, the standard 123 and #+= pages show and type Chinese
+  marks (`，。、？！：；（）“”` and `【】《》—…·‘’「」〈〉`), keeping a half-width
+  `.` for decimals. A sentence mark (`，。？！、：；`) typed as the first key after
+  opening 123 returns to letters; digits and other marks stay. English, imported
+  schemes and the chord number page are unchanged. The nine-key punctuation key
+  lists `，。？！、：；…“”（）` in the candidate row instead of a menu. Android uses
+  the same table (`PunctuationLayout`), checked on both sides against one fixture.
 - Imported Rime packages can be deleted from the package list with confirmation.
   Deleting the selected package restores the previous built-in scheme when the
   keyboard reopens and preserves learned dictionaries.

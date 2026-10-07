@@ -12,6 +12,8 @@ final class KeyboardViewController: UIInputViewController {
     var layoutNeedsInputModeSwitchKey: Bool?
     private var developmentPreferencesAreIsolated = false
     private var developmentPluginRoot: URL?
+    var developmentAIFullAccess: Bool?
+    var developmentAuthorizedAIRequest: ((String, ProviderConfiguration, KeyboardPlugin) -> Void)?
     deinit { if let root = developmentPluginRoot { try? FileManager.default.removeItem(at: root) } }
     override var needsInputModeSwitchKey: Bool { layoutNeedsInputModeSwitchKey ?? super.needsInputModeSwitchKey }
     override var textDocumentProxy: any UITextDocumentProxy { layoutProxy }
@@ -126,6 +128,10 @@ final class KeyboardViewController: UIInputViewController {
     private let spellingStrip = NineKeySpellingStrip()
     private var spellingChoicesOpen = false
     private var symbolPage = false
+    /// The nine-key punctuation key shows its marks in the candidate row until one is chosen.
+    private var punctuationOpen = false
+    /// No key has been typed since the number page opened from letters.
+    private var numberPageFresh = false
     private lazy var nineKeySpelling: NineKeyPinyin = {
         let url = Bundle.main.url(forResource: "EngineData", withExtension: nil)?.appendingPathComponent("nine-key-syllables.json")
         let syllables = url.flatMap { try? Data(contentsOf: $0) }.flatMap { try? JSONDecoder().decode([String].self, from: $0) } ?? []
@@ -146,6 +152,9 @@ final class KeyboardViewController: UIInputViewController {
     private var usesNineKeyEngine: Bool { preferences.ordinaryLayout == .nineKey && customLayoutSnapshot == nil && scheme == .pinyin && importedSchemeSelection == nil }
     private var usesNineKey: Bool { usesNineKeyEngine && !directEnglish && !surface.shifted && !surface.numeric && !surface.emojiMode }
     private var compactTypingKeys: Bool { surface.chordMode && !surface.numeric && !surface.emojiMode }
+    /// Built-in Chinese input shows Chinese marks on the standard 123 and #+= pages and types
+    /// them as shown. Chord keeps its own number page; imported schemes own their punctuation.
+    private var chineseNumberPages: Bool { !directEnglish && importedSchemeSelection == nil && scheme != .chord }
     private let status = UILabel(), source = SingleLineTextView(), result = SingleLineTextView(), surface = KeySurface()
     private let bufferPanel = UIView(), insertionSlot = UIView(), candidatePanel = UIView()
     private let bufferButton = KeycapButton(), aiButton = KeycapButton(), moreButton = KeycapButton()
@@ -245,6 +254,21 @@ final class KeyboardViewController: UIInputViewController {
         return [preedit, chordPreview].filter { !$0.isEmpty }.joined(separator: " ")
     }
     private var consentThisSession = Set<String>()
+    private struct PendingAIConsent {
+        let id = UUID()
+        let provider: ProviderConfiguration
+        let plugin: KeyboardPlugin
+        let authorization: String
+        let revision: UUID
+        let target: UUID
+    }
+    private var pendingAIConsent: PendingAIConsent?
+    private var canRunAI: Bool {
+        #if KEYBOARD_LAYOUT_TESTS
+        if let developmentAIFullAccess { return developmentAIFullAccess }
+        #endif
+        return hasFullAccess
+    }
     private struct InsertionContext: Equatable {
         var target: UUID?, revision: UUID, plugin: KeyboardPlugin?, authorization: String?, blocks: [String]
     }
@@ -323,7 +347,8 @@ final class KeyboardViewController: UIInputViewController {
         insertionSlot.addSubview(insertButton); insertionSlot.addSubview(stopButton)
         candidateStrip.onSelect = { [weak self] index in
             guard let self else { return }; self.collapseCandidates(); self.surface.cancel()
-            if self.showingAssociations { self.chooseAssociation(index) } else { self.receive(self.engine.candidate(index)) }
+            if self.punctuationOpen { self.choosePunctuation(index) }
+            else if self.showingAssociations { self.chooseAssociation(index) } else { self.receive(self.engine.candidate(index)) }
         }
         candidateStrip.onPress = { [weak self] in self?.surface.feedback.send(.press) }
         candidateStrip.onSelectionChanged = { [weak self] in
@@ -379,7 +404,7 @@ final class KeyboardViewController: UIInputViewController {
         globe.addTarget(self, action: #selector(handleInputModeList(from:with:)), for: .allTouchEvents)
         configure(numbers, "123") { [weak self] in
             guard let self else { return }; self.surface.cancel(); self.settle(); self.surface.numeric.toggle()
-            self.symbolPage = false
+            self.symbolPage = false; self.numberPageFresh = self.surface.numeric
             self.numbers.setTitle(self.surface.numeric ? "ABC" : "123", for: .normal); self.render()
         }
         configure(shiftButton, "") { [weak self] in
@@ -452,20 +477,22 @@ final class KeyboardViewController: UIInputViewController {
         customBufferKey.symbol("square.stack.3d.up", label: L("Buffer 开关", "Toggle Buffer"))
         customBufferKey.accessibilityIdentifier = "keyboard.custom.buffer"
         configure(symbolsKey, "#+=") { [weak self] in
-            guard let self else { return }; self.settle(); self.surface.numeric = true; self.symbolPage.toggle(); self.render()
+            guard let self else { return }; self.settle()
+            if !self.surface.numeric { self.numberPageFresh = true }
+            self.surface.numeric = true; self.symbolPage.toggle(); self.render()
         }
         configure(separatorKey, "分隔") { [weak self] in
             guard let self, self.usesNineKey, !self.engine.rawInput.isEmpty, !self.engine.rawInput.hasSuffix("'") else { return }
             self.type("'")
         }
         configure(spellingKey, "选拼音") { [weak self] in
-            guard let self else { return }; self.spellingChoicesOpen.toggle(); self.render()
+            guard let self else { return }; self.spellingChoicesOpen.toggle(); self.punctuationOpen = false; self.render()
         }
-        configure(punctuationKey, "，。?!") {}
-        punctuationKey.menu = UIMenu(children: ["，", "。", "？", "！", "、", "：", "；"].map { mark in
-            UIAction(title: mark) { [weak self] _ in self?.settle(); self?.insert(mark); self?.render() }
-        })
-        punctuationKey.showsMenuAsPrimaryAction = true
+        configure(punctuationKey, "，。?!") { [weak self] in
+            guard let self, self.usesNineKey else { return }
+            self.punctuationOpen.toggle(); self.spellingChoicesOpen = false; self.collapseCandidates(); self.render()
+        }
+        punctuationKey.accessibilityLabel = L("中文标点", "Chinese punctuation")
         for (id, button) in [("symbols", symbolsKey), ("separator", separatorKey), ("spelling", spellingKey), ("punctuation", punctuationKey)] {
             button.accessibilityIdentifier = "keyboard.nineKey.\(id)"
         }
@@ -542,10 +569,10 @@ final class KeyboardViewController: UIInputViewController {
         breakAssociationChain(); saveAssociationHistory()
         stopDefaultAutoSend(); liveTyping.reset()
         returnKey.cancelTracking(with: nil); pressedReturn = nil
-        cancelDeletes(); surface.shifted = false; shiftButton.isSelected = false
+        cancelDeletes(); surface.shifted = false; shiftButton.isSelected = false; punctuationOpen = false
         metrics.sampleMemory(); metrics.save()
         delivery.discardMarkedText()
-        onscreen = false; consentThisSession.removeAll(); speaker.stop(); session.reset(); statsTimer?.invalidate(); statsTimer = nil; surface.retire(); cancelRequest(); engine.clear(); snapshot = .init(); buffer = .init(); bufferEnabled = false; selectedPlugin = nil; panelOpen = false; status.text = ""; refreshPluginMenu(); render()
+        onscreen = false; consentThisSession.removeAll(); speaker.stop(); session.reset(); statsTimer?.invalidate(); statsTimer = nil; surface.retire(); cancelRequest(); engine.suspend(); snapshot = .init(); buffer = .init(); bufferEnabled = false; selectedPlugin = nil; panelOpen = false; status.text = ""; refreshPluginMenu(); render()
     }
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) { candidateStrip.cancelSelection(); cancelDeletes(); insertButton.cancelPress(); surface.retire(); super.viewWillTransition(to: size, with: coordinator); coordinator.animate(alongsideTransition: { _ in self.resize() }) }
     override func textDidChange(_ textInput: UITextInput?) {
@@ -649,7 +676,7 @@ final class KeyboardViewController: UIInputViewController {
         candidateStrip.cancelSelection()
         let value: InputScheme = requested == .chord && officialPlugins?.isEnabled(legacyID: "chord") != true ? .pinyin : requested
         cancelDeletes()
-        spellingChoicesOpen = false; symbolPage = false
+        spellingChoicesOpen = false; symbolPage = false; punctuationOpen = false
         engine.clear(); snapshot = .init(); chordPreview = ""; surface.cancel()
         var selectedImported = false
         if let selection = importedSchemeSelection {
@@ -770,7 +797,8 @@ final class KeyboardViewController: UIInputViewController {
     private func type(_ text: String, chord: Bool = false) {
         let start = ProcessInfo.processInfo.systemUptime; defer { metrics.processed(since: start) }
         guard onscreen else { return }; status.text = ""
-        if usesNineKeyEngine && surface.numeric { breakAssociationChain(); insert(text); render(); return }
+        // Chinese number-page keys already show what they type, so they bypass the engine.
+        if surface.numeric && chineseNumberPages { typeOnNumberPage(text); return }
         if directEnglish || surface.shifted { breakAssociationChain(); insert(surface.shifted ? text.uppercased() : text); render(); return }
         guard engine.available else { return }
         for scalar in text.unicodeScalars {
@@ -784,6 +812,21 @@ final class KeyboardViewController: UIInputViewController {
             // once its error and fallback state are final.
             render()
         }
+    }
+    private func typeOnNumberPage(_ text: String) {
+        // Opening 123 just for a sentence mark is a one-shot visit; digits and other marks stay.
+        let oneShot = numberPageFresh && PunctuationLayout.returnsToLetters(after: text)
+        numberPageFresh = false
+        breakAssociationChain(); insert(text)
+        if oneShot { symbolPage = false; surface.numeric = false }
+        render()
+    }
+    /// A mark from the nine-key strip settles the composition first, like an alternate.
+    private func choosePunctuation(_ index: Int) {
+        punctuationOpen = false
+        guard PunctuationLayout.strip.indices.contains(index), onscreen,
+              currentDocument == DocumentIdentity.read(textDocumentProxy) else { render(); return }
+        insertAlternate(PunctuationLayout.strip[index])
     }
     private func insertAlternate(_ text: String) {
         guard onscreen, currentDocument == DocumentIdentity.read(textDocumentProxy) else { return }
@@ -879,7 +922,11 @@ final class KeyboardViewController: UIInputViewController {
     private func toggleBuffer() { cancelBufferImport(); pendingPaste = nil; breakAssociationChain(); stopDefaultAutoSend(); autoSuspended = false; liveTyping.reset(); cancelDeletes(); surface.cancel(); settle(); bufferEnabled.toggle(); if !bufferEnabled { cancelRequest(); selectedPlugin = nil; panelOpen = false; refreshPluginMenu() }; bufferButton.isSelected = bufferEnabled; render() }
     private func render() {
         guard !preparingPresentation else { return }
+        if let pending = pendingAIConsent, !isCurrentConsent(pending) { dismissAIConsent() }
         syncCustomLayout()
+        surface.chineseNumberPages = chineseNumberPages
+        if !usesNineKey { punctuationOpen = false }
+        punctuationKey.isSelected = punctuationOpen
         var spellings = usesNineKey ? nineKeySpelling.choices(for: engine.rawInput) : []
         if let best = engine.candidateReadings.first?.split(separator: " ").first.map(String.init),
            let index = spellings.firstIndex(of: best) { spellings.remove(at: index); spellings.insert(best, at: 0) }
@@ -891,8 +938,9 @@ final class KeyboardViewController: UIInputViewController {
             if bufferEnabled { delivery.discardMarkedText() }
             else if let target = currentDocument { delivery.updateMarkedText(compositionText, target: target) }
         }
-        candidateStrip.update(showingAssociations ? associations : snapshot.candidates,
-                              context: showingAssociations ? "associations" : "composition:\(snapshot.preedit)")
+        candidateStrip.showsChineseMarks = punctuationOpen
+        candidateStrip.update(punctuationOpen ? PunctuationLayout.strip : showingAssociations ? associations : snapshot.candidates,
+                              context: punctuationOpen ? "punctuation" : showingAssociations ? "associations" : "composition:\(snapshot.preedit)")
         renderHandPreview(); renderShortcuts(); refreshLanguageSwap(); refreshKeyboardSkin(); renderBuffer(); resize()
     }
     private func syncCustomLayout() {
@@ -999,7 +1047,7 @@ final class KeyboardViewController: UIInputViewController {
     }
     /// An empty candidate row offers the plugins instead.
     private func renderShortcuts() {
-        let empty = snapshot.preedit.isEmpty && snapshot.candidates.isEmpty && !showingAssociations && !surface.isChordActive && handPreview.isHidden
+        let empty = snapshot.preedit.isEmpty && snapshot.candidates.isEmpty && !showingAssociations && !punctuationOpen && !surface.isChordActive && handPreview.isHidden
         let choosing = handPreview.isHidden && !showingAssociations && (!snapshot.preedit.isEmpty || !snapshot.candidates.isEmpty)
         if moreButton.isHidden != choosing { moreButton.isHidden = choosing }
         if bufferButton.isHidden != choosing { bufferButton.isHidden = choosing }
@@ -1275,6 +1323,7 @@ final class KeyboardViewController: UIInputViewController {
     }
     private func noteTypingKey(backspace: Bool = false) {
         candidateStrip.cancelSelection()
+        if punctuationOpen { punctuationOpen = false; render() }
         // A key press hides associations; Delete also ends the learning chain.
         if backspace { breakAssociationChain() } else { associations = [] }
         if !backspace {
@@ -1624,7 +1673,7 @@ final class KeyboardViewController: UIInputViewController {
               let target = currentDocument, delivery.insert(buffer.source, target: target) else { return }
         cancelRequest(); buffer.consumeSource(); surface.feedback.send(.commit); render()
     }
-    private func cancelRequest() { insertButton.cancelPress(); pressedInsertion = nil; lastRunFailed = false; runner.cancel(); buffer.cancel(); reveal.stop(); caption.stop(); revealGeneration = nil }
+    private func cancelRequest() { dismissAIConsent(); insertButton.cancelPress(); pressedInsertion = nil; lastRunFailed = false; runner.cancel(); buffer.cancel(); reveal.stop(); caption.stop(); revealGeneration = nil }
     private var outputState: StatusLight.State {
         if buffer.generating { return buffer.preview.isEmpty ? .waiting : .streaming }
         if lastRunFailed { return .failed }
@@ -1722,7 +1771,7 @@ final class KeyboardViewController: UIInputViewController {
         refreshPluginMenu(); sourceChanged(); render()
     }
     private func aiReadinessHint() -> String? {
-        if !hasFullAccess { return L("AI 插件需要在系统设置中为 RIMES 开启“完全访问”", "AI plugins need Full Access for RIMES in Settings") }
+        if !canRunAI { return L("AI 插件需要在系统设置中为 RIMES 开启“完全访问”", "AI plugins need Full Access for RIMES in Settings") }
         if config.provider == nil { return L("请先在 RIMES App 中配置 AI 服务", "Configure an AI service in the RIMES app first") }
         return nil
     }
@@ -1734,16 +1783,29 @@ final class KeyboardViewController: UIInputViewController {
     /// Opens the panel for a plugin (nil for Buffer), turning the Buffer on first.
     private func openSettings(for plugin: KeyboardPlugin?) {
         guard onscreen else { return }
+        dismissAIConsent()
         surface.cancel(); settle(); cancelDeletes(); insertButton.cancelPress(); collapseCandidates()
         if !bufferEnabled { stopDefaultAutoSend(); autoSuspended = false; liveTyping.reset(); bufferEnabled = true }
         if plugin != selectedPlugin { selectPlugin(plugin) }
         panelOpen = true; render()
     }
-    private func closePanel() { panelOpen = false; render() }
+    private func closePanel() { dismissAIConsent(); panelOpen = false; render() }
     private func renderPanel() {
         panel.isHidden = !panelOpen
         guard panelOpen else { return }
         view.bringSubviewToFront(panel)
+        if let pending = pendingAIConsent {
+            panel.show(title: L("发送到 AI 服务", "Send to AI service"), sections: [
+                PanelSection(title: pending.provider.name,
+                    note: pending.provider.consentIdentity + "\n\n" + L("仅发送当前 Buffer 原文，不读取宿主全文。接收方的数据政策适用。", "Only the current Buffer text will be sent. Host documents are not read. The recipient's data policy applies."),
+                    items: [PanelItem(id: "cancel", title: L("取消", "Cancel"), symbol: "xmark"),
+                            PanelItem(id: "agree", title: L("同意并发送", "Agree and send"), symbol: "paperplane")],
+                    customKey: pending.id.uuidString) { [weak self] id in
+                    self?.resolveAIConsent(pending.id, agreed: id == "agree")
+                }
+            ])
+            return
+        }
         panel.show(title: L("Buffer 设置", "Buffer settings"), sections: panelSections())
     }
     private func panelSections() -> [PanelSection] {
@@ -1759,7 +1821,8 @@ final class KeyboardViewController: UIInputViewController {
             })
         case .translate?:
             refreshLanguageRows()
-            sections.append(PanelSection(title: L("语言", "Languages"), custom: languageRow, customHeight: 102,
+            sections.append(PanelSection(title: L("Apple 本地翻译", "Apple on-device translation"),
+                                         note: L("使用本机 Apple 语言包。AI 服务用于快问、润色、作诗和字符画。", "Uses Apple's on-device language packs. Your AI service powers Q&A, polish, poems and text art."), custom: languageRow, customHeight: 102,
                                          customKey: "\(preferences.sourceLanguage)>\(preferences.targetLanguage)|\(languages.count)"))
             speakRow.toggle.setOn(preferences.speakTranslation, animated: false)
             sections.append(PanelSection(title: L("朗读", "Read aloud"), note: L("开启后，发送时朗读发出的块。不开启也可以点按输出块来听。", "When on, blocks are read as you send them. Tap an output block to hear it any time."),
@@ -1905,7 +1968,9 @@ final class KeyboardViewController: UIInputViewController {
     private func generate(_ plugin: KeyboardPlugin) {
         defer { render() }
         surface.cancel(); settle()
-        guard onscreen, bufferEnabled, selectedPlugin == plugin, plugin.isAI else { return }
+        guard onscreen, bufferEnabled, selectedPlugin == plugin, plugin.isAI,
+              let authorization = pluginAuthorization(plugin.rawValue),
+              let target = currentDocument, target == DocumentIdentity.read(textDocumentProxy) else { return }
         if let hint = aiReadinessHint() { status.text = hint; return }
         guard !buffer.source.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, let provider = config.provider else {
             status.text = L("先在输入行写下内容", "Write something in the input line first"); return
@@ -1923,10 +1988,18 @@ final class KeyboardViewController: UIInputViewController {
         catch { status.text = error.localizedDescription; return }
         let identity = provider.consentIdentity
         guard config.consents.contains(identity) || consentThisSession.contains(identity) else {
-            let alert = UIAlertController(title: L("发送到 AI 服务", "Send to AI service"), message: "\(provider.name)\n\(identity)\n\n" + L("仅发送当前 Buffer 原文，不读取宿主全文。接收方的数据政策适用。", "Only the current Buffer text will be sent. Host documents are not read. The recipient's data policy applies."), preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: L("取消", "Cancel"), style: .cancel))
-            alert.addAction(UIAlertAction(title: L("同意并发送", "Agree and send"), style: .default) { [weak self] _ in self?.consentThisSession.insert(identity); self?.generate(plugin) }); present(alert, animated: true); return
+            // Keyboard extensions cannot present UIAlertController on newer iOS.
+            // Keep consent inside the existing key-area panel without resizing the host.
+            dismissAIConsent()
+            pendingAIConsent = PendingAIConsent(provider: provider, plugin: plugin, authorization: authorization,
+                                                revision: buffer.sourceRevision, target: target)
+            collapseCandidates(); panelOpen = true; return
         }
+        #if KEYBOARD_LAYOUT_TESTS
+        if let developmentAuthorizedAIRequest {
+            developmentAuthorizedAIRequest(buffer.source, provider, plugin); return
+        }
+        #endif
         do {
             let key = try secrets.read(provider.id)
             guard !key.isEmpty else { status.text = L("请在 App 中保存 API Key", "Save your API Key in the app"); return }
@@ -1940,6 +2013,32 @@ final class KeyboardViewController: UIInputViewController {
             run(AITextPlugin(id: plugin.rawValue, title: plugin.title, provider: provider, key: key, consent: identity, instruction: instruction,
                              thinking: preferences.thinking, shape: shape), delay: 0)
         } catch { status.text = (error as? CoreError)?.localizedDescription ?? L("无法读取 AI 配置", "Unable to read AI configuration") }
+    }
+    private func isCurrentConsent(_ pending: PendingAIConsent) -> Bool {
+        onscreen && bufferEnabled && canRunAI && selectedPlugin == pending.plugin && config.provider == pending.provider
+            && !hasComposition && engine.rawInput.isEmpty
+            && buffer.sourceRevision == pending.revision && currentDocument == pending.target
+            && DocumentIdentity.read(textDocumentProxy) == pending.target
+            && pluginAuthorization(pending.plugin.rawValue) == pending.authorization
+    }
+    private func dismissAIConsent() {
+        guard pendingAIConsent != nil else { return }
+        // Retired controls must reject a held touch even if the panel has already
+        // opened another confirmation with the same provider and button labels.
+        for chip in panel.chips {
+            chip.cancelTracking(with: nil)
+            var item = chip.item; item.enabled = false; chip.item = item
+        }
+        pendingAIConsent = nil; panelOpen = false
+    }
+    private func resolveAIConsent(_ id: UUID, agreed: Bool) {
+        guard let pending = pendingAIConsent, pending.id == id else { return }
+        let valid = isCurrentConsent(pending)
+        dismissAIConsent()
+        if agreed && valid {
+            consentThisSession.insert(pending.provider.consentIdentity)
+            generate(pending.plugin)
+        } else { render() }
     }
     #if KEYBOARD_LAYOUT_TESTS
     private func developmentPasteClipboard() {
@@ -1991,6 +2090,9 @@ final class KeyboardViewController: UIInputViewController {
     var developmentSelectedPlugin: KeyboardPlugin? { selectedPlugin }
     var developmentPluginControls: (run: KeycapButton, plugin: KeycapButton, settings: KeycapButton) { (runButton, aiButton, settingsButton) }
     func developmentHostResigned() { hostResigned() }
+    func developmentAIProvider(_ provider: ProviderConfiguration) {
+        config.providers = [provider]; config.selectedProvider = provider.id; config.consents = []; render()
+    }
     func developmentPreview(_ text: String) { if let id = buffer.generation { buffer.receive(text, id: id); render() } }
     /// Opens a plugin with sample text, optionally a finished output or a running request.
     func developmentPlugin(_ plugin: KeyboardPlugin?, source: String, output: String? = nil, blocks: [String]? = nil, generating: Bool = false) {

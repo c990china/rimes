@@ -4,7 +4,7 @@ import Translation
 struct TranslationSetupView: View {
     var body: some View {
         if #available(iOS 26, *) { TranslationLanguageSetup() }
-        else { Text(L("苹果翻译插件需要 iOS 26 或更新版本。离线输入和已有 AI 功能仍可用。", "Apple translation requires iOS 26 or later. Offline typing and existing AI remain available.")).padding() }
+        else { Text(L("Apple 本地翻译需要 iOS 26 或更新版本。离线输入和已有 AI 功能仍可用。", "Apple on-device translation requires iOS 26 or later. Offline typing and existing AI remain available.")).padding() }
     }
 }
 
@@ -19,7 +19,7 @@ private struct TranslationLanguageSetup: View {
     var body: some View {
         Form {
             Section(L("在设备上翻译", "Translate on device")) {
-                Text(L("先下载语言包，再到键盘 Buffer 开启“苹果翻译”。停顿后自动预览，点击才插入；不需要 API Key。", "Download languages, then enable Apple translation in the keyboard Buffer. Preview updates after a pause; insertion is manual. No API key needed."))
+                Text(L("先下载语言包，再到键盘 Buffer 开启“苹果翻译”。这是 Apple 本地翻译：停顿后自动预览，点击才插入；使用本机 Apple 语言模型，不需要 API Key。", "Download languages, then choose Translate in the keyboard Buffer. This is Apple on-device translation: previews update after a pause and insertion is manual. It uses on-device Apple language models and needs no API key."))
                 Picker(L("原文", "Source"), selection: $source) { languageOptions }.disabled(preparing)
                 Picker(L("译文", "Target"), selection: $target) { languageOptions }.disabled(preparing)
                 Button(L("交换方向", "Swap languages")) { swap(&source, &target) }.disabled(preparing)
@@ -32,12 +32,12 @@ private struct TranslationLanguageSetup: View {
                 if !status.isEmpty { Text(status).accessibilityIdentifier("translation.preparationStatus") }
             }
         }
-        .navigationTitle(L("苹果翻译语言包", "Translation languages"))
+        .navigationTitle(L("Apple 本地翻译语言包", "Apple translation languages"))
         .task { languages = await LanguageAvailability().supportedLanguages.sorted { label($0) < label($1) } }
         .translationTask(configuration) { session in
             do {
                 try await session.prepareTranslation()
-                status = L("语言包已就绪，可以回到键盘开启苹果翻译。", "Languages are ready. Enable Apple translation in the keyboard.")
+                status = L("语言包已就绪，可以回到键盘开启“苹果翻译”。", "Languages are ready. Choose Translate in the keyboard.")
             } catch { status = L("语言包准备未完成，请检查网络和系统下载提示后重试。", "Preparation did not finish. Check the network and system download prompt, then retry.") }
             preparing = false
         }

@@ -12,6 +12,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.InputBinding;
 import java.lang.reflect.Field;
@@ -26,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.scholay.rimes.core.BufferSession;
@@ -33,6 +36,7 @@ import org.scholay.rimes.core.ChordGesture;
 import org.scholay.rimes.core.ChordLayout;
 import org.scholay.rimes.core.PluginSession;
 import org.scholay.rimes.core.RimeEngine;
+import org.scholay.rimes.core.InputEpoch;
 
 /**
  * Calls the real service delivery methods with a local, synchronously rejecting connection.
@@ -69,13 +73,21 @@ final class ServiceDeliveryContract {
                 contract.translationSurvivesMockPolicy();
                 contract.remoteConfigurationPolicy();
                 contract.pluginAuthorizationPolicy();
+                contract.clearReadyAndRetained();
+                for(String guard:new String[]{"disabled","not-permitted","private","connection","no-target"}) contract.clearDenied(guard);
+                contract.nineKeyCompositionProjection();
             } catch(Throwable error) { failure.set(error); }
         });
         if(failure.get()!=null) throw new AssertionError("Service delivery contract failed",failure.get());
         try {
+            contract.idleDeleteKeepsPluginButtons(instrumentation);
             contract.runningMockPolicy(instrumentation);
             contract.atomicSettingsPair(instrumentation);
             contract.deferredSettingsPair(instrumentation);
+            contract.clearQueuedEngineWork(instrumentation);
+            contract.clearPostedEngineResult(instrumentation);
+            contract.clearRunningPlugin(instrumentation);
+            contract.pendingDeleteRemainsOrdered(instrumentation);
         } catch(Throwable error) { throw new AssertionError("Service settings contract failed",error); }
         return contract.checks;
     }
@@ -324,6 +336,207 @@ final class ServiceDeliveryContract {
         } finally { onMain(instrumentation,() -> { if(reference.get()!=null) reference.get().close(); }); }
     }
 
+    /** Clear is a discard transaction, including a real capacity-failed service delivery. */
+    private void clearReadyAndRetained() throws Exception {
+        try(Fixture fixture=new Fixture(false)) {
+            char[] full=new char[BufferSession.MAX_CHARACTERS]; java.util.Arrays.fill(full,'x');
+            fixture.buffer.clear(); fixture.buffer.appendCommittedBlock(new String(full));
+            invoke(fixture.service,"type",new Class<?>[]{String.class},"旧😀");
+            check(!((String)get(fixture.service,"retained")).isEmpty() && !fixture.retained().isEmpty(),"capacity failure retains an actual service result before clear");
+            PluginSession.Request old=fixture.prepare("translate",OUTPUT);
+            set(fixture.service,"snapshot",new RimeEngine.Snapshot(true,"ni","ni",2,"",new String[]{"你"},new String[]{"ni"},0,0,true));
+            set(fixture.service,"pending",3); set(fixture.service,"spellingOpen",true); set(fixture.service,"punctuationOpen",true);
+            InputEpoch.Ticket ticket=fixture.epoch().issue(); List<Integer> expected=fixture.expectations();
+            fixture.clear();
+            check(fixture.buffer.isEnabled() && fixture.buffer.isPermitted(),"clear preserves enabled and permitted Buffer mode");
+            check("translate".equals(get(fixture.service,"activePlugin")) && "translate".equals(fixture.plugins.snapshot(fixture.buffer).plugin),"clear preserves selected plugin in service and core");
+            check(fixture.buffer.text().isEmpty() && fixture.buffer.blockCount()==0,"clear removes every confirmed source block");
+            check(get(fixture.service,"snapshot")==RimeEngine.Snapshot.EMPTY && (Integer)get(fixture.service,"pending")==0,"clear removes composition and outstanding pending count");
+            check(fixture.retained().isEmpty() && ((String)get(fixture.service,"retained")).isEmpty(),"clear discards retained results rather than retrying freed capacity");
+            check(!(Boolean)get(fixture.service,"spellingOpen") && !(Boolean)get(fixture.service,"punctuationOpen"),"clear dismisses composition-only choices");
+            check(!fixture.epoch().current(ticket),"clear revokes pre-clear engine and plugin tickets");
+            check(fixture.plugins.snapshot(fixture.buffer).status==PluginSession.Status.IDLE && fixture.plugins.prepare(fixture.buffer)==null
+                    && get(fixture.service,"pluginResultAuthorization")==null,"clear revokes ready output and its delivery grant");
+            check(!fixture.plugins.update(old,fixture.buffer,OUTPUT,true) && !fixture.plugins.fail(old,fixture.buffer,"late"),"cleared request rejects late success and failure");
+            invoke(fixture.service,"retryRetained",new Class<?>[0]); invoke(fixture.service,"delete",new Class<?>[0]); fixture.clear();
+            check(fixture.buffer.text().isEmpty() && fixture.retained().isEmpty(),"retry, Delete and repeated clear cannot refill discarded source");
+            check(fixture.connection.attempts==0 && fixture.connection.deletions==0 && fixture.connection.compositions==0,"Buffer clear and empty Buffer Delete never alter host text");
+            check(fixture.selection()==7 && fixture.selectionStart()==7 && expected.equals(fixture.expectations()),"clear never advances host selection or expected selections");
+            fixture.buffer.appendCommittedBlock("新😀"); invoke(fixture.service,"retryRetained",new Class<?>[0]);
+            check("新😀".equals(fixture.buffer.text()),"discarded retained results cannot contaminate a later draft");
+        }
+    }
+
+    private void clearDenied(String guard) throws Exception {
+        try(Fixture fixture=new Fixture(true)) {
+            if("disabled".equals(guard)) fixture.buffer.setEnabled(false);
+            else if("not-permitted".equals(guard)) fixture.buffer.beginTarget(false);
+            else if("private".equals(guard)) set(fixture.service,"privateField",true);
+            else if("connection".equals(guard)) fixture.bind(new Connection(context));
+            else set(fixture.service,"target",null);
+            set(fixture.service,"pending",2);
+            RimeEngine.Snapshot before=new RimeEngine.Snapshot(true,"n","n",1,"",new String[0],new String[0],0,0,true);
+            set(fixture.service,"snapshot",before);
+            String source=fixture.buffer.text(); boolean enabled=fixture.buffer.isEnabled(),permitted=fixture.buffer.isPermitted();
+            InputEpoch.Ticket ticket=fixture.epoch().issue(); List<Integer> expected=fixture.expectations();
+            fixture.clear();
+            check(source.equals(fixture.buffer.text()) && fixture.buffer.isEnabled()==enabled && fixture.buffer.isPermitted()==permitted,"denied "+guard+" clear leaves source and Buffer mode unchanged");
+            check(get(fixture.service,"snapshot")==before && (Integer)get(fixture.service,"pending")==2 && fixture.epoch().current(ticket),"denied "+guard+" clear does not retire unrelated work");
+            check("translate".equals(get(fixture.service,"activePlugin")) && expected.equals(fixture.expectations()) && fixture.selection()==7,"denied "+guard+" clear preserves plugin and selection state");
+            check(fixture.connection.attempts==0 && fixture.connection.deletions==0 && fixture.connection.compositions==0,"denied "+guard+" clear makes no host calls");
+        }
+    }
+
+    /** Native buttons are from the real input-view builder; this is a state gate, not frame evidence. */
+    private void idleDeleteKeepsPluginButtons(Instrumentation instrumentation) throws Exception {
+        AtomicReference<Fixture> reference=new AtomicReference<>(); RecordingEngine engine=new RecordingEngine("");
+        try {
+            onMain(instrumentation,() -> {
+            Fixture fixture=new Fixture(true); reference.set(fixture);
+            set(fixture.service,"engine",engine); set(fixture.service,"session",1L); set(fixture.service,"ready",true);
+            fixture.service.onCreateInputView();
+            ViewGroup row=(ViewGroup)((PluginShortcutBar)get(fixture.service,"pluginShortcuts")).getChildAt(0);
+            check(row.getChildCount()==5 && (Boolean)invoke(fixture.service,"canSelectPlugin",new Class<?>[0]),"idle real plugin shortcuts start available");
+            for(int i=0;i<row.getChildCount();i++) check(row.getChildAt(i).isEnabled(),"idle plugin "+i+" is enabled before deletion");
+            invoke(fixture.service,"delete",new Class<?>[0]);
+            check(fixture.buffer.text().isEmpty() && fixture.connection.attempts==0,"idle Buffer Delete removes its whole block without host commit");
+            check((Integer)get(fixture.service,"pending")==0 && (Boolean)invoke(fixture.service,"canSelectPlugin",new Class<?>[0]),"idle Delete never enters pending or closes the plugin gate");
+            for(int i=0;i<row.getChildCount();i++) check(row.getChildAt(i).isEnabled(),"idle plugin "+i+" remains natively enabled after deletion");
+            check(fixture.plugins.snapshot(fixture.buffer).status==PluginSession.Status.IDLE,"idle source deletion revokes previously ready generated output");
+            fixture.buffer.setEnabled(false); fixture.connection.beforeCursor="A😀";
+            invoke(fixture.service,"delete",new Class<?>[0]);
+            check(fixture.connection.deletions==1 && fixture.connection.deleteBefore==1 && fixture.connection.deleteAfter==0,"idle host Delete uses one codepoint through the direct path");
+            check(fixture.selection()==5 && (Integer)get(fixture.service,"pending")==0,"idle host Delete accounts for supplementary UTF16 units without pending");
+            });
+            engineIdle(instrumentation);
+            onMain(instrumentation,() -> {
+            check(engine.snapshots.get()==0 && engine.keys.get()==0 && engine.clears.get()==0 && engine.creates.get()==0,"idle deletes do not call or reset the engine");
+            set(reference.get().service,"ready",false);
+            });
+        } finally { onMain(instrumentation,() -> { if(reference.get()!=null) reference.get().close(); }); engineIdle(instrumentation); }
+    }
+
+    private void nineKeyCompositionProjection() throws Exception {
+        try(Fixture fixture=new Fixture(false)) {
+            fixture.buffer.setEnabled(false); set(fixture.service,"layout","nineKey"); set(fixture.service,"schema","rimes_pinyin");
+            set(fixture.service,"ready",true);
+            RimeEngine.Snapshot digits=new RimeEngine.Snapshot(true,"64426","64 426",5,"",new String[]{"你好"},new String[]{"ni hao"},0,0,true);
+            set(fixture.service,"snapshot",digits);
+            invoke(fixture.service,"updateComposition",new Class<?>[0]);
+            check(fixture.connection.compositions==1 && "ni'hao".equals(fixture.connection.lastComposition),"real updateComposition presents the nine-key candidate reading");
+            check(fixture.selection()==7+"ni'hao".length() && fixture.expectations().get(fixture.expectations().size()-1)==13,"nine-key composing selection follows displayed UTF16 length rather than five raw digits");
+            check(get(fixture.service,"snapshot")==digits && "64426".equals(digits.raw) && "64 426".equals(digits.preedit),"presentation leaves immutable engine raw code and preedit unchanged");
+            int expectations=fixture.expectations().size(); invoke(fixture.service,"updateComposition",new Class<?>[0]);
+            check(fixture.connection.compositions==1 && fixture.expectations().size()==expectations,"identical nine-key presentation avoids duplicate host composing calls");
+            fixture.buffer.setEnabled(true); invoke(fixture.service,"updateComposition",new Class<?>[0]);
+            check(fixture.connection.compositions==1 && SOURCE.equals(fixture.buffer.text()),"Buffer composition neither touches host nor appends unconfirmed code");
+            fixture.buffer.setEnabled(false); set(fixture.service,"directOnly",true); invoke(fixture.service,"updateComposition",new Class<?>[0]);
+            check(fixture.connection.compositions==1,"direct and protected fields do not receive Chinese preedit");
+            set(fixture.service,"directOnly",false); set(fixture.service,"hostComposing",false); set(fixture.service,"selection",7); set(fixture.service,"selectionStart",7);
+            set(fixture.service,"snapshot",new RimeEngine.Snapshot(true,"x","😀",1,"",new String[0],new String[0],0,0,true));
+            invoke(fixture.service,"updateComposition",new Class<?>[0]);
+            check("😀".equals(fixture.connection.lastComposition) && fixture.selection()==9,"preedit fallback uses supplementary character UTF16 length");
+            check(fixture.connection.attempts==0,"presentation alone never commits host text");
+            set(fixture.service,"ready",false);
+        }
+    }
+
+    /** The old operation is still queued when clear revokes its lease; it must not execute. */
+    private void clearQueuedEngineWork(Instrumentation instrumentation) throws Exception {
+        AtomicReference<Fixture> reference=new AtomicReference<>(); RecordingEngine engine=new RecordingEngine("");
+        engine.plan('a',new RimeEngine.Snapshot(true,"","",0,"旧😀",new String[0],new String[0],0,0,true));
+        CountDownLatch started=new CountDownLatch(1),release=new CountDownLatch(1);
+        Future<?> barrier=EngineWorker.QUEUE.submit(() -> { started.countDown(); try { if(!release.await(10,TimeUnit.SECONDS)) throw new AssertionError("queue fixture release timed out"); } catch(InterruptedException error) { Thread.currentThread().interrupt(); throw new AssertionError(error); } });
+        try {
+            check(started.await(10,TimeUnit.SECONDS),"real serial worker reaches controlled queue barrier");
+            onMain(instrumentation,() -> {
+                Fixture fixture=new Fixture(false); reference.set(fixture);
+                set(fixture.service,"engine",engine); set(fixture.service,"session",1L); set(fixture.service,"ready",true);
+                invoke(fixture.service,"type",new Class<?>[]{String.class},"a");
+                check((Integer)get(fixture.service,"pending")==1,"actual old key is queued before clear");
+                fixture.clear();
+                check((Integer)get(fixture.service,"pending")==0 && fixture.buffer.text().isEmpty(),"clear retires queued count and source immediately");
+            });
+            release.countDown(); barrier.get(10,TimeUnit.SECONDS); engineIdle(instrumentation);
+            onMain(instrumentation,() -> {
+                Fixture fixture=reference.get();
+                check(engine.keys.get()==0 && engine.snapshots.get()==0,"clear revokes queued engine work before it could process or learn the old key");
+                check(engine.creates.get()==1 && engine.destroyed.get()==1 && engine.selections.get()==1,"clear resets the fake session on the actual serial worker exactly once");
+                check(fixture.buffer.text().isEmpty() && fixture.connection.attempts==0 && fixture.retained().isEmpty(),"released old key cannot restore source, host text or retained output");
+                check((Integer)get(fixture.service,"pending")==0 && get(fixture.service,"snapshot")==RimeEngine.Snapshot.EMPTY,"stale work cannot recreate pending or composition");
+            });
+        } finally { release.countDown(); onMain(instrumentation,() -> { if(reference.get()!=null) reference.get().close(); }); engineIdle(instrumentation); }
+    }
+
+    /** An engine commit has executed, but its production main callback is delayed until after clear. */
+    private void clearPostedEngineResult(Instrumentation instrumentation) throws Exception {
+        AtomicReference<Fixture> reference=new AtomicReference<>(); RecordingEngine engine=new RecordingEngine("");
+        engine.plan('a',new RimeEngine.Snapshot(true,"","",0,"旧😀",new String[0],new String[0],0,0,true));
+        onMain(instrumentation,() -> {
+            Fixture fixture=new Fixture(false); reference.set(fixture); fixture.holding=new HoldingHandler(); set(fixture.service,"main",fixture.holding);
+            set(fixture.service,"engine",engine); set(fixture.service,"session",1L); set(fixture.service,"ready",true);
+            invoke(fixture.service,"type",new Class<?>[]{String.class},"a");
+        });
+        try {
+            engineIdle(instrumentation);
+            onMain(instrumentation,() -> {
+                Fixture fixture=reference.get();
+                check(engine.keys.get()==1 && !fixture.holding.callbacks.isEmpty() && (Integer)get(fixture.service,"pending")==1,"old engine result really executes and posts before clear");
+                fixture.clear(); fixture.buffer.appendCommittedBlock("新😀"); fixture.holding.replay();
+                check("新😀".equals(fixture.buffer.text()) && fixture.retained().isEmpty(),"already-posted old commit cannot append to or retain against the fresh draft");
+                check((Integer)get(fixture.service,"pending")==0 && get(fixture.service,"snapshot")==RimeEngine.Snapshot.EMPTY,"stale posted callback cannot underflow pending or restore candidates");
+                check(fixture.connection.attempts==0 && fixture.selection()==7,"clear and stale engine callback leave host untouched");
+            });
+            engineIdle(instrumentation);
+        } finally { onMain(instrumentation,() -> { if(reference.get()!=null) reference.get().close(); }); engineIdle(instrumentation); }
+    }
+
+    private void clearRunningPlugin(Instrumentation instrumentation) throws Exception {
+        AtomicReference<Fixture> reference=new AtomicReference<>();
+        onMain(instrumentation,() -> {
+            Fixture fixture=new Fixture(false); reference.set(fixture); fixture.holding=new HoldingHandler(); set(fixture.service,"main",fixture.holding);
+            set(fixture.service,"activePlugin","ask"); fixture.plugins.select("ask"); invoke(fixture.service,"runPlugin",new Class<?>[0]);
+            check(fixture.plugins.snapshot(fixture.buffer).status==PluginSession.Status.RUNNING && get(fixture.service,"pluginJob")!=null,"real local Mock starts before source clear");
+        });
+        try {
+            AtomicInteger held=new AtomicInteger(); long deadline=SystemClock.elapsedRealtime()+15000;
+            do { onMain(instrumentation,() -> held.set(reference.get().holding.callbacks.size())); if(held.get()>0) break; SystemClock.sleep(20); } while(SystemClock.elapsedRealtime()<deadline);
+            check(held.get()>0,"real Mock posts a service callback before clear within the bound");
+            onMain(instrumentation,() -> {
+                Fixture fixture=reference.get(); BufferPluginExecutor.Job job=(BufferPluginExecutor.Job)get(fixture.service,"pluginJob");
+                fixture.clear(); Field token=job.getClass().getDeclaredField("cancellation"); token.setAccessible(true);
+                check(((PluginCancellation)token.get(job)).isCancelled() && get(fixture.service,"pluginJob")==null,"clear cancels and detaches the actual running Job");
+                check(fixture.buffer.isEnabled() && "ask".equals(get(fixture.service,"activePlugin")),"clear keeps Buffer and selected AI mode");
+                fixture.buffer.appendCommittedBlock("下一稿😀"); fixture.holding.replay();
+                check(fixture.plugins.snapshot(fixture.buffer).status==PluginSession.Status.IDLE && fixture.plugins.snapshot(fixture.buffer).output.isEmpty(),"late real plugin callbacks cannot restore cleared output");
+                fixture.send(true);
+                check("下一稿😀".equals(fixture.buffer.text()) && fixture.connection.attempts==0,"old plugin send cannot consume or commit a later source draft");
+            });
+        } finally { onMain(instrumentation,() -> { if(reference.get()!=null) reference.get().close(); }); }
+    }
+
+    private void pendingDeleteRemainsOrdered(Instrumentation instrumentation) throws Exception {
+        AtomicReference<Fixture> reference=new AtomicReference<>(); RecordingEngine engine=new RecordingEngine("");
+        engine.plan('n',new RimeEngine.Snapshot(true,"n","n",1,"",new String[]{"你"},new String[]{"ni"},0,0,true)); engine.plan(0xff08,RimeEngine.Snapshot.EMPTY);
+        onMain(instrumentation,() -> {
+            Fixture fixture=new Fixture(false); reference.set(fixture);
+            set(fixture.service,"engine",engine); set(fixture.service,"session",1L); set(fixture.service,"ready",true);
+            invoke(fixture.service,"type",new Class<?>[]{String.class},"n");
+            check((Integer)get(fixture.service,"pending")==1 && !((RimeEngine.Snapshot)get(fixture.service,"snapshot")).composing(),"preceding key is pending while main snapshot is still idle");
+            invoke(fixture.service,"delete",new Class<?>[0]);
+            check((Integer)get(fixture.service,"pending")==2 && SOURCE.equals(fixture.buffer.text()),"pending Delete queues behind the unseen composition instead of deleting the Buffer");
+        });
+        try {
+            engineIdle(instrumentation);
+            onMain(instrumentation,() -> {
+                Fixture fixture=reference.get();
+                check(engine.processed.size()==2 && engine.processed.get(0)=='n' && engine.processed.get(1)==0xff08,"real serial worker processes the composing key before Backspace");
+                check(SOURCE.equals(fixture.buffer.text()) && fixture.connection.attempts==0 && fixture.connection.deletions==0,"queued Backspace edits composition without consuming confirmed source or host");
+                check((Integer)get(fixture.service,"pending")==0 && !((RimeEngine.Snapshot)get(fixture.service,"snapshot")).composing(),"ordered completion returns to idle without stale pending state");
+            });
+        } finally { onMain(instrumentation,() -> { if(reference.get()!=null) reference.get().close(); }); engineIdle(instrumentation); }
+    }
+
     private final class Fixture implements AutoCloseable {
         final RimesInputMethodService service=new RimesInputMethodService();
         final InputMethodService.InputMethodImpl input;
@@ -374,6 +587,9 @@ final class ServiceDeliveryContract {
         }
         void bind(Connection target) { input.bindInput(new InputBinding(target,new Binder(),Process.myUid(),Process.myPid())); }
         void send(boolean all) throws Exception { invoke(service,"insertNow",new Class<?>[]{boolean.class},all); }
+        void clear() throws Exception { invoke(service,"clearBuffer",new Class<?>[0]); }
+        InputEpoch epoch() throws Exception { return (InputEpoch)get(service,"epoch"); }
+        @SuppressWarnings("unchecked") ArrayDeque<?> retained() throws Exception { return (ArrayDeque<?>)get(service,"retainedResults"); }
         int selection() throws Exception { return (Integer)get(service,"selection"); }
         int selectionStart() throws Exception { return (Integer)get(service,"selectionStart"); }
         @SuppressWarnings("unchecked") ArrayDeque<Integer> expected() throws Exception { return (ArrayDeque<Integer>)get(service,"expectedSelections"); }
@@ -428,15 +644,25 @@ final class ServiceDeliveryContract {
 
     private static final class RecordingEngine implements RimeEngine {
         final AtomicInteger snapshots=new AtomicInteger(),clears=new AtomicInteger(),selections=new AtomicInteger();
+        final AtomicInteger creates=new AtomicInteger(),destroyed=new AtomicInteger(),keys=new AtomicInteger();
+        final List<Integer> processed=new ArrayList<>();
+        final ArrayDeque<Integer> plannedKeys=new ArrayDeque<>();
+        final ArrayDeque<Snapshot> plannedResults=new ArrayDeque<>();
         volatile Snapshot current;
         volatile String selected="";
         RecordingEngine(String raw) { current=new Snapshot(true,raw,raw,raw.length(),"",new String[0],new String[0],0,0,true); }
+        synchronized void plan(int key,Snapshot result) { plannedKeys.add(key); plannedResults.add(result); }
         private void offMain() { if(Looper.myLooper()==Looper.getMainLooper()) throw new AssertionError("engine policy operation ran on main"); }
         public void initialize(String system,String user) { throw new AssertionError("fixture cannot initialize a native engine"); }
-        public long createSession() { throw new AssertionError("fixture cannot create a native session"); }
-        public void destroySession(long session) { offMain(); }
+        // Explicitly synthetic session IDs let the real service reset its worker state; no JNI is loaded.
+        public long createSession() { offMain(); current=Snapshot.EMPTY; return 100+creates.incrementAndGet(); }
+        public void destroySession(long session) { offMain(); destroyed.incrementAndGet(); }
         public boolean selectSchema(long session,String schema) { offMain(); selected=schema; selections.incrementAndGet(); return true; }
-        public Snapshot processKey(long session,int key) { throw new AssertionError("fixture cannot invent key processing"); }
+        public synchronized Snapshot processKey(long session,int key) {
+            offMain();
+            if(plannedKeys.isEmpty() || plannedKeys.remove()!=key) throw new AssertionError("fixture received an unplanned engine key");
+            keys.incrementAndGet(); processed.add(key); current=plannedResults.remove(); return current;
+        }
         public Snapshot selectCandidate(long session,int index) { throw new AssertionError("fixture cannot invent candidates"); }
         public Snapshot snapshot(long session) { offMain(); snapshots.incrementAndGet(); return current; }
         public void clearComposition(long session) { offMain(); clears.incrementAndGet(); current=Snapshot.EMPTY; }
@@ -487,10 +713,23 @@ final class ServiceDeliveryContract {
     private static final class Connection extends BaseInputConnection {
         boolean accept;
         int attempts;
+        int deletions,deleteBefore,deleteAfter,compositions;
+        String beforeCursor="",lastComposition="";
         String lastAttempt="";
         final List<String> accepted=new ArrayList<>();
         BeforeReturn beforeReturn;
         Connection(Context context) { super(new View(context),true); }
+        @Override public CharSequence getSelectedText(int flags) { return null; }
+        @Override public CharSequence getTextBeforeCursor(int length,int flags) { return beforeCursor.substring(Math.max(0,beforeCursor.length()-length)); }
+        @Override public boolean deleteSurroundingTextInCodePoints(int before,int after) {
+            if(Looper.myLooper()!=Looper.getMainLooper()) throw new AssertionError("service delete left the main owner");
+            deletions++; deleteBefore=before; deleteAfter=after; return true;
+        }
+        @Override public boolean setComposingText(CharSequence text,int cursor) {
+            if(Looper.myLooper()!=Looper.getMainLooper()) throw new AssertionError("service composition left the main owner");
+            if(cursor!=1) throw new AssertionError("service composition changed cursor semantics");
+            compositions++; lastComposition=text.toString(); return true;
+        }
         @Override public boolean commitText(CharSequence text,int newCursorPosition) {
             if(Looper.myLooper()!=Looper.getMainLooper()) throw new AssertionError("service commit left the main owner");
             attempts++; lastAttempt=text.toString();

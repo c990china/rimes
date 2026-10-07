@@ -1,0 +1,46 @@
+{
+  "format_version": 1,
+  "completed_utc": "2026-10-06T18:47:40.564877+00:00",
+  "scope": "Export-only semantic comparison of selected no_backup/rime-user directory copies from pre-validation and final restored device backups. Original archives/user files and phone were not modified; preferences were not extracted or read.",
+  "engine": "Host Darwin librime 1.17.0 levers export_user_dict, initialized with current packaged Android system resources; no sessions created and no keys processed.",
+  "canonicalization": "Byte-sort nonempty UTF-8 export lines excluding lines starting #; append LF per line; compare SHA-256 and count. Full entry/code/frequency metadata lines retained in hash; no actual entries included in this report.",
+  "dictionaries": {
+    "pinyin_simp": {
+      "before": {
+        "exists": true,
+        "exported_entries": 91,
+        "canonical_entry_count": 91,
+        "canonical_entries_sha256": "4a4e7790949b4e1151acab922c9aac7d958228ad95f1089aff684f0d11ee3e9b"
+      },
+      "after": {
+        "exists": true,
+        "exported_entries": 91,
+        "canonical_entry_count": 91,
+        "canonical_entries_sha256": "4a4e7790949b4e1151acab922c9aac7d958228ad95f1089aff684f0d11ee3e9b"
+      },
+      "equal": true
+    },
+    "wubi86": {
+      "before": {
+        "exists": true,
+        "exported_entries": 1,
+        "canonical_entry_count": 1,
+        "canonical_entries_sha256": "c4020bea342d0ed22173a39fc9eae5e6f0dc332f8c6df0a702f503e51d3e7baf"
+      },
+      "after": {
+        "exists": true,
+        "exported_entries": 1,
+        "canonical_entry_count": 1,
+        "canonical_entries_sha256": "c4020bea342d0ed22173a39fc9eae5e6f0dc332f8c6df0a702f503e51d3e7baf"
+      },
+      "equal": true
+    }
+  },
+  "all_dictionary_entry_exports_equal": true,
+  "private_artifacts_permissions": "Private extracted directories0700; actual exports and logs0600; remain private temporary files, excluded from repository.",
+  "limitations": [
+    "Comparison covers existing pinyin_simp and wubi86 learned entries and their exported frequency metadata, not every private application state byte.",
+    "LevelDB manifest/CURRENT/LOG and user.yaml metadata can differ independently of equal exported dictionary entries."
+  ],
+  "result": "PASS"
+}

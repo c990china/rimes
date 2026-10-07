@@ -114,6 +114,15 @@ def prepare_data():
         if item['path'].endswith('.dict.yaml'):
             download(item['url'],WORK/'downloads'/pathlib.Path(item['path']).name,item['sha256'])
             shutil.copy2(WORK/'downloads'/pathlib.Path(item['path']).name,stage)
+    # Merge reviewed Android additions into the original dictionary identity. Keeping
+    # pinyin_simp preserves the existing user dictionary shared by all Pinyin layouts.
+    supplement=ANDROID/'resources/rimes_android_supplement.dict.yaml'
+    shutil.copy2(supplement,stage)
+    pinyin=stage/'pinyin_simp.dict.yaml'
+    pinned=pinyin.read_text()
+    if 'sort: by_weight\n' not in pinned or 'import_tables:' in pinned:
+        raise RuntimeError('Review the pinned Pinyin header before importing Android additions')
+    pinyin.write_text(pinned.replace('sort: by_weight\n','sort: by_weight\nimport_tables:\n  - rimes_android_supplement\n',1))
     deployer = WORK/'host/rime/bin/rime_deployer'
     run(deployer,'--build',stage,stage,stage/'build')
     for schema in SCHEMAS:
@@ -153,6 +162,7 @@ if __name__ == '__main__':
     inputs += list((ANDROID/'native').glob('*'))
     inputs += [schema_source(name) for name in SCHEMAS]
     inputs += [ANDROID/'resources/nine-key-syllables.json',ANDROID/'resources/chord-profile.json',
+               ANDROID/'resources/rimes_android_supplement.dict.yaml',
                ANDROID/'core/src/main/java/org/scholay/rimes/core/ChordData.java']
     inputs += [ROOT/'platforms/ios/Resources/EngineData/default.yaml']
     inputs += list((ROOT/'platforms/ios/Licenses').glob('*'))

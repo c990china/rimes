@@ -57,6 +57,8 @@ final class CandidateStrip: UIView, UIScrollViewDelegate, UIGestureRecognizerDel
     var onPress: (() -> Void)?
     var expanded = false { didSet { if expanded != oldValue { cancelSelection(); setNeedsLayout() } } }
     var landscape = false { didSet { if landscape != oldValue { cancelSelection(); setNeedsLayout() } } }
+    /// The nine-key punctuation strip draws its marks in their Chinese forms.
+    var showsChineseMarks = false { didSet { if showsChineseMarks != oldValue { setNeedsLayout() } } }
     override var isHidden: Bool { didSet { if isHidden { cancelSelection() } } }
     /// Fixed controls occupy only their visible corner rectangles, not an entire column.
     var controlInsets = UIEdgeInsets.zero { didSet { if controlInsets != oldValue { cancelSelection(); setNeedsLayout() } } }
@@ -166,7 +168,7 @@ final class CandidateStrip: UIView, UIScrollViewDelegate, UIGestureRecognizerDel
         expandButton.frame = CGRect(x: bounds.width - controlInsets.right - 32, y: 0, width: 32, height: rowHeight)
         expandButton.symbol(expanded ? "chevron.down" : "chevron.up", label: expanded ? L("收起候选", "Collapse candidates") : L("展开候选", "Expand candidates"))
         for (button, frame) in zip(buttons, layout.frames) {
-            button.titleLabel?.font = .systemFont(ofSize: landscape ? 18 : 20)
+            button.titleLabel?.font = showsChineseMarks ? .chineseMarks(ofSize: landscape ? 18 : 20) : .systemFont(ofSize: landscape ? 18 : 20)
             button.frame = frame
         }
         if offset != scroll.contentOffset { scroll.contentOffset = offset }

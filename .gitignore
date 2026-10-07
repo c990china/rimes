@@ -32,6 +32,10 @@ rime-data/**/build/
 # Python bytecode caches written by running the release and preview tooling
 __pycache__/
 *.pyc
+
+# Input-scheme packages, upstream source cache and verification harness built by
+# scripts/input-schemes/scheme_build.py. The catalog in Catalog/input-schemes is committed.
+/build/input-schemes/
 Shared/build/
 platforms/ios/RIMES.xcodeproj/-Xcc/
 

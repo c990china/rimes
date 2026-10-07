@@ -6,6 +6,8 @@ subprocess.run([sys.executable,str(ROOT/'resources/icons/convert-lucide.py'),'--
 assets=ROOT/'app/build/generated/rime/assets'
 receipt=json.loads((ROOT/'app/build/generated/rime/build-receipt.json').read_text())
 assert receipt['ndk']=='29.0.14206865' and receipt['cmake']=='3.22.1'
+supplement='platforms/android/resources/rimes_android_supplement.dict.yaml'
+assert supplement in receipt['inputs'], 'Rebuild resources with the reviewed Android dictionary additions'
 for name,digest in receipt['inputs'].items():
     assert hashlib.sha256((ROOT.parents[1]/name).read_bytes()).hexdigest()==digest, 'Rebuild native inputs: '+name
 data=assets/'rime'
@@ -22,6 +24,8 @@ for schema in ('rimes_pinyin','rimes_pinyin9','rimes_ziranma','rimes_wubi'):
         text=(data/'build'/(schema+suffix+'.schema.yaml')).read_text()
         assert 'page_size: 9' in text
         assert ('enable_user_dict: false' if suffix else 'enable_user_dict: true') in text
+        if schema!='rimes_wubi': assert 'dictionary: pinyin_simp' in text, 'Preserve the existing Pinyin user dictionary identity'
+assert (data/'build/pinyin_simp.table.bin').is_file()
 syllables=json.loads((data/'nine-key-syllables.json').read_text())
 assert len(syllables)>400 and 'ni' in syllables and 'hao' in syllables
 nine_source=(ROOT/'resources/rimes_pinyin9.schema.yaml').read_text()

@@ -174,6 +174,14 @@ void activateEngine(NSString *resources, NSString *directory, bool deployment = 
     // Clearing a retired view must not switch the active package back.
     if (_session && _generation == engineGeneration) rime_get_api()->clear_composition(_session);
 }
+- (void)suspend {
+    std::lock_guard<std::recursive_mutex> lock(engineMutex);
+    // Clearing composition leaves the user database open with its POSIX file
+    // lock held. Retire this session before the host can suspend the extension.
+    // A stale instance must never destroy a new generation's reused session ID.
+    if (_session && _generation == engineGeneration) rime_get_api()->destroy_session(_session);
+    _session = 0;
+}
 - (NSString *)rawInput {
     std::lock_guard<std::recursive_mutex> lock(engineMutex);
     if (!_session || _generation != engineGeneration) return @"";

@@ -114,11 +114,11 @@ enum RimeSchemeImportService {
             let headerText = String(decoding: header, as: UTF8.self).components(separatedBy: "\n")
                 .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "" : $0 }.joined(separator: "\n")
             let node = try yaml(Data(headerText.utf8), path: path)
-            guard let name = node["name"]?.string, validID(name) else {
+            guard let name = node["name"]?.string, validResourceID(name) else {
                 throw invalid("词典 \(path) 的 name 缺失或不合法。")
             }
             let fileID = String(path.dropLast(".dict.yaml".count))
-            if fileID != name {
+            if fileID != name, (fileID as NSString).lastPathComponent != name {
                 normalizationWarnings.append("词典 \(path) 的内部名称为 \(name)，保留原文件并按文件名检查引用；实际编译结果决定是否可用。")
             }
             dictionaryHeaders[fileID] = node
@@ -130,12 +130,27 @@ enum RimeSchemeImportService {
         for (path, node) in configurationNodes {
             for (key, value) in scalarFields(node) where !value.isEmpty {
                 let leaf = key.split(separator: "/").last.map(String.init) ?? key
-                if ["dictionary", "prism", "user_dict", "import_preset"].contains(leaf), !validID(value) {
+                if leaf == "dictionary", !validResourceID(value) {
+                    throw invalid("\(path) 的 \(leaf) 引用标识不合法。")
+                }
+                if ["prism", "import_preset"].contains(leaf), !validID(value) {
                     throw invalid("\(path) 的 \(leaf) 引用标识不合法。")
                 }
                 if leaf == "opencc_config" { try checkRelativePath(value) }
                 if ["__include", "__patch"].contains(leaf) { try checkReference(value, paths: paths) }
             }
+            var effective = configurationFields(node)
+            if path.hasSuffix(".schema.yaml") {
+                let custom = String(path.dropLast(".schema.yaml".count)) + ".custom.yaml"
+                if let patch = configurationNodes[custom]?["patch"] {
+                    applyConfigurationPatch(patch, to: &effective)
+                }
+            } else if path.hasSuffix(".custom.yaml"), let patch = node["patch"] {
+                let base = String(path.dropLast(".custom.yaml".count)) + ".schema.yaml"
+                effective = configurationNodes[base].map(configurationFields) ?? [:]
+                applyConfigurationPatch(patch, to: &effective)
+            }
+            try checkUserDictionaryReferences(effective, path: path, paths: paths)
         }
         let preferred = configurationNodes["default.yaml"]?["schema_list"]?.array().compactMap { $0["schema"]?.string } ?? []
         var candidates = [RimeSchemeCandidate]()
@@ -156,7 +171,7 @@ enum RimeSchemeImportService {
                 for (key, value) in scalarFields(inspected) {
                     if key == "dictionary" || key.hasSuffix("/dictionary") {
                         guard !value.isEmpty else { continue }
-                        guard validID(value) else { throw invalid("词典引用标识不合法：\(id)。") }
+                        guard validResourceID(value) else { throw invalid("词典引用标识不合法：\(id)。") }
                         if dictionaryHeaders[value] == nil {
                             if key.hasPrefix("translator/") || inspected["translator"]?["dictionary"]?.string == value {
                                 issues.append("缺少主词典 \(value).dict.yaml。")
@@ -169,7 +184,7 @@ enum RimeSchemeImportService {
                         guard validID(value) else { throw invalid("预设引用标识不合法：\(id)。") }
                         if value != "default", !paths.contains(value + ".yaml") { issues.append("缺少预设 \(value).yaml。") }
                     }
-                    if ["prism", "user_dict"].contains(key) || key.hasSuffix("/prism") || key.hasSuffix("/user_dict") {
+                    if key == "prism" || key.hasSuffix("/prism") {
                         if !value.isEmpty, !validID(value) { throw invalid("词典缓存／用户词典标识不合法：\(id)。") }
                     }
                     if key == "opencc_config" || key.hasSuffix("/opencc_config") {
@@ -333,6 +348,10 @@ enum RimeSchemeImportService {
         if lower.hasPrefix("opencc/") {
             return [".json", ".txt", ".ocd", ".ocd2", ".lua"].contains { lower.hasSuffix($0) }
         }
+        // Rime Ice keeps source tables in cn_dicts/ and en_dicts/. These are data
+        // resources, staged below the isolated package root just like root tables.
+        if path.hasSuffix(".dict.yaml") { return validResourceID(String(path.dropLast(".dict.yaml".count))) }
+        if path.hasSuffix(".txt") { return validResourceID(String(path.dropLast(".txt".count))) }
         return false
     }
 
@@ -343,7 +362,7 @@ enum RimeSchemeImportService {
             guard visited.insert(id).inserted else { return }
             guard let header = headers[id] else { issues.append("缺少词典 \(id).dict.yaml。"); return }
             for dependency in header["import_tables"]?.array(of: String.self) ?? [] {
-                guard validID(dependency) else { throw invalid("词典引用标识不合法。") }
+                guard validResourceID(dependency) else { throw invalid("词典引用标识不合法。") }
                 try visit(dependency, stack: stack + [id])
             }
         }
@@ -502,6 +521,79 @@ enum RimeSchemeImportService {
         !value.isEmpty && value.count <= 100 && !value.contains("..") && value.unicodeScalars.allSatisfy {
             CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-").contains($0)
         }
+    }
+    private static func validResourceID(_ value: String) -> Bool {
+        value.count <= 256 && value.split(separator: "/", omittingEmptySubsequences: false).allSatisfy {
+            $0 != "." && validID(String($0))
+        }
+    }
+    /// Retain native namespaces to pair user_dict with its own db_class.
+    /// Custom patch paths are applied separately using the compiler's semantics.
+    private static func configurationFields(_ root: Node) -> [String: String] {
+        var fields = [String: String]()
+        func walk(_ node: Node, path: String) {
+            switch node {
+            case .scalar(let value): fields[path] = value.string
+            case .mapping(let values):
+                for pair in values {
+                    // A slash in an ordinary YAML key is literal. Only patch keys
+                    // are traversed as paths by the native configuration compiler.
+                    guard let key = pair.key.string, !key.contains("/") else { continue }
+                    walk(pair.value, path: path.isEmpty ? key : path + "/" + key)
+                }
+            case .sequence: break
+            }
+        }
+        walk(root, path: "")
+        return fields
+    }
+    private static func checkUserDictionaryReferences(_ fields: [String: String], path: String, paths: Set<String>) throws {
+        for (key, value) in fields where key == "user_dict" || key.hasSuffix("/user_dict") {
+            // Empty and bare names already resolve inside the native user directory.
+            // A subdirectory name is accepted only for a supplied StableDb table:
+            // librime's StableDb::Open uses OpenReadOnly, never creates a database.
+            guard !value.isEmpty else { continue }
+            guard validResourceID(value) else { throw invalid("\(path) 的 user_dict 引用标识不合法。") }
+            guard value.contains("/") else { continue }
+            let namespace = String(key.dropLast("user_dict".count))
+            guard fields[namespace + "db_class"] == "stabledb" else {
+                throw invalid("\(path) 的子目录 user_dict 仅支持随包提供的只读 stabledb 词典。")
+            }
+            guard paths.contains(value + ".txt") else {
+                throw invalid("\(path) 缺少只读用户词典 \(value).txt。")
+            }
+        }
+    }
+    private static func applyConfigurationPatch(_ patch: Node, to fields: inout [String: String]) {
+        func apply(_ node: Node, path: String, merge: Bool) {
+            if merge, case .mapping(let values) = node {
+                edit(values, prefix: path, merge: true)
+                return
+            }
+            fields = path.isEmpty ? [:] : fields.filter { $0.key != path && !$0.key.hasPrefix(path + "/") }
+            for (key, value) in configurationFields(node) {
+                fields[path.isEmpty ? key : key.isEmpty ? path : path + "/" + key] = value
+            }
+        }
+        func edit(_ values: Node.Mapping, prefix: String, merge: Bool) {
+            // Native ConfigMap applies keys in lexical order. A branch replacement
+            // removes its old db_class; appending to a scalar concatenates it.
+            for pair in values.sorted(by: { ($0.key.string ?? "") < ($1.key.string ?? "") }) {
+                guard let raw = pair.key.string else { continue }
+                let append = raw == "__append" || raw.hasSuffix("/+")
+                let directive = raw == "__append" || raw == "__merge"
+                let rawKey = directive ? "" : raw.hasSuffix("/+") || raw.hasSuffix("/=") ? String(raw.dropLast(2)) : raw
+                if merge, rawKey.contains("/") { continue }
+                let key = merge ? rawKey : String(rawKey.drop(while: { $0 == "/" }))
+                let path = prefix.isEmpty ? key : key.isEmpty ? prefix : prefix + "/" + key
+                if append, let value = pair.value.string, let existing = fields[path] {
+                    fields[path] = existing + value
+                } else {
+                    apply(pair.value, path: path, merge: append || raw == "__merge" || (merge && !raw.hasSuffix("/=")))
+                }
+            }
+        }
+        if case .mapping(let values) = patch { edit(values, prefix: "", merge: false) }
     }
     private static func checkRelativePath(_ path: String) throws {
         let parts = path.split(separator: "/", omittingEmptySubsequences: false)

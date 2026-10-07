@@ -1,0 +1,15 @@
+{
+  "package": "org.scholay.rimes.android.debug",
+  "version_name": "1.1.0",
+  "version_code": 13,
+  "source_commit": "cf6390a95d4d6fd7ebf6a0447578984d7198ed5f",
+  "apk_bytes": 17843020,
+  "apk_sha256": "f3189670324a55c49ae4f8b35a03fc6ec64906ca9c26261150331998caadb405",
+  "installed_apk_sha256": "f3189670324a55c49ae4f8b35a03fc6ec64906ca9c26261150331998caadb405",
+  "installed_matches": true,
+  "artifact": "platforms/android/build/delivery/community-feedback-20261007/rimes-android-dev-1.1.0-code13.apk",
+  "installed_version_readback": [
+    "versionCode=13 minSdk=26 targetSdk=37",
+    "versionName=1.1.0"
+  ]
+}

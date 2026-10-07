@@ -8,6 +8,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSDictionary *)processKey:(int32_t)key;
 - (NSDictionary *)selectCandidate:(NSUInteger)index;
 - (void)clear;
+/// Release this session's user-dictionary locks before the keyboard is suspended.
+/// The selected schema is retained and recreated lazily by the next engine call.
+- (void)suspend;
 @property(nonatomic, readonly) NSString *rawInput;
 @property(nonatomic, readonly) NSUInteger inputCaret;
 @property(nonatomic, readonly) NSString *lastError;

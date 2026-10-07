@@ -29,6 +29,7 @@ import org.scholay.rimes.core.PluginSession;
 import org.scholay.rimes.core.RimeEngine;
 import org.scholay.rimes.core.KeyboardLayout;
 import org.scholay.rimes.core.NineKeyPinyin;
+import org.scholay.rimes.core.PunctuationLayout;
 import org.scholay.rimes.core.ChordGesture;
 import org.scholay.rimes.core.ChordLayout;
 
@@ -74,18 +75,19 @@ public final class RimesInputMethodService extends InputMethodService {
     private String pluginResultAuthorization;
     private boolean pluginSettingsOpen, renderedPluginMode;
     private LinearLayout bufferTop,bufferBottom;
-    private KeyButton bufferSettings,pluginButton,pluginRunButton;
+    private KeyButton bufferSettings,bufferClear,pluginButton,pluginRunButton;
     private FrameLayout surfaceContainer;
     private KeyButton themeButton,layoutButton;
     private final List<KeyButton> chromeButtons=new ArrayList<>();
     private KeyboardTheme theme=KeyboardTheme.ALL[0];
     private String layout="qwerty";
     private boolean symbols,emoji,appearanceOpen,spellingOpen,punctuationOpen;
+    /** No key has been typed since the number page opened from letters. */
+    private boolean numberPageFresh;
     private int spellingPage;
     private NineKeyPinyin spellings=new NineKeyPinyin(java.util.Collections.emptyList());
     private List<String> spellingChoices=java.util.Collections.emptyList();
-    private static final String[] MARKS={",",".","?","!","、",":",";","'"};
-    private static final String[] MARK_LABELS={"，","。","？","！","、","：","；","'"};
+    private static final int CANDIDATE_SLOTS=Math.max(9,PunctuationLayout.STRIP.size());
     private TextView preedit;
     private HorizontalScrollView candidateScroll;
     private ChordPreview chordReadout;
@@ -149,7 +151,7 @@ public final class RimesInputMethodService extends InputMethodService {
         numeric=kind==InputType.TYPE_CLASS_NUMBER || kind==InputType.TYPE_CLASS_PHONE || kind==InputType.TYPE_CLASS_DATETIME;
         directOnly=numeric || isPassword(info) || kind!=InputType.TYPE_CLASS_TEXT;
         privateField=!allowsBuffer(info);
-        uppercase=false; symbols=false; emoji=false; appearanceOpen=false; spellingOpen=false; punctuationOpen=false;
+        uppercase=false; symbols=false; emoji=false; appearanceOpen=false; spellingOpen=false; punctuationOpen=false; numberPageFresh=false;
         selection=info.initialSelEnd; selectionStart=info.initialSelStart;
         buffer.beginTarget(target!=null && allowsBuffer(info));
         resetEngine(); rebuildKeys(); render();
@@ -215,6 +217,8 @@ public final class RimesInputMethodService extends InputMethodService {
     }
     private boolean nineKeyEngine() { return layout.equals("nineKey") && schema.equals("rimes_pinyin"); }
     private boolean nineKeyVisible() { return ready && nineKeyEngine() && !directOnly && !english && !numeric && !emoji && !uppercase; }
+    /** Chinese input shows Chinese marks on the number and symbol pages. */
+    private boolean chinesePages() { return !english && !directOnly; }
     private void preferenceChanged(SharedPreferences changed,String key) {
         if(destroyed || changingSettingsPair) return;
         KeyboardSettings.Snapshot saved=settings.snapshot();
@@ -348,6 +352,23 @@ public final class RimesInputMethodService extends InputMethodService {
             return Result.state(after);
         });
     }
+    /** Confirm the current candidates before a punctuation mark or a literal swipe number. */
+    private void punctuate(String mark) {
+        if(!ready) { type(mark); return; }
+        if(!ownsTarget()) return;
+        invalidatePlugin();
+        dispatch(() -> {
+            RimeEngine.Snapshot after=state();
+            if(!after.composing()) return new Result(RimeEngine.Snapshot.EMPTY,mark,false,0);
+            StringBuilder committed=new StringBuilder();
+            for(int step=0;step<32 && after.composing() && !after.candidates.isEmpty();step++) {
+                after=engine.selectCandidate(session,after.pageStart); committed.append(after.commit);
+            }
+            // Code without a candidate settles as raw code, like Return.
+            if(after.composing()) { committed.append(after.raw); engine.clearComposition(session); after=RimeEngine.Snapshot.EMPTY; }
+            return new Result(after,committed.append(mark).toString(),true,0);
+        });
+    }
     private boolean deliver(String text,boolean block) {
         if(!ownsTarget()) return false;
         if(buffer.isEnabled()) return block ? buffer.appendCommittedBlock(text) : buffer.appendLiteral(text);
@@ -360,15 +381,20 @@ public final class RimesInputMethodService extends InputMethodService {
     private void updateComposition() {
         if(!ownsTarget() || buffer.isEnabled() || directOnly) return;
         if(snapshot.composing()) {
-            if(hostComposing && hostPreedit.equals(snapshot.preedit)) return;
+            String displayed=compositionText();
+            if(hostComposing && hostPreedit.equals(displayed)) return;
             if(!hostComposing) composingStart=Math.min(selectionStart,selection);
-            expect(composingStart<0 ? -1 : composingStart+snapshot.preedit.length());
-            hostComposing=target.setComposingText(snapshot.preedit,1);
-            hostPreedit=hostComposing?snapshot.preedit:"";
+            expect(composingStart<0 ? -1 : composingStart+displayed.length());
+            hostComposing=target.setComposingText(displayed,1);
+            hostPreedit=hostComposing?displayed:"";
         } else if(hostComposing && retained.isEmpty()) {
             expect(composingStart); target.setComposingText("",1); target.finishComposingText();
             hostComposing=false; composingStart=-1;
         }
+    }
+    private String compositionText() {
+        return nineKeyVisible() ? NineKeyPinyin.displayPreedit(snapshot.raw,snapshot.preedit,
+                snapshot.comments.isEmpty()?null:snapshot.comments.get(0)) : snapshot.preedit;
     }
     private void expect(int end) { if(end>=0) { expectedSelections.add(end); selection=end; selectionStart=end; while(expectedSelections.size()>64) expectedSelections.remove(); } }
     @Override public void onUpdateSelection(int oldStart,int oldEnd,int newStart,int newEnd,int candidatesStart,int candidatesEnd) {
@@ -416,10 +442,26 @@ public final class RimesInputMethodService extends InputMethodService {
     private void delete() {
         invalidatePlugin();
         if(!retained.isEmpty()) { if(buffer.isEnabled()) { buffer.deleteLastBlock(); retryRetained(); } return; }
-        if(!ready) { deleteHostOrBuffer(); render(); return; }
+        // The idle snapshot is authoritative only after all preceding engine operations finish.
+        // Plain deletion needs no engine round-trip or transiently disabled plugin shortcuts.
+        if(!ready || pending==0 && !snapshot.composing()) { deleteHostOrBuffer(); render(); return; }
         final boolean nine=nineKeyVisible();
         dispatch(() -> state().composing() ? (nine?replaceNineKey(NineKeyPinyin.backspace(state().raw)):Result.state(engine.processKey(session,0xff08)))
                 : new Result(RimeEngine.Snapshot.EMPTY,"",false,1));
+    }
+    private void clearBuffer() {
+        if(!ownsTarget() || !buffer.isEnabled() || !buffer.isPermitted() || privateField) return;
+        cancelChord(); invalidatePlugin(); pluginResultAuthorization=null;
+        // Clear is an explicit discard, never a delivery retry after freeing capacity.
+        // Retire work already queued or posted before resetting the worker's session.
+        epoch.revoke(); pending=0; snapshot=RimeEngine.Snapshot.EMPTY;
+        retained=""; retainedResults.clear(); buffer.clear();
+        spellingOpen=false; spellingPage=0; punctuationOpen=false;
+        spellingChoices=java.util.Collections.emptyList();
+        if(bufferRail!=null) bufferRail.clearProjection();
+        if(pluginOutput!=null) pluginOutput.clearProjection();
+        if(deferredSettingsPair!=null) { deferredSettingsPair=null; restoreSettings(); }
+        resetEngine(); render();
     }
     private void deleteHostOrBuffer() {
         if(!ownsTarget()) return;
@@ -506,7 +548,7 @@ public final class RimesInputMethodService extends InputMethodService {
         settleAndSwitch(() -> { english=!english; uppercase=false; spellingOpen=false; punctuationOpen=false; });
     }
     private void toggleNumbers() {
-        settleAndSwitch(() -> { numeric=!numeric; symbols=false; emoji=false; spellingOpen=false; punctuationOpen=false; });
+        settleAndSwitch(() -> { numeric=!numeric; numberPageFresh=numeric; symbols=false; emoji=false; spellingOpen=false; punctuationOpen=false; });
     }
     private KeyboardLayout.Mode visibleMode() {
         return emoji?KeyboardLayout.Mode.EMOJI:numeric?(symbols?KeyboardLayout.Mode.SYMBOLS:KeyboardLayout.Mode.NUMERIC)
@@ -534,7 +576,7 @@ public final class RimesInputMethodService extends InputMethodService {
                 case SPACE: return english || directOnly?"space":"空格";
                 case SPELLING: return "选拼音";
                 case SEPARATOR: return "分隔";
-                case PUNCTUATION: return "，。?!";
+                case PUNCTUATION: return key.text.isEmpty()?"，。":chinesePages()?(key.text.equals(",")?"，":"。"):key.text;
                 default: throw new IllegalStateException();
             }
         }
@@ -551,7 +593,7 @@ public final class RimesInputMethodService extends InputMethodService {
                 case SPACE: return getString(R.string.space);
                 case SPELLING: return "选拼音";
                 case SEPARATOR: return "分隔音节";
-                case PUNCTUATION: return "中文标点";
+                case PUNCTUATION: return key.text.isEmpty()?"中文标点":label(key);
                 default: throw new IllegalStateException();
             }
         }
@@ -563,26 +605,36 @@ public final class RimesInputMethodService extends InputMethodService {
         }
         @Override public boolean selected(KeyboardLayout.Key key) {
             return key.action==KeyboardLayout.Action.SHIFT && uppercase || key.action==KeyboardLayout.Action.SPELLING && spellingOpen
+                    || key.action==KeyboardLayout.Action.PUNCTUATION && key.text.isEmpty() && punctuationOpen
                     || key.action==KeyboardLayout.Action.RETURN && returnSelected();
         }
+        @Override public void onAlternate(String number) { punctuate(number); }
         @Override public void press(KeyboardLayout.Key key) {
+            if(punctuationOpen && key.action!=KeyboardLayout.Action.PUNCTUATION) { punctuationOpen=false; render(); }
             switch(key.action) {
                 case TEXT:
                     String text=uppercase && !numeric && !emoji?key.text.toUpperCase(Locale.ROOT):key.text;
-                    if(numeric && !english && !directOnly) for(int i=0;i<MARKS.length;i++) if(text.equals(MARKS[i])) { text=MARK_LABELS[i]; break; }
-                    type(text); break;
+                    // A sentence mark typed first is a one-shot number-page visit.
+                    boolean oneShot=numeric && numberPageFresh && chinesePages() && retained.isEmpty() && PunctuationLayout.returnsToLetters(text);
+                    numberPageFresh=false;
+                    if(chinesePages() && PunctuationLayout.STRIP.contains(text)) punctuate(text); else type(text);
+                    if(oneShot) { numeric=false; symbols=false; render(); }
+                    break;
                 case SHIFT: settleAndSwitch(() -> uppercase=!uppercase); break;
                 case DELETE: delete(); break;
                 case RETURN: enter(); break;
                 case NUMBERS:
                     if(emoji) settleAndSwitch(() -> { emoji=false; numeric=false; }); else toggleNumbers(); break;
-                case SYMBOLS: settleAndSwitch(() -> { symbols=!symbols || !numeric; numeric=true; emoji=false; }); break;
+                case SYMBOLS: settleAndSwitch(() -> { symbols=!symbols || !numeric; numberPageFresh|=!numeric; numeric=true; emoji=false; }); break;
                 case LANGUAGE: toggleLanguage(); break;
                 case EMOJI: settleAndSwitch(() -> { emoji=!emoji; numeric=false; }); break;
                 case SPACE: type(" "); break;
                 case SPELLING: spellingOpen=!spellingOpen; punctuationOpen=false; spellingPage=0; render(); break;
                 case SEPARATOR: type("'"); break;
-                case PUNCTUATION: punctuationOpen=!punctuationOpen; spellingOpen=false; render(); break;
+                case PUNCTUATION:
+                    if(!key.text.isEmpty()) punctuate(label(key));
+                    else { punctuationOpen=!punctuationOpen; spellingOpen=false; if(punctuationOpen) candidateScroll.scrollTo(0,0); render(); }
+                    break;
                 default: throw new IllegalStateException();
             }
         }
@@ -644,6 +696,8 @@ public final class RimesInputMethodService extends InputMethodService {
         bufferSettings=button(details,"设置",() -> openPluginSettings(activePlugin),0); fixedWidth(bufferSettings,32); gapRight(bufferSettings,4); bufferSettings.icon(KeyboardIcon.SLIDERS); bufferSettings.setContentDescription("Buffer 设置");
         metrics=new TextView(this); metrics.setGravity(Gravity.CENTER); metrics.setTextSize(landscape()?14:16);
         metrics.setTypeface(android.graphics.Typeface.create("sans-serif-medium",android.graphics.Typeface.NORMAL)); details.addView(metrics,new LinearLayout.LayoutParams(0,-1,1));
+        bufferClear=button(details,"清空",this::clearBuffer,0); fixedWidth(bufferClear,32); gapLeft(bufferClear,4);
+        bufferClear.icon(KeyboardIcon.CLEAR); bufferClear.setContentDescription("清空 Buffer");
         pluginRunButton=button(details,"执行",this::runOrCancelPlugin,0); fixedWidth(pluginRunButton,32); gapLeft(pluginRunButton,4); pluginRunButton.icon(KeyboardIcon.PLAY);
         pluginButton=button(details,"插件",() -> openPluginSettings(activePlugin),0); fixedWidth(pluginButton,32); gapLeft(pluginButton,4); pluginButton.icon(KeyboardIcon.GRID_9); pluginButton.setContentDescription("Buffer 插件设置");
         candidateRow=row(keyboard,32);
@@ -657,7 +711,7 @@ public final class RimesInputMethodService extends InputMethodService {
             public void onPluginTap(String id) { selectPlugin(id); }
             public void onPluginLongPress(String id) { openPluginSettings(id); }
         }); center.addView(pluginShortcuts,new FrameLayout.LayoutParams(-1,-1)); chordReadout=new ChordPreview(this); center.addView(chordReadout,new FrameLayout.LayoutParams(-1,-1)); candidates.clear();
-        for(int i=0;i<9;i++) {
+        for(int i=0;i<CANDIDATE_SLOTS;i++) {
             final int index=i; KeyButton candidate=button(strip,"",() -> candidateTapped(index),0);
             candidate.setLayoutParams(new LinearLayout.LayoutParams(-2,-1)); candidate.fontStyle(false,20,false); candidate.plain(true);
             candidate.setMinWidth(dp(32)); candidate.setMinimumWidth(dp(32)); candidate.setPadding(dp(6),0,dp(6),0);
@@ -682,10 +736,12 @@ public final class RimesInputMethodService extends InputMethodService {
             public String label(ChordLayout.Action action) { return action==ChordLayout.Action.DELETE?"⌫":"☺"; }
             public String description(ChordLayout.Action action) { return action==ChordLayout.Action.DELETE?getString(R.string.backspace):"表情"; }
         }); surfaceContainer.addView(chords,new FrameLayout.LayoutParams(-1,-1));
+        DeleteRepeatTouch chordDelete=new DeleteRepeatTouch(chords.utilityButton(ChordLayout.Action.DELETE));
+        chords.setUtilityRetirementListener(chordDelete::cancel);
         appearancePanel=new KeyboardAppearancePanel(this,this::chooseLayout,settings::setTheme);
         appearancePanel.schemes(schema,this::chooseSchema);
         appearancePanel.action("全部插入",getString(R.string.insert_all),() -> insert(true));
-        appearancePanel.action("清空 Buffer",getString(R.string.clear),() -> { if(pending==0 && !snapshot.composing()) { invalidatePlugin(); buffer.clear(); retryRetained(); render(); } });
+        appearancePanel.action("清空 Buffer",getString(R.string.clear),this::clearBuffer);
         appearancePanel.action("系统键盘",getString(R.string.switch_keyboard),() -> { endTarget(); getSystemService(InputMethodManager.class).showInputMethodPicker(); });
         surfaceContainer.addView(appearancePanel,new FrameLayout.LayoutParams(-1,-1));
         pluginPanel=new BufferPluginPanel(this,new BufferPluginPanel.Listener() {
@@ -697,6 +753,7 @@ public final class RimesInputMethodService extends InputMethodService {
         pluginOutput=new BufferRail(this);
         renderedPluginMode=false;
         keyboard.addView(surfaceContainer,new LinearLayout.LayoutParams(-1,dp(KeyboardLayout.height(landscape()))));
+        keyboard.setInputSurface(surfaceContainer);
         chordFooter=row(keyboard,landscape()?34:40); ((LinearLayout.LayoutParams)chordFooter.getLayoutParams()).bottomMargin=0;
         KeyboardLayout.Action[] actions={KeyboardLayout.Action.NUMBERS,KeyboardLayout.Action.SHIFT,KeyboardLayout.Action.SPACE,KeyboardLayout.Action.LANGUAGE,KeyboardLayout.Action.RETURN};
         for(KeyboardLayout.Action action:actions) {
@@ -786,11 +843,11 @@ public final class RimesInputMethodService extends InputMethodService {
     private void gapLeft(View view,int gap) { ((LinearLayout.LayoutParams)view.getLayoutParams()).leftMargin=dp(gap); }
     private void gapRight(View view,int gap) { ((LinearLayout.LayoutParams)view.getLayoutParams()).rightMargin=dp(gap); }
     private boolean landscape() { return getResources().getConfiguration().orientation==Configuration.ORIENTATION_LANDSCAPE; }
-    private void rebuildKeys() { if(keys!=null) keys.render(visibleMode(),theme); }
+    private void rebuildKeys() { if(keys!=null) keys.render(visibleMode(),chinesePages(),theme); }
     private void candidateTapped(int index) {
         if(!chordPreview.isEmpty()) return;
         if(punctuationOpen) {
-            if(index<MARKS.length) { punctuationOpen=false; type(MARKS[index]); }
+            if(index<PunctuationLayout.STRIP.size()) { punctuationOpen=false; punctuate(PunctuationLayout.STRIP.get(index)); }
         } else if(snapshot.composing()) select(index);
     }
     private void candidatePage(boolean forward) {
@@ -819,14 +876,14 @@ public final class RimesInputMethodService extends InputMethodService {
         candidateScroll.setVisibility(heldPreview==null && !idle?View.VISIBLE:View.GONE); chordReadout.setVisibility(heldPreview==null?View.GONE:View.VISIBLE);
         chordReadout.render(heldPreview,theme,landscape());
         boolean marks=punctuationOpen;
-        int count=directOnly?0:!chordPreview.isEmpty()?1:marks?MARKS.length:snapshot.candidates.size();
-        for(int i=0;i<9;i++) {
+        int count=directOnly?0:!chordPreview.isEmpty()?1:marks?PunctuationLayout.STRIP.size():snapshot.candidates.size();
+        for(int i=0;i<candidates.size();i++) {
             Button item=candidates.get(i); boolean exists=i<count;
             item.setVisibility(exists?View.VISIBLE:View.GONE);
             if(exists) {
-                String value=!chordPreview.isEmpty()?chordPreview:marks?(english || numeric || emoji?MARKS[i]:MARK_LABELS[i]):snapshot.candidates.get(i);
+                String value=!chordPreview.isEmpty()?chordPreview:marks?PunctuationLayout.STRIP.get(i):snapshot.candidates.get(i);
                 setText(item,value);
-                item.setContentDescription(marks?MARKS[i]:"候选"+(i+1)+" "+value);
+                item.setContentDescription(marks?value:"候选"+(i+1)+" "+value);
             }
             item.setEnabled(exists && pending==0 && chordPreview.isEmpty());
         }
@@ -846,7 +903,7 @@ public final class RimesInputMethodService extends InputMethodService {
         }
         if(buffer.isEnabled()) {
             bufferRail.placeholder(plugin?pluginPlaceholder(activePlugin):"输入内容暂存于此");
-            bufferRail.render(buffer.blocks(),snapshot.preedit,theme,landscape());
+            bufferRail.render(buffer.blocks(),compositionText(),theme,landscape());
             String text=buffer.text(); setText(metrics,text.codePointCount(0,text.length())+" 字 · "+buffer.blockCount()+" 块");
             metrics.setContentDescription(null);
             if(plugin) {
@@ -866,6 +923,7 @@ public final class RimesInputMethodService extends InputMethodService {
         pluginRunButton.icon(pluginState==PluginSession.Status.RUNNING?KeyboardIcon.STOP:KeyboardIcon.PLAY);
         pluginRunButton.setEnabled(plugin && pluginAllowed() && pending==0 && !snapshot.composing() && !chords.isChordActive() && buffer.blockCount()>0);
         pluginButton.setSelected(plugin);
+        bufferClear.setEnabled(ownsTarget() && buffer.isEnabled() && buffer.isPermitted() && !privateField);
         insertNext.setEnabled(pending==0 && !snapshot.composing() && buffer.blockCount()>0 && !chords.isChordActive() && (!plugin || pluginState==PluginSession.Status.READY));
         retryButton.setVisibility(failed || !retained.isEmpty()?View.VISIBLE:View.GONE);
         boolean chord=chordVisible();
@@ -875,7 +933,7 @@ public final class RimesInputMethodService extends InputMethodService {
         if(chord && panelOpen) surfaceHeight+=landscape()?35:41;
         int desiredHeight=Math.round(surfaceHeight*getResources().getDisplayMetrics().density);
         if(surfaceContainer.getLayoutParams().height!=desiredHeight) { surfaceContainer.getLayoutParams().height=desiredHeight; surfaceContainer.requestLayout(); }
-        keys.render(visibleMode(),theme); keys.setVisibility(panelOpen || chord?View.GONE:View.VISIBLE);
+        keys.render(visibleMode(),chinesePages(),theme); keys.setVisibility(panelOpen || chord?View.GONE:View.VISIBLE);
         chords.render("splitOrthogonal".equals(layout),!english && !uppercase,uppercase,theme); chords.setVisibility(panelOpen || !chord?View.GONE:View.VISIBLE);
         chordFooter.setVisibility(!panelOpen && chord?View.VISIBLE:View.GONE);
         ((LinearLayout.LayoutParams)surfaceContainer.getLayoutParams()).bottomMargin=chord && !panelOpen?dp(1):0;

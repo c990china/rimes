@@ -12,7 +12,7 @@ Compose in a local Buffer before inserting text into your app. Tap to insert the
 OPTIONAL TRANSLATION AND AI
 On iOS 26 or later, Apple on-device translation can preview confirmed Buffer text after a brief pause. Prepare the required languages in the RIMES app first. Availability depends on supported languages and downloaded models.
 
-You can also configure your own HTTPS AI provider and API key for translation, polishing and rewriting. These optional requests send only the Buffer text you explicitly submit after granting recipient consent. Third-party providers may require their own account or payment.
+You can also configure your own HTTPS AI provider and API key for Quick Q&A, AI Polish, AI Poem and AI Text Art. These features use your selected AI provider; Apple on-device translation uses downloaded language packs. These optional requests send only the Buffer text you explicitly submit after granting recipient consent. Third-party providers may require their own account or payment.
 
 LOCAL EVERYDAY INPUT
 Ordinary typing and Buffer editing work offline without Full Access, an account or a subscription. No ads or keyboard-text telemetry. Optional provider-based AI requires Full Access. The app explains how to enable the keyboard in Settings; secure fields and apps that disallow third-party keyboards use the system keyboard.

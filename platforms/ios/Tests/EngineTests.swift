@@ -70,6 +70,26 @@ import RimesCore
         let state = engine.process(key:119)
         XCTAssertFalse(state.preedit.contains("ni"))
     }
+    func testSuspendedEngineDropsCompositionAndReopensSelectedSchema() throws {
+        let engine = MobileEngine()
+        XCTAssertTrue(engine.select(schema: "rimes_ziranma"))
+        for scalar in "nihk".unicodeScalars { _ = engine.handledKey(Int32(scalar.value)) }
+        XCTAssertEqual(engine.rawInput, "nihk")
+        XCTAssertFalse(engine.currentSnapshot.candidates.isEmpty)
+
+        engine.suspend(); engine.suspend()
+        XCTAssertTrue(engine.rawInput.isEmpty)
+        XCTAssertTrue(engine.literalInput.isEmpty)
+        XCTAssertTrue(engine.currentSnapshot.preedit.isEmpty)
+        XCTAssertTrue(engine.currentSnapshot.candidates.isEmpty)
+        XCTAssertTrue(engine.candidateReadings.isEmpty)
+
+        var state = EngineSnapshot()
+        for scalar in "nihk".unicodeScalars { state = engine.handledKey(Int32(scalar.value)).0 }
+        let index = try XCTUnwrap(state.candidates.firstIndex(of: "你好"))
+        XCTAssertEqual(engine.candidate(index).commit, "你好")
+        engine.suspend()
+    }
     func testRawInputUsesEngineCodeAndOnlyDropsGeneratedChordSeparators() {
         let engine = MobileEngine()
         XCTAssertTrue(engine.select(schema: "rimes_ziranma"))

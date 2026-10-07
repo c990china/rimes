@@ -1,0 +1,298 @@
+{
+  "checkCount": 46,
+  "checks": [
+    {
+      "name": "select built-in pinyin",
+      "passed": true
+    },
+    {
+      "childResults": [
+        1
+      ],
+      "expected": 1,
+      "lockCount": 1,
+      "name": "active session holds user dictionary lock",
+      "passed": true
+    },
+    {
+      "childResults": [
+        1
+      ],
+      "expected": 1,
+      "lockCount": 1,
+      "name": "clear composition still holds lock (baseline)",
+      "passed": true
+    },
+    {
+      "name": "commit non-first synthetic candidate",
+      "passed": true
+    },
+    {
+      "name": "selected candidate is learned",
+      "passed": true
+    },
+    {
+      "name": "repeated suspension drops raw composition",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "suspend releases lock to another process",
+      "passed": true
+    },
+    {
+      "childResult": 0,
+      "name": "fresh process reads persisted learned order",
+      "passed": true
+    },
+    {
+      "name": "lazy session recreation preserves learned order",
+      "passed": true
+    },
+    {
+      "childResults": [
+        1
+      ],
+      "expected": 1,
+      "lockCount": 1,
+      "name": "resumed session reacquires lock",
+      "passed": true
+    },
+    {
+      "name": "resumed candidate commits without replay",
+      "passed": true
+    },
+    {
+      "name": "select double pinyin",
+      "passed": true
+    },
+    {
+      "name": "selected double-pinyin schema is restored",
+      "passed": true
+    },
+    {
+      "name": "double-pinyin commit after resume",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "cycle 0 suspended locks",
+      "passed": true
+    },
+    {
+      "name": "cycle 0 restored input",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "cycle 1 suspended locks",
+      "passed": true
+    },
+    {
+      "name": "cycle 1 restored input",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "cycle 2 suspended locks",
+      "passed": true
+    },
+    {
+      "name": "cycle 2 restored input",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "cycle 3 suspended locks",
+      "passed": true
+    },
+    {
+      "name": "cycle 3 restored input",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "cycle 4 suspended locks",
+      "passed": true
+    },
+    {
+      "name": "cycle 4 restored input",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "cycle 5 suspended locks",
+      "passed": true
+    },
+    {
+      "name": "cycle 5 restored input",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "cycle 6 suspended locks",
+      "passed": true
+    },
+    {
+      "name": "cycle 6 restored input",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "cycle 7 suspended locks",
+      "passed": true
+    },
+    {
+      "name": "cycle 7 restored input",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "cycle 8 suspended locks",
+      "passed": true
+    },
+    {
+      "name": "cycle 8 restored input",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "cycle 9 suspended locks",
+      "passed": true
+    },
+    {
+      "name": "cycle 9 restored input",
+      "passed": true
+    },
+    {
+      "name": "second instance selects schema",
+      "passed": true
+    },
+    {
+      "childResults": [
+        1
+      ],
+      "expected": 1,
+      "lockCount": 1,
+      "name": "suspending one instance preserves peer lock",
+      "passed": true
+    },
+    {
+      "name": "peer remains usable",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "last instance releases shared DB lock",
+      "passed": true
+    },
+    {
+      "name": "new resource generation selects schema",
+      "passed": true
+    },
+    {
+      "childResults": [
+        1
+      ],
+      "expected": 1,
+      "lockCount": 1,
+      "name": "stale instance cannot retire current generation",
+      "passed": true
+    },
+    {
+      "name": "current generation still accepts input",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "current generation releases lock",
+      "passed": true
+    },
+    {
+      "name": "retired instance can recreate its own resources",
+      "passed": true
+    },
+    {
+      "childResults": [
+        1
+      ],
+      "expected": 1,
+      "lockCount": 1,
+      "name": "retired other instance cannot release active DB",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "all primary locks released at end",
+      "passed": true
+    },
+    {
+      "childResults": [
+        0
+      ],
+      "expected": 0,
+      "lockCount": 1,
+      "name": "all secondary locks released at end",
+      "passed": true
+    }
+  ],
+  "librimeVersion": "1.17.0",
+  "passed": true,
+  "runtime": "macOS host probe of iOS RimeMobile bridge"
+}
