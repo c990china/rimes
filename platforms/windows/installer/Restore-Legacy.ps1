@@ -11,16 +11,25 @@ if(-not $legacy.Count){throw 'No legacy registration is recorded'}
 Stop-OwnedBroker $state.active
 Assert-Unlocked $state.active
 foreach($entry in $legacy){if((Get-FileHash -LiteralPath $entry.dll -Algorithm SHA256).Hash -ne $entry.sha256){throw 'Legacy DLL checksum mismatch'}}
+$oldAutostart=Get-BrokerAutostart
+$oldInstalledApp=Read-InstalledAppRegistration
+$oldShortcut=Read-SettingsShortcut
 try{
     foreach($arch in @('x86','x64')){Invoke-Registrar $state.active $arch 'unregister'}
     foreach($entry in $legacy){Invoke-LegacyRegistrar $state.active $entry 'register'}
-    $run='HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
-    if($null -ne $recovery.autostart){Set-ItemProperty -LiteralPath $run -Name RimesBroker -Value $recovery.autostart}
-    else{Remove-ItemProperty -LiteralPath $run -Name RimesBroker -ErrorAction SilentlyContinue}
+    Restore-BrokerAutostart $recovery.autostart
+    Restore-InstalledAppRegistration $null
+    Remove-OwnedSettingsShortcut $InstallRoot
     Move-Item -LiteralPath "$InstallRoot\state.json" -Destination "$InstallRoot\legacy-restored-state.json" -Force
 }catch{
     foreach($entry in $legacy){try{Invoke-LegacyRegistrar $state.active $entry 'unregister'}catch{Write-Warning $_}}
-    foreach($arch in @('x64','x86')){Invoke-Registrar $state.active $arch 'register'}
-    throw 'Legacy rollback failed; the preview registration was restored.'
+    $failure=$_
+    $recoveryFailures=@()
+    foreach($arch in @('x64','x86')){try{Invoke-Registrar $state.active $arch 'register'}catch{$recoveryFailures+=$_.ToString()}}
+    try{Restore-BrokerAutostart $oldAutostart}catch{$recoveryFailures+=$_.ToString()}
+    try{Restore-InstalledAppRegistration $oldInstalledApp}catch{$recoveryFailures+=$_.ToString()}
+    try{Restore-SettingsShortcut $oldShortcut}catch{$recoveryFailures+=$_.ToString()}
+    if($recoveryFailures.Count){throw "Legacy rollback failed: $failure. Recovery is incomplete: $($recoveryFailures -join '; ')"}
+    throw "Legacy rollback failed; the managed registration, startup and Installed Apps entry were restored. $failure"
 }
 Write-Output 'Restored the exact previous DLL paths and startup setting. User data retained. Sign out before daily use if any host used the preview.'

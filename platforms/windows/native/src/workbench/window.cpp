@@ -29,6 +29,7 @@
 namespace rimes::windows::workbench {
 namespace {
 constexpr UINT kChanged = WM_APP + 80, kTray = WM_APP + 81;
+constexpr UINT kOpenSettings = WM_APP + 82;
 constexpr int kToggle = 100, kSettings = 101, kDeploy = 102, kStartup = 103,
               kAbout = 105, kExit = 104, kPasteMenu = 106;
 constexpr int kModeInput = 110, kModeGenerate = 111, kModeTranslate = 112;
@@ -42,6 +43,8 @@ DWORD ForegroundProcess() {
 struct Window {
   Runtime& runtime;
   std::function<void()> stop, deploy;
+  UiCommands* commands = nullptr;
+  UINT taskbar_created = RegisterWindowMessageW(L"TaskbarCreated");
   HWND window = nullptr;
   std::unique_ptr<SettingsUiHost> settings;
   std::atomic<HWND> notification{nullptr};
@@ -65,8 +68,9 @@ struct Window {
   HFONT menu_font = nullptr;
   std::map<UINT, std::wstring> menu_labels;
 
-  Window(Runtime& r, std::function<void()> s, std::function<void()> d)
-      : runtime(r), stop(std::move(s)), deploy(std::move(d)) {}
+  Window(Runtime& r, std::function<void()> s, std::function<void()> d,
+         UiCommands* c)
+      : runtime(r), stop(std::move(s)), deploy(std::move(d)), commands(c) {}
   ~Window() {
     if (maintenance.joinable()) maintenance.join();
     if (product_icon) DestroyIcon(product_icon);
@@ -93,6 +97,7 @@ struct Window {
   void PopupModeMenu();
   void PopupMoreMenu();
   void PopupTrayMenu();
+  void AddTrayIcon();
   HMENU BuildOwnerMenu(const std::vector<ui::OwnerMenuItem>& items);
   void UpdateTooltip(int hit);
   ui::BufferPaintState MakePaintState(const core::Json& state) const;
@@ -201,9 +206,16 @@ void Window::EnsureSettings() {
 }
 
 void Window::OpenSettings() {
-  runtime.Close();
+  // Settings revoke the old host's capture authority. They do not hide the
+  // Buffer, consume its blocks, or cancel its source/configuration-frozen job.
+  runtime.PauseCapture();
   EnsureSettings();
   settings->Open(window);
+}
+
+void Window::AddTrayIcon() {
+  if (!Shell_NotifyIconW(NIM_ADD, &tray))
+    Shell_NotifyIconW(NIM_MODIFY, &tray);
 }
 
 HMENU Window::BuildOwnerMenu(const std::vector<ui::OwnerMenuItem>& items) {
@@ -545,6 +557,10 @@ LRESULT CALLBACK Window::Procedure(HWND hwnd, UINT message, WPARAM wparam,
   }
   if (!self) return DefWindowProcW(hwnd, message, wparam, lparam);
   try {
+    if (self->taskbar_created && message == self->taskbar_created) {
+      self->AddTrayIcon();
+      return 0;
+    }
     switch (message) {
       case WM_NCCALCSIZE:
         // Keep resize semantics without a native frame subtracting pixels
@@ -562,6 +578,9 @@ LRESULT CALLBACK Window::Procedure(HWND hwnd, UINT message, WPARAM wparam,
         return 0;
       case kChanged:
         self->Update();
+        return 0;
+      case kOpenSettings:
+        self->OpenSettings();
         return 0;
       case WM_TIMER:
         self->runtime.Tick();
@@ -815,6 +834,7 @@ LRESULT CALLBACK Window::Procedure(HWND hwnd, UINT message, WPARAM wparam,
         DestroyWindow(hwnd);
         return 0;
       case WM_DESTROY:
+        if (self->commands) self->commands->Attach(nullptr);
         self->notification.store(nullptr);
         self->runtime.SetNotify({});
         UnregisterHotKey(hwnd, 1);
@@ -835,8 +855,19 @@ LRESULT CALLBACK Window::Procedure(HWND hwnd, UINT message, WPARAM wparam,
 }
 }  // namespace
 
+void UiCommands::Attach(HWND window) {
+  std::lock_guard lock(mutex_);
+  window_ = window;
+}
+
+bool UiCommands::RequestSettings() {
+  std::lock_guard lock(mutex_);
+  return window_ && PostMessageW(window_, kOpenSettings, 0, 0);
+}
+
 void RunWindow(Runtime& runtime, const std::function<void()>& stop,
-               const std::function<void()>& deploy) {
+               const std::function<void()>& deploy, UiCommands* commands,
+               bool open_settings) {
   CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
   struct Apartment {
     ~Apartment() { CoUninitialize(); }
@@ -844,7 +875,7 @@ void RunWindow(Runtime& runtime, const std::function<void()>& stop,
   SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
   INITCOMMONCONTROLSEX icc{sizeof(icc), ICC_WIN95_CLASSES};
   InitCommonControlsEx(&icc);
-  Window ui(runtime, stop, deploy);
+  Window ui(runtime, stop, deploy, commands);
   if (FAILED(
           D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &ui.factory)) ||
       FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,
@@ -912,7 +943,7 @@ void RunWindow(Runtime& runtime, const std::function<void()>& stop,
   ui.tray.hIcon =
       ui.product_icon ? ui.product_icon : LoadIconW(nullptr, IDI_APPLICATION);
   wcscpy_s(ui.tray.szTip, L"RIMES 输入法与 Buffer");
-  Shell_NotifyIconW(NIM_ADD, &ui.tray);
+  ui.AddTrayIcon();
   ui.tooltip = CreateWindowExW(0, TOOLTIPS_CLASSW, nullptr,
                                WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX, 0, 0, 0,
                                0, window, nullptr, wc.hInstance, nullptr);
@@ -928,6 +959,8 @@ void RunWindow(Runtime& runtime, const std::function<void()>& stop,
   }
   WTSRegisterSessionNotification(window, NOTIFY_FOR_THIS_SESSION);
   SetTimer(window, 1, 100, nullptr);
+  if (commands) commands->Attach(window);
+  if (open_settings) ui.OpenSettings();
   MSG message{};
   while (GetMessageW(&message, nullptr, 0, 0) > 0) {
     if (ui.settings && ui.settings->HandleDialogMessage(&message)) continue;

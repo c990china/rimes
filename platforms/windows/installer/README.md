@@ -1,10 +1,10 @@
 # RIMES Windows 安装
 
-Windows 11 x64；包括 x64/x86 TSF 和一个 x64 Broker。1.0.0 采用未签名 EXE 安装包，内置微软 VC++ 运行库。Windows 可能显示未知发布者或 SmartScreen 提示；安装器不会修改系统安全设置。真实宿主与一天试用需单独验收。
+Windows 11 x64；包括 x64/x86 TSF 和一个 x64 Broker。采用未签名 EXE 安装包，内置微软 VC++ 运行库。Windows 可能显示未知发布者或 SmartScreen 提示；安装器不会修改系统安全设置。真实宿主与一天试用需单独验收。
 
-1. 下载 `RIMES-Windows-1.0.0-Setup.exe` 和对应 SHA-256 文件。
+1. 下载当前版本的 `RIMES-Windows-版本-Setup.exe` 和对应 SHA-256 文件。
 2. 保存 Buffer 内容并从托盘退出已有 RIMES，然后双击 EXE，同意管理员权限请求，点击“安装 / 升级”。可取消“登录后启动 RIMES”。若提示注销或重启，先保存其他工作再执行；安装器不会自动注销或重启。请用当前 Windows 用户提权，暂不支持使用另一个管理员账号代装。
-3. 用 Win+Space 选择 RIMES。托盘右键打开设置，选择输入方案、简繁/标点、候选字号、启动行为、API 和快捷键。
+3. 用 Win+Space 选择 RIMES。在开始菜单搜索 **RIMES Settings**，或托盘右键打开设置，选择输入方案、简繁/标点、候选字号、启动行为、API 和快捷键。开始菜单入口会在升级或回退时指向当前版本；回退到不支持设置启动命令的早期版本时，移除该入口并提示从托盘打开。自己改过入口的目标或参数时，安装器会保留该修改。
 4. 在宿主输入框按 Ctrl+Alt+B 打开并绑定 Buffer。面板不激活，键盘继续留在宿主。点击“粘贴”只将剪贴板内容放入原文；点击“下一块”或轻按 Return 投递下一块，长按 Return 1.2 秒或点击“全部”投递当时队列。中文组字中的 Return 先处理组字。
 5. 从托盘打开后，先点击宿主输入框，再点击 Buffer 原文区开始输入（当前输入法需为 RIMES）。切换输入框、应用或输入法后，Buffer 暂停输入和投递；重新点击原文区，或在宿主按快捷键明确绑定。重复点击原文区不会关闭 Buffer。无可靠目标可复制。关闭面板保留本次进程内容；退出 Broker、注销或重启不会恢复正文。确认丢失时不重发，先检查宿主，再复制保留内容。
 6. API 地址填到兼容服务的 API 根路径（例如 `https://example.com/v1`），程序追加 `/chat/completions`。模型可配置；修改 API 地址后需要重新填写密钥，旧密钥不会转发到新地址。密钥在凭据管理器 `RIMES.Windows.OpenAI`，设置文件不含密钥。使用“生成”或“翻译”会发送原文到你配置的服务。取消、编辑原文、切换配置会使旧请求失效。服务须提供 SSE 和 `[DONE]`；普通输入不等待网络。
@@ -16,11 +16,17 @@ Windows 11 x64；包括 x64/x86 TSF 和一个 x64 Broker。1.0.0 采用未签名
 - 升级：运行新版本的 EXE。使用独立版本目录；注册失败尝试恢复旧版本。
 - 验证：运行 `Verify.ps1`。核对两架构注册、文件清单、版本和提交。
 - 回退：运行 `Rollback.ps1`，恢复 state.json 中记录的前一版。回退同样检查占用。迁移自旧的未打包安装时，恢复 `legacy-recovery.json` 记录的原始 DLL 路径与启动设置。
-- 卸载：运行 `Uninstall.ps1`。注销两架构，删除自启动；保留版本文件和 `uninstalled-state.json` 供恢复。
+- 卸载：在 Windows **设置 → 应用 → 安装的应用** 搜索 **RIMES** 并点击“卸载”，或在控制面板 **程序和功能** 中选择 RIMES。按提示保存 Buffer 并从托盘退出，以安装时的同一 Windows 用户完成管理员授权和确认。注销两架构并删除自启动、安装的应用记录及安装器管理的开始菜单入口；保留版本文件和 `uninstalled-state.json` 供恢复。若宿主仍加载 DLL，卸载器会明确要求注销，不强行结束宿主。用户修改过的开始菜单入口会保留。
 - 用户词库：`%APPDATA%\RIMES`；设置：`%LOCALAPPDATA%\RIMES\settings.json`。升级、回退、默认卸载均保留词库、设置和凭据。
 
 初次部署完整词库可能较慢。诊断只包含版本、路径、错误类型和阶段，不包含 Buffer 正文、API 密钥或响应正文。不要把用户词库、设置和凭据放入问题报告。
 
 ## 脚本维护入口
 
-需要手工验证、回退或卸载时，在安装目录的当前版本文件夹中，以当前用户打开管理员 64 位 PowerShell 并运行上述脚本。ZIP 保留为诊断产物；手工安装命令为 `powershell -NoProfile -ExecutionPolicy Bypass -File .\Install.ps1`。逐文件校验信息保存在 PACKAGE.json。
+需要手工验证、回退或卸载时，在安装目录的当前版本文件夹中，以当前用户打开管理员 64 位 PowerShell 并运行上述脚本。ZIP 保留为诊断产物；手工安装命令为 `powershell -NoProfile -ExecutionPolicy Bypass -File .\Install.ps1`。逐文件校验信息保存在 PACKAGE.json。直接运行 `Uninstall.ps1` 默认拒绝 DLL 占用；保存工作后可显式传入 `-AllowPendingRestart`，采用与图形卸载入口相同的注销后生效方式。
+
+安装器将“安装的应用”记录、开始菜单入口与两架构注册作为同一次操作处理。任一步失败都会尝试恢复之前的注册、启动项、卸载记录与入口；恢复失败会明确报错，不显示安装或卸载成功。同版本重装会修复缺失的系统入口。回退到没有图形卸载脚本的早期包时，继续使用保留版本目录中已校验的新版卸载器。
+
+回退到早期包后请继续从 Windows“安装的应用”卸载，或运行卸载记录指向的新版 `Uninstall-App.ps1`；不要手工调用旧版目录中的原始 `Uninstall.ps1`，旧脚本无法清理新增的系统入口。
+
+维护者可在源码仓库运行 `platforms/windows/tests/Test-InstalledAppsLifecycle.ps1 -OutputDirectory 新临时目录`，在管理员 64 位 PowerShell 中验证全新安装、升级、回退、部分失败和卸载规则。该测试只写临时文件及 `HKLM\SOFTWARE\Scholay\RIMES-Installer-Tests\随机ID`，使用假 TSF/Broker，不注册、停止或卸载正在使用的输入法。

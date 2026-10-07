@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "expectedCommit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+  "version": "1.1.0-preview.2",
+  "package": "%TASK_ROOT%\\candidate-58fc4bc\\RIMES-Windows-1.1.0-preview.2",
+  "installRoot": "C:\\Program Files\\RIMES",
+  "startedAt": "2026-10-07T08:51:26.0529918+08:00",
+  "phase": "done",
+  "verification": {
+    "Verified": true,
+    "Version": "1.1.0-preview.2",
+    "Commit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+    "Directory": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.2-58fc4bcf8319-ecab591174ef",
+    "UserData": "%APPDATA%\\RIMES",
+    "RequiresSignOut": true,
+    "HostInputAcceptance": "Requires desktop testing"
+  },
+  "state": {
+    "active": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.2-58fc4bcf8319-ecab591174ef",
+    "previous": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.1-f5057d3ba467-eb634b2cb3d5",
+    "version": "1.1.0-preview.2",
+    "commit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+    "requiresSignOut": true,
+    "legacy": [],
+    "previousAutostart": "\"C:\\Program Files\\RIMES\\versions\\1.1.0-preview.1-f5057d3ba467-eb634b2cb3d5\\x64\\RimesBroker.exe\"",
+    "installedAt": "2026-10-07T08:51:29.9637583+08:00"
+  },
+  "requiresSignOut": true,
+  "finishedAt": "2026-10-07T08:51:31.8571791+08:00"
+}

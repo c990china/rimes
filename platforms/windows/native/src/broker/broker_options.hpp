@@ -12,6 +12,7 @@ struct BrokerOptions {
   bool print_endpoint = false;
   bool print_paths = false;
   bool show_help = false;
+  bool open_settings = false;
   bool install_autostart = false;
   bool remove_autostart = false;
   bool used_default_paths = false;

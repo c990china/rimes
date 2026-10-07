@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "registryKey": "SOFTWARE\\Scholay\\RIMES-Installer-Tests\\90ea578a13ef4d61b5e7dc1d75bba8ce",
+  "checks": [
+    "upgrade adds one Installed Apps entry and settings shortcut",
+    "uninstall command quotes paths containing spaces and uses the GUI launcher",
+    "same-version reinstall repairs missing discovery entries",
+    "partial x86 upgrade failure is reported",
+    "partial registration failure restores native state and Installed Apps",
+    "discovery-entry write failure is reported",
+    "discovery-entry failure restores exact entry and shortcut bytes",
+    "shortcut write failure is reported",
+    "shortcut failure restores exact entry, shortcut and native state",
+    "rollback to a pre-integration package retains a verified working launcher",
+    "rollback to a Broker without --settings removes the managed shortcut",
+    "uninstall discovery-entry failure is reported",
+    "uninstall failure restores both TSF registrations and discovery entry",
+    "script uninstall refuses occupied DLLs by default",
+    "explicit pending-restart uninstall confirms completion and removes discovery entries",
+    "uninstall retains version files and synthetic user data unchanged",
+    "fresh install after uninstall is discoverable",
+    "user-edited shortcut is preserved on reinstall",
+    "user-edited shortcut is preserved on uninstall"
+  ],
+  "sourceDirectory": "%TASK_ROOT%\\source-58fc4bc\\platforms\\windows\\installer"
+}

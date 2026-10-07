@@ -1,0 +1,43 @@
+{
+  "observedAt": "2026-10-07T09:01:17.3294247+08:00",
+  "readOnly": true,
+  "expectedCommit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+  "installedCommit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+  "installedVersion": "1.1.0-preview.2",
+  "active": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.2-58fc4bcf8319-ecab591174ef",
+  "expectedBrokerProcessId": 66352,
+  "brokers": [
+    {
+      "processId": 66352,
+      "sessionId": 3,
+      "path": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.2-58fc4bcf8319-ecab591174ef\\x64\\RimesBroker.exe",
+      "startTime": "2026-10-07T08:54:31.2589058+08:00",
+      "startTimeUTC": "2026-10-07T00:54:31.2589058Z",
+      "fileSHA256": "af2b439ea677fd7480cf7088598e2942a8ca012821a84e9e23bc9bc3f0a53b60",
+      "matchesExpectedBroker": true
+    }
+  ],
+  "explorers": [
+    {
+      "processId": 12812,
+      "sessionId": 3,
+      "path": "C:\\WINDOWS\\Explorer.EXE",
+      "startTime": "2026-10-07T09:00:16.2401361+08:00",
+      "startTimeUTC": "2026-10-07T01:00:16.2401361Z"
+    }
+  ],
+  "unavailableProcesses": [],
+  "brokerStayedAtExpectedPID": true,
+  "rimesAutostart": {
+    "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+    "valueName": "RimesBroker",
+    "value": "\"C:\\Program Files\\RIMES\\versions\\1.1.0-preview.2-58fc4bcf8319-ecab591174ef\\x64\\RimesBroker.exe\"",
+    "matchesActiveBroker": true
+  },
+  "windowOrInputContentRead": false,
+  "processesStartedOrStopped": false,
+  "excludedOtherSessionExplorerCount": 1,
+  "explorerStartedAfterBroker": true,
+  "evidenceScope": "Session 3 Explorer/Broker process identity/start times and RIMES-only Run value; unrelated session details omitted; no window, input, webpage, command line or credential content read.",
+  "rawReportSHA256": "2d8c95d2e73bbff8d59edecfec4015fdb33329d114c84a53e4f7cd2b7fe29428"
+}

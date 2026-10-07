@@ -1,0 +1,33 @@
+{
+  "formatVersion": 1,
+  "method": "sips crop, followed by visual review of crops",
+  "screenshots": [
+    {
+      "file": "chromium-input-fields.jpg",
+      "sourceCrop": {
+        "x": 500,
+        "y": 740,
+        "width": 1820,
+        "height": 560
+      },
+      "bytes": 52006,
+      "sha256": "8ffb1db3d37a82a75234f3440f83d4ec206187fda8540333f276d3836252fe41",
+      "privacyReview": "Synthetic page fields only. Background application, browser sidebar/account information and Windows on-screen keyboard excluded.",
+      "visibleEvidence": "Synthetic Input A shows 你好? /; Input B shows 中文."
+    },
+    {
+      "file": "chromium-contenteditable.jpg",
+      "sourceCrop": {
+        "x": 500,
+        "y": 340,
+        "width": 425,
+        "height": 960
+      },
+      "bytes": 37849,
+      "sha256": "5c0614f214b5cef3c8fa374903e9dd4bc583253ba586fd1002b77e6a80760af8",
+      "privacyReview": "Synthetic page fields only. Background application, browser sidebar/account information and Windows on-screen keyboard excluded.",
+      "visibleEvidence": "Synthetic Input B textarea shows 中文; Contenteditable shows 你好?."
+    }
+  ],
+  "interpretation": "Screenshots record visible synthetic text only; exact candidate/browser/key-sequence attribution is supplied by the desktop operator."
+}

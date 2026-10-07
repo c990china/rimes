@@ -1,5 +1,7 @@
 #include "rimes_version.hpp"
 #include <iostream>
+#include <fstream>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <thread>
@@ -12,10 +14,30 @@
 #include "default_paths.hpp"
 #include "named_pipe_server.hpp"
 #include "single_instance.hpp"
+#include "ui_command.hpp"
 #include "win32_security.hpp"
 
 namespace rimes::windows::broker {
 namespace {
+
+void ReportBackgroundFailure(const BrokerOptions& options, const char* stage,
+                             const std::wstring& detail) noexcept {
+  if (options.serve_once || options.deploy_only || options.print_endpoint ||
+      options.print_paths || options.install_autostart || options.remove_autostart)
+    return;
+  try {
+    // Startup can fail before librime opens its own log. Keep a stage-only
+    // record; no input, model request, credentials or untrusted error text.
+    std::error_code ignored;
+    std::filesystem::create_directories(options.engine.log_dir, ignored);
+    std::ofstream(options.engine.log_dir / L"broker-startup.log", std::ios::app)
+        << "RIMES " << kProductVersion << ": " << stage << '\n';
+  } catch (...) {}
+  DWORD session = 0;
+  if (options.open_settings &&
+      ProcessIdToSessionId(GetCurrentProcessId(), &session) && session != 0)
+    MessageBoxW(nullptr, detail.c_str(), L"RIMES 设置", MB_OK | MB_ICONERROR);
+}
 
 void PrintUsage() {
   std::wcout
@@ -24,12 +46,14 @@ void PrintUsage() {
       << L"  RimesBroker --print-endpoint\n"
       << L"  RimesBroker --print-paths\n"
       << L"  RimesBroker --deploy-only\n"
+      << L"  RimesBroker --settings\n"
       << L"  RimesBroker --install-autostart | --remove-autostart\n"
       << L"  RimesBroker [--once] [--rime-dll <absolute-path>]\n"
       << L"      [--shared-data-dir <absolute-path>]\n"
       << L"      [--user-data-dir <absolute-path>]\n"
       << L"      [--log-dir <absolute-path>] [--full-maintenance-check]\n\n"
       << L"  --once                  Serve one verified client, then exit.\n"
+      << L"  --settings              Open settings in the current desktop Broker.\n"
       << L"  --print-endpoint        Print this user's pipe name, then exit.\n"
       << L"  --print-paths           Print resolved engine paths, then exit.\n"
       << L"  --install-autostart     Register a current-user logon Run key.\n"
@@ -58,6 +82,14 @@ int wmain(const int argc, wchar_t** argv) {
     PrintUsage();
     return 0;
   }
+  // Ordinary desktop serving is a background application. A console opened
+  // by double-click/logon must not remain as a black window. Keep the console
+  // for explicit diagnostics, deployment and --once integration runs so their
+  // existing stdout/exit-code contracts remain intact.
+  if (!options.serve_once && !options.deploy_only && !options.print_endpoint &&
+      !options.print_paths && !options.install_autostart &&
+      !options.remove_autostart)
+    FreeConsole();
 
   UserSecurityContext security;
   if (options.print_endpoint) {
@@ -108,6 +140,7 @@ int wmain(const int argc, wchar_t** argv) {
   if (!EnsureBrokerDataDirectories(created_dirs, &error)) {
     std::wcerr << L"Failed to create broker data directories: " << error
                << L'\n';
+    ReportBackgroundFailure(options, "data directories unavailable", error);
     return 5;
   }
 
@@ -126,14 +159,26 @@ int wmain(const int argc, wchar_t** argv) {
   }
   if (!security.Initialize(&error)) {
     std::wcerr << error << L'\n';
+    ReportBackgroundFailure(options, "user security initialization failed", error);
     return 3;
+  }
+  if (options.open_settings && security.session_id() == 0) {
+    std::wcerr << L"Settings require an interactive Windows session.\n";
+    return 8;
   }
   SingleInstance instance;
   if (!instance.Acquire(security.mutex_name(), security.attributes(), &error)) {
     std::wcerr << L"Failed to acquire the broker mutex: " << error << L'\n';
+    ReportBackgroundFailure(options, "single instance initialization failed", error);
     return 4;
   }
   if (instance.already_running()) {
+    if (options.open_settings) {
+      if (RequestSettings(security, &error)) return 0;
+      std::wcerr << error << L'\n';
+      ReportBackgroundFailure(options, "settings forwarding failed", error);
+      return 8;
+    }
     std::wcerr << L"The per-user RIMES broker is already running.\n";
     return 0;
   }
@@ -142,24 +187,31 @@ int wmain(const int argc, wchar_t** argv) {
   std::string engine_error;
   if (!engine.Start(options.engine, &engine_error)) {
     std::cerr << "Failed to start the RIME engine: " << engine_error << '\n';
+    ReportBackgroundFailure(options, "engine startup failed",
+                            L"输入引擎无法启动：\n" + workbench::Wide(engine_error));
     return 5;
   }
 
   NamedPipeServer server(&security);
   workbench::Runtime runtime;
+  workbench::UiCommands commands;
   const bool interactive = security.session_id() != 0;
   std::jthread ui;
   if (interactive && !options.serve_once)
     ui = std::jthread([&] {
       workbench::RunWindow(
           runtime, [&] { server.RequestStop(); },
-          [&] { engine.RunMaintenance(true, nullptr); });
+          [&] { engine.RunMaintenance(true, nullptr); }, &commands,
+          options.open_settings);
     });
   error.clear();
   const ServeResult result = server.ServeClients(
-      [&security, &engine, &runtime, interactive](DWORD) {
+      [&security, &engine, &runtime, &commands, interactive, &options](DWORD) {
         auto connection = std::make_shared<BrokerConnection>(
-            security.session_id(), &engine, interactive ? &runtime : nullptr);
+            security.session_id(), &engine, interactive ? &runtime : nullptr,
+            interactive && !options.serve_once ? std::function<bool()>([&commands] {
+              return commands.RequestSettings();
+            }) : std::function<bool()>{});
         return
             [connection](const core::Frame& request,
                          const DWORD client_process_id, core::Frame* response) {
@@ -171,6 +223,7 @@ int wmain(const int argc, wchar_t** argv) {
   if (ui.joinable()) ui.join();
   if (result == ServeResult::kFatalError) {
     std::wcerr << L"Broker pipe failure: " << error << L'\n';
+    ReportBackgroundFailure(options, "named pipe server failed", error);
     return 6;
   }
   if (result == ServeResult::kClientRejected && !error.empty()) {

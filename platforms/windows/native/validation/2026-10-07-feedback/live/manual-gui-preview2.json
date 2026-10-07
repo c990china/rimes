@@ -1,0 +1,159 @@
+{
+  "formatVersion": 1,
+  "machine": "YOUNG-HOME",
+  "platform": "Windows 11 Pro x64 Build 22631",
+  "candidateVersion": "1.1.0-preview.2",
+  "candidateCommit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+  "recordType": "Manual GUI acceptance by parent agent",
+  "desktopChannel": "CUA Windows App/RDP",
+  "observedLocalWindow": "2026-10-07 08:57-09:03 +08:00",
+  "checks": [
+    {
+      "id": "capture-settings-preserve-rebind-deliver",
+      "issue": 65,
+      "result": "passed",
+      "steps": [
+        "Focused fresh own x64 TestHost Input A, explicitly clicked Buffer body to bind.",
+        "Typed nihao + Space; Buffer contains 你好 while host retains earlier synthetic prefix nihao他.",
+        "Opened Start Menu search rimes and selected RIMES Settings while Broker already running. Six schemes render, Buffer draft remains visible.",
+        "Closed Settings without saving and returned to Input A; Buffer remains paused and still contains 你好.",
+        "Explicitly clicked Buffer source body; status becomes 已绑定.",
+        "Pressed Return once: host changes nihao他 -> nihao他你好, Buffer becomes 已发送 / 等待输入."
+      ],
+      "screenshots": [
+        "buffer-preview2-bound.jpg",
+        "settings-preview2-existing.jpg",
+        "buffer-preview2-settings-paused.jpg",
+        "buffer-preview2-delivered-host.jpg",
+        "buffer-preview2-delivered-status.jpg"
+      ],
+      "processIdentity": "preview2-live-process-identity-x64.json",
+      "limits": "Earlier synthetic prefix arose during keyboard/focus setup and is not the accepted ordinary-input sample; accepted delta is exactly 你好."
+    },
+    {
+      "id": "explorer-tray-recovery",
+      "issue": 65,
+      "result": "passed",
+      "steps": [
+        "Taskbar right click -> Task Manager, filter xplorer, Windows资源管理器 -> 重新启动.",
+        "Taskbar disappeared then returned.",
+        "Opened hidden tray and right clicked first RIMES Broker icon; Settings menu renders.",
+        "Selected 设置; six-scheme Settings renders.",
+        "Closed Settings, empty Buffer and own TestHost after acceptance."
+      ],
+      "screenshots": [
+        "explorer-restart-command.jpg",
+        "explorer-restored-tray-menu.jpg",
+        "explorer-restored-settings.jpg"
+      ],
+      "processIdentity": "explorer-restart-process-identity.json",
+      "brokerStayedSamePID": 66352,
+      "newExplorerPID": 12812
+    }
+  ],
+  "notClaimed": [
+    "Actual reboot/logout/login acceptance for #67",
+    "Full #8 daily-use matrix",
+    "Real external API request; held stream preservation is automated",
+    "All previously running hosts upgraded; requiresSignOut=true",
+    "Turbo browser or newer Windows build"
+  ],
+  "screenshots": [
+    {
+      "file": "buffer-preview2-bound.jpg",
+      "sourceCrop": {
+        "x": 84,
+        "y": 1107,
+        "width": 1515,
+        "height": 140
+      },
+      "bytes": 26241,
+      "sha256": "f504922039b772280cac835e9f42b145c978af65c8583772e6055092d628b62d",
+      "privacyReview": "Only RIMES UI, own synthetic test input, or Explorer command/menu is visible. Full desktop originals remain private; no accounts, credentials or user documents."
+    },
+    {
+      "file": "buffer-preview2-settings-paused.jpg",
+      "sourceCrop": {
+        "x": 84,
+        "y": 1107,
+        "width": 1515,
+        "height": 140
+      },
+      "bytes": 29353,
+      "sha256": "fbc4722dc6c0b18ef120caf5f665a85214649937336ea2d1186b2abdca54160b",
+      "privacyReview": "Only RIMES UI, own synthetic test input, or Explorer command/menu is visible. Full desktop originals remain private; no accounts, credentials or user documents."
+    },
+    {
+      "file": "settings-preview2-existing.jpg",
+      "sourceCrop": {
+        "x": 298,
+        "y": 64,
+        "width": 1967,
+        "height": 1265
+      },
+      "bytes": 110721,
+      "sha256": "02d2888869a26c1cc687cde1203cdceb85939f85efe430ee92338d2275a87f67",
+      "privacyReview": "Only RIMES UI, own synthetic test input, or Explorer command/menu is visible. Full desktop originals remain private; no accounts, credentials or user documents."
+    },
+    {
+      "file": "buffer-preview2-delivered-host.jpg",
+      "sourceCrop": {
+        "x": 125,
+        "y": 222,
+        "width": 1480,
+        "height": 345
+      },
+      "bytes": 25637,
+      "sha256": "fbbff5f46e32e378131c3989630993d1a073e2f112bfe4532c8da1366b4ed7f0",
+      "privacyReview": "Only RIMES UI, own synthetic test input, or Explorer command/menu is visible. Full desktop originals remain private; no accounts, credentials or user documents."
+    },
+    {
+      "file": "buffer-preview2-delivered-status.jpg",
+      "sourceCrop": {
+        "x": 84,
+        "y": 1107,
+        "width": 1515,
+        "height": 140
+      },
+      "bytes": 25677,
+      "sha256": "63b27ca2c416e5a09b07ee206fb225e82b3bd279faae3056dcde1e8e892818a5",
+      "privacyReview": "Only RIMES UI, own synthetic test input, or Explorer command/menu is visible. Full desktop originals remain private; no accounts, credentials or user documents."
+    },
+    {
+      "file": "explorer-restored-tray-menu.jpg",
+      "sourceCrop": {
+        "x": 2000,
+        "y": 827,
+        "width": 379,
+        "height": 365
+      },
+      "bytes": 25959,
+      "sha256": "708be5b99ae66bc91effe2c415e23a15f557dc28a270715810019ea1663ba14f",
+      "privacyReview": "Only RIMES UI, own synthetic test input, or Explorer command/menu is visible. Full desktop originals remain private; no accounts, credentials or user documents."
+    },
+    {
+      "file": "explorer-restored-settings.jpg",
+      "sourceCrop": {
+        "x": 298,
+        "y": 64,
+        "width": 1967,
+        "height": 1265
+      },
+      "bytes": 112564,
+      "sha256": "5fba17dca3ae57c48e2d68c1e79c3cf89199dda2d17b624e15e9c769ef1176af",
+      "privacyReview": "Only RIMES UI, own synthetic test input, or Explorer command/menu is visible. Full desktop originals remain private; no accounts, credentials or user documents."
+    },
+    {
+      "file": "explorer-restart-command.jpg",
+      "sourceCrop": {
+        "x": 498,
+        "y": 622,
+        "width": 820,
+        "height": 515
+      },
+      "bytes": 42266,
+      "sha256": "08c4712d187a1be17441e4f15969c1defefc1c41fe1f96abfe4ca31af7ebddcd",
+      "privacyReview": "Only RIMES UI, own synthetic test input, or Explorer command/menu is visible. Full desktop originals remain private; no accounts, credentials or user documents."
+    }
+  ]
+}

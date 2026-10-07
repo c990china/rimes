@@ -1,24 +1,32 @@
 #requires -Version 5.1
 [CmdletBinding()]
-param([string]$InstallRoot = "$env:ProgramFiles\RIMES",[switch]$NoAutostart,[switch]$AllowPendingRestart)
+param([string]$InstallRoot = "$env:ProgramFiles\RIMES",[switch]$NoAutostart,[switch]$AllowPendingRestart,[string]$PackageDirectory=$PSScriptRoot)
 . "$PSScriptRoot\Package.Common.ps1"
 Assert-Administrator
-$manifest=Read-VerifiedPackage $PSScriptRoot
+$PackageDirectory=[IO.Path]::GetFullPath($PackageDirectory)
+$manifest=Read-VerifiedPackage $PackageDirectory
 $InstallRoot=[IO.Path]::GetFullPath($InstallRoot)
-$packageHash=(Get-FileHash -LiteralPath "$PSScriptRoot\PACKAGE.json" -Algorithm SHA256).Hash.ToLowerInvariant()
+$packageHash=(Get-FileHash -LiteralPath "$PackageDirectory\PACKAGE.json" -Algorithm SHA256).Hash.ToLowerInvariant()
 $target=Join-Path $InstallRoot ('versions\'+$manifest.version+'-'+$manifest.commit.Substring(0,12)+'-'+$packageHash.Substring(0,12))
 $previous=$null
 $legacy=@()
 $requiresRestart=$false
-$runKey='HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
-$oldAutostart=$null
-$runHandle=[Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Software\Microsoft\Windows\CurrentVersion\Run')
-if($runHandle){$oldAutostart=$runHandle.GetValue('RimesBroker',$null);$runHandle.Dispose()}
+$oldAutostart=Get-BrokerAutostart
+$oldInstalledApp=Read-InstalledAppRegistration
+$oldShortcut=Read-SettingsShortcut
 if (Test-Path -LiteralPath "$InstallRoot\state.json") {
     $previous=Get-Content -LiteralPath "$InstallRoot\state.json" -Raw | ConvertFrom-Json
     $requiresRestart=[bool]$previous.requiresSignOut
     Assert-OwnedVersion $InstallRoot $previous.active | Out-Null
-    if ($previous.active -eq $target) { & "$target\Verify.ps1" -InstallRoot $InstallRoot; return }
+    if ($previous.active -eq $target) {
+        try {
+            $launcher=if(Test-Path -LiteralPath "$target\Uninstall-App.ps1"){$target}elseif($oldInstalledApp){[string]$oldInstalledApp.RIMESUninstallDirectory.value}else{$PSScriptRoot}
+            Write-InstalledAppRegistration $InstallRoot $target $manifest $launcher
+            Write-SettingsShortcut $InstallRoot $target
+            & "$PSScriptRoot\Verify.ps1" -InstallRoot $InstallRoot
+        } catch {Restore-InstalledAppRegistration $oldInstalledApp;Restore-SettingsShortcut $oldShortcut;throw}
+        return
+    }
     Stop-OwnedBroker $previous.active
     try{Assert-Unlocked $previous.active}catch{if(-not $AllowPendingRestart){throw};$requiresRestart=$true}
 }
@@ -32,7 +40,7 @@ if(-not $previous){
 if (Test-Path -LiteralPath $target) { Read-VerifiedPackage $target | Out-Null }
 else {
     New-Item -ItemType Directory -Path $target -Force | Out-Null
-    Copy-Item -Path "$PSScriptRoot\*" -Destination $target -Recurse
+    Copy-Item -Path "$PackageDirectory\*" -Destination $target -Recurse
     Read-VerifiedPackage $target | Out-Null
 }
 # Dependency and architecture probes precede every registration mutation.
@@ -49,7 +57,10 @@ try {
     foreach($arch in @('x64','x86')) {Invoke-Registrar $target $arch 'register'; $registered+=$arch}
     foreach($arch in @('x64','x86')) {Invoke-Registrar $target $arch 'verify'}
     if(-not $NoAutostart){ & "$target\x64\RimesBroker.exe" --install-autostart; if($LASTEXITCODE){throw 'Autostart registration failed'} }
-    else{Remove-ItemProperty -LiteralPath $runKey -Name RimesBroker -ErrorAction SilentlyContinue}
+    else{Restore-BrokerAutostart $null}
+    $launcher=if(Test-Path -LiteralPath "$target\Uninstall-App.ps1"){$target}elseif($previous -and (Test-Path -LiteralPath "$($previous.active)\Uninstall-App.ps1")){$previous.active}else{$PSScriptRoot}
+    Write-InstalledAppRegistration $InstallRoot $target $manifest $launcher
+    Write-SettingsShortcut $InstallRoot $target
     $oldPath=if($previous){$previous.active}else{''}
     Write-InstallState $InstallRoot ([ordered]@{active=$target;previous=$oldPath;version=$manifest.version;commit=$manifest.commit;requiresSignOut=$requiresRestart;legacy=$legacy;previousAutostart=$oldAutostart;installedAt=(Get-Date).ToString('o')})
 } catch {
@@ -58,7 +69,9 @@ try {
     foreach($arch in $registered){try{Invoke-Registrar $target $arch 'unregister'}catch{$rollbackFailures+=$_.ToString()}}
     if($previous){foreach($arch in @('x64','x86')){try{Invoke-Registrar $previous.active $arch 'register'}catch{$rollbackFailures+=$_.ToString()}}}
     else{foreach($entry in $legacy){try{Invoke-LegacyRegistrar $target $entry 'register'}catch{$rollbackFailures+=$_.ToString()}}}
-    try{if($null -ne $oldAutostart){Set-ItemProperty -LiteralPath $runKey -Name RimesBroker -Value $oldAutostart}else{Remove-ItemProperty -LiteralPath $runKey -Name RimesBroker -ErrorAction SilentlyContinue}}catch{$rollbackFailures+=$_.ToString()}
+    try{Restore-BrokerAutostart $oldAutostart}catch{$rollbackFailures+=$_.ToString()}
+    try{Restore-InstalledAppRegistration $oldInstalledApp}catch{$rollbackFailures+=$_.ToString()}
+    try{Restore-SettingsShortcut $oldShortcut}catch{$rollbackFailures+=$_.ToString()}
     if($rollbackFailures.Count){throw "Installation failed: $failure. Recovery is incomplete: $($rollbackFailures -join '; '). Recovery records and all prior DLLs are retained."}
     throw "Installation failed; prior registration and startup setting restored. $failure"
 }

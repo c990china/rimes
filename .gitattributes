@@ -16,6 +16,8 @@
 
 # Brand assets must retain their bytes even beneath the platform text rules.
 *.png binary
+*.jpg binary
+*.jpeg binary
 *.ico binary
 *.icns binary
 *.pdf binary

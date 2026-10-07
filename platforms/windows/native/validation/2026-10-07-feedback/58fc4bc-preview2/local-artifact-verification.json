@@ -1,0 +1,61 @@
+{
+  "commit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+  "version": "1.1.0-preview.2",
+  "sourceSnapshot": "3f575ebc9f2b5604c91c5b9edeabaf9fd7d87abdffc585e742167648ed67297d",
+  "artifactDirectory": "%TASK_ROOT%/candidate-58fc4bc",
+  "archivePackageFilesVerified": 109,
+  "downloadedFiles": [
+    {
+      "name": "RIMES-Windows-1.1.0-preview.2.zip",
+      "bytes": 49021827,
+      "sha256": "e83f8c28061d6503dd05cb99915c319450dfd58febb80a59dbab1d21d3b31b64",
+      "verified": true
+    },
+    {
+      "name": "RIMES-Windows-1.1.0-preview.2-Setup.exe",
+      "bytes": 49143296,
+      "sha256": "b961abbd1361ae15b6ac40813778c9a8194172aaf656d1d32f063afb2d9a29f8",
+      "verified": true
+    },
+    {
+      "name": "PACKAGE.json",
+      "bytes": 27660,
+      "sha256": "ecab591174efe40980bf566b105c5e8ea6e7d076aaf467837f71ce87fa61e40c",
+      "verified": true
+    },
+    {
+      "name": "BUILD-INFO.json",
+      "bytes": 4761,
+      "sha256": "8c97f25b2234784af04cdcc82700baadcb5d0e6ea3a404293680d6e2b6044903",
+      "verified": true
+    },
+    {
+      "name": "SETUP-VERIFY.json",
+      "bytes": 312,
+      "sha256": "456f283617f7392eed0de26edf253606815c3d1b0cb0b65fe44162e197d2a347",
+      "verified": true
+    },
+    {
+      "name": "INTERNAL-CANDIDATE.md",
+      "bytes": 714,
+      "sha256": "137c92f0531c9e483d8b0bfd65dc5d0197cafc657810746cdff3a16942f2356e",
+      "verified": true
+    }
+  ],
+  "exactCTest": {
+    "x64": {
+      "tests": 18,
+      "failed": 0,
+      "skipped": 0
+    },
+    "x86": {
+      "tests": 18,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "installerChecks": 19,
+  "unsigned": true,
+  "installedByThisAgent": false,
+  "publicRelease": false
+}

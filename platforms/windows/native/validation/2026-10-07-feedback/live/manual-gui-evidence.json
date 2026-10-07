@@ -1,0 +1,159 @@
+{
+  "formatVersion": 1,
+  "platform": "Windows 11 x64",
+  "machine": "YOUNG-HOME",
+  "candidateVersion": "1.1.0-preview.1",
+  "candidateCommit": "f5057d3ba467ec9a04a67e5e0664b1d8c5224741",
+  "recordType": "Manual GUI acceptance evidence finalized by parent desktop operator",
+  "desktopChannel": "CUA Windows App/RDP; all GUI actions and observations performed by parent agent",
+  "modifierDelivery": "Windows On-Screen Keyboard native Shift was used for the punctuation check because the RDP modifier forwarding was unreliable. This does not verify RDP modifier forwarding.",
+  "checks": [
+    {
+      "id": "control-panel-discovery",
+      "issue": 66,
+      "result": "passed per desktop operator",
+      "observed": "Filtered Programs and Features displays one RIMES entry and product version 1.1.0-preview.1.",
+      "screenshot": "control-panel-rimes.jpg"
+    },
+    {
+      "id": "uninstall-launch-cancel",
+      "issue": 66,
+      "result": "passed per desktop operator",
+      "observed": "System uninstall entry opened RIMES confirmation with retention guidance; Cancel was chosen. Installed Verify passed afterwards.",
+      "screenshot": "uninstall-confirmation.jpg",
+      "actualUninstallPerformed": false
+    },
+    {
+      "id": "modern-installed-apps-window",
+      "issue": 66,
+      "result": "passed per desktop operator",
+      "observed": "After delayed Windows Settings startup, the Installed Apps page rendered. Filter rimes reports one application: RIMES 1.1.0-preview.1, Scholay, 2026/10/7. Its overflow menu exposes enabled Uninstall.",
+      "screenshot": "installed-apps.jpg",
+      "uninstallOverflowEnabled": true,
+      "uninstallConfirmationCoverage": "The shared system uninstall target was exercised through Control Panel and Cancel; the modern overflow was inspected without another uninstall execution.",
+      "historicalProcessEvidence": "system-settings-process.json"
+    },
+    {
+      "id": "settings-cold-visible",
+      "issue": 65,
+      "result": "passed",
+      "observed": "With Broker stopped, Start Menu search rimes -> RIMES Settings opened the six-scheme page; no persistent console remained.",
+      "screenshot": "settings-cold-full.jpg"
+    },
+    {
+      "id": "shift-question-x64",
+      "issue": 59,
+      "result": "passed",
+      "observed": "Fresh x64 TestHost Input A: nihao + Space commits 你好; native Windows OSK Shift + slash inserts ?, unshifted slash inserts /, repeated shifted key inserts ?. Final synthetic text 你好? /?.",
+      "screenshot": "shift-question-win32-x64.jpg"
+    },
+    {
+      "id": "chromium-local-fields",
+      "issue": 59,
+      "result": "passed",
+      "observed": "Own Chrome window on local synthetic page: Input A 你好? /, textarea B 中文, contenteditable 你好?. Native Windows OSK Shift used for question marks. Chrome was closed before module hash readback, so exact Chrome DLL identity is not claimed.",
+      "screenshots": [
+        "chromium-input-fields.jpg",
+        "chromium-contenteditable.jpg"
+      ]
+    }
+  ],
+  "notClaimed": [
+    "Actual uninstall/reinstall",
+    "Actual reboot/login behavior",
+    "Working-day soak",
+    "Full host/DPI/multimonitor/lock/resume matrix",
+    "Turbo browser acceptance"
+  ],
+  "installationWarning": "Installed state requiresSignOut=true; fresh own test-host observations do not establish that previously running hosts have loaded the new DLL.",
+  "screenshots": [
+    {
+      "file": "settings-cold-full.jpg",
+      "sourceCrop": {
+        "x": 298,
+        "y": 64,
+        "width": 1967,
+        "height": 1265
+      },
+      "bytes": 110201,
+      "sha256": "eaca3ccc9e47be84402cbcbd0cb15ea28add0797fe8fbf8280d28afedb00f9e7",
+      "privacyReview": "Only the relevant RIMES-owned or RIMES-filtered Windows window is shown; background Scholay UI excluded."
+    },
+    {
+      "file": "control-panel-rimes.jpg",
+      "sourceCrop": {
+        "x": 516,
+        "y": 125,
+        "width": 1568,
+        "height": 1183
+      },
+      "bytes": 138585,
+      "sha256": "3823eb10b795f47b34f4f28584ff1d5c1b379f84966c6679333aa366192162b0",
+      "privacyReview": "Only the relevant RIMES-owned or RIMES-filtered Windows window is shown; background Scholay UI excluded."
+    },
+    {
+      "file": "uninstall-confirmation.jpg",
+      "sourceCrop": {
+        "x": 818,
+        "y": 461,
+        "width": 955,
+        "height": 597
+      },
+      "bytes": 72751,
+      "sha256": "3902adb62ca3a0dd4fd6210d1a8d391f854fd6de68bb9688e2b0e2bed20eb7f7",
+      "privacyReview": "Only the relevant RIMES-owned or RIMES-filtered Windows window is shown; background Scholay UI excluded."
+    },
+    {
+      "file": "shift-question-win32-x64.jpg",
+      "sourceCrop": {
+        "x": 196,
+        "y": 222,
+        "width": 1480,
+        "height": 345
+      },
+      "bytes": 34306,
+      "sha256": "c6c5916f3b0647afa337dfafd53be86f7dc2996a9b41004b00502d5bab80f395",
+      "privacyReview": "Only the relevant RIMES-owned or RIMES-filtered Windows window is shown; background Scholay UI excluded."
+    },
+    {
+      "file": "installed-apps.jpg",
+      "sourceCrop": {
+        "x": 650,
+        "y": 165,
+        "width": 1860,
+        "height": 480
+      },
+      "bytes": 60344,
+      "sha256": "ba685666c55c464b005dd80c820f6521bc250d224dfe25e711051b7ad0bdb9c8",
+      "privacyReview": "Heading, rimes filter and unique RIMES row only; Windows account/sidebar/email and background UI excluded."
+    },
+    {
+      "file": "chromium-input-fields.jpg",
+      "sourceCrop": {
+        "x": 500,
+        "y": 740,
+        "width": 1820,
+        "height": 560
+      },
+      "bytes": 52006,
+      "sha256": "8ffb1db3d37a82a75234f3440f83d4ec206187fda8540333f276d3836252fe41",
+      "privacyReview": "Synthetic page fields only. Background application, browser sidebar/account information and Windows on-screen keyboard excluded.",
+      "visibleEvidence": "Synthetic Input A shows 你好? /; Input B shows 中文."
+    },
+    {
+      "file": "chromium-contenteditable.jpg",
+      "sourceCrop": {
+        "x": 500,
+        "y": 340,
+        "width": 425,
+        "height": 960
+      },
+      "bytes": 37849,
+      "sha256": "5c0614f214b5cef3c8fa374903e9dd4bc583253ba586fd1002b77e6a80760af8",
+      "privacyReview": "Synthetic page fields only. Background application, browser sidebar/account information and Windows on-screen keyboard excluded.",
+      "visibleEvidence": "Synthetic Input B textarea shows 中文; Contenteditable shows 你好?."
+    }
+  ],
+  "readOnlyFollowup": "installed-post-cancel-verify.json; all three active binary hashes match committed candidate BUILD-INFO",
+  "scopeNote": "All checks here belong to preview.1 f5057d3; later Buffer/Explorer acceptance belongs to manual-gui-preview2.json."
+}

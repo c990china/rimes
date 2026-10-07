@@ -1,0 +1,42 @@
+{
+  "diagnosticOnly": true,
+  "sourceBase": "a45965e",
+  "uncommittedFiles": 5,
+  "sessionId": 0,
+  "fixedWindowSHA256": "545AA5999DB1E62D644AD8CDCD290C3CD544F4799530B61C397755DD466BF234",
+  "restored": true,
+  "steps": [
+    {
+      "phase": "build-fixed",
+      "exitCode": 0
+    },
+    {
+      "phase": "settings-fixed",
+      "exitCode": 0
+    },
+    {
+      "phase": "runtime-fixed",
+      "exitCode": 0
+    },
+    {
+      "phase": "build-old-close-guard",
+      "exitCode": 0
+    },
+    {
+      "phase": "settings-old-close-guard",
+      "exitCode": 1
+    },
+    {
+      "phase": "guard-rejected-old-close",
+      "exitCode": 0
+    },
+    {
+      "phase": "build-restored",
+      "exitCode": 0
+    },
+    {
+      "phase": "settings-restored",
+      "exitCode": 0
+    }
+  ]
+}
