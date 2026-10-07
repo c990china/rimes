@@ -19,6 +19,15 @@
 - `rimes-plugins` 仍是独立仓库，以自己的 `main` 维护；本体继续使用已审查的子模块/锁文件提交，不自动追逐插件 HEAD。
 - 本轮仅汇总源码和维护分支，不创建发布 tag。iOS 48 的首次闪动、宿主高度同步与实际宿主验收边界见 [验证记录](platforms/ios/validation/build48/README.md)。上线前从确切的主线提交构建并完成这些验收。
 
+## 2026-10-07 移动端反馈整合
+
+- 集成提交 `97e3c31` 保留 Android 社区反馈分支的原始提交，并纳入 iOS TestFlight 修复、共享中文标点行为和固定版本的输入方案目录工具。
+- 官方插件固定到 `c276dce6cf19a62fa055affc8e274036d8ffcf1d`，包含 Android 并击工具键取消和受限高度适配；本体不自动跟随插件仓库 HEAD。
+- 此次集成本机检查：Shared 82 项、Android JVM 70 项、方案工具 35 项均通过；iOS 模拟器 212 项中 1 项跳过、0 失败。Android Debug APK、两套 instrumentation APK 编译和 Lint 通过；iOS 静态检查、插件目录与日志隐私检查通过。
+- Android 原生库和预编译词库复用已验收工作区产物，其全部 34 项输入摘要与集成源码相符，并重新通过资源完整性及双 ABI 16 KB 对齐检查。本次没有重新安装或验收集成后的手机包，既有设备记录仅代表各自记录的产物。
+- Windows [PR #73](https://github.com/scholay/rimes/pull/73) 保持草稿，等待真实桌面验收；不把 CI 通过当成桌面验收完成。
+- `platforms/ios/AppStore/submission-1.1.0/` 的本地提交材料保留在工作区，不纳入源码提交。此次分支维护不创建发布标签、不上传商店版本。
+
 ## 代码边界
 
 2026-09-29 起按 [平台路线图](PLATFORM-ROADMAP.md) 开发：Windows 对标 macOS、Android 对标
