@@ -1,0 +1,8 @@
+{
+  "same_as_code13": true,
+  "native_resources_compared": 45,
+  "jni_hashes": {
+    "lib/arm64-v8a/librimes_jni.so": "717c7869deb86eead97a7ac603e69e79b46f4e80a75d7327adafc64131f8d11d",
+    "lib/x86_64/librimes_jni.so": "aaffc2f34729fb25dade3b4c5605f12d8f3ed2574e922b038d486bd3842f80da"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "package": "org.scholay.rimes.android.debug",
+  "version_name": "1.1.0",
+  "version_code": 14,
+  "source_commit": "535964a04ff385a2ce69c153216d4542c6277021",
+  "apk_bytes": 17964260,
+  "apk_sha256": "f30122212eff502dd89e209edaa49ce9c1bf6c3a6810ba661f565f7ce92e0b09",
+  "artifact": "platforms/android/build/delivery/community-feedback-closure-20261007/rimes-android-dev-1.1.0-code14.apk",
+  "alignment_16k": "PASS",
+  "same_development_signer": true
+}

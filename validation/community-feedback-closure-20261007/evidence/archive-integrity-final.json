@@ -1,0 +1,12 @@
+{
+  "initial_live_archive_bytes": 28429,
+  "initial_live_archive_512_aligned": false,
+  "quiescent_archive_bytes": 28160,
+  "quiescent_archive_512_aligned": true,
+  "quiescent_dictionary_regular_files": 21,
+  "device_dictionary_directory_intact": true,
+  "original_default_ime_restored_after_capture": true,
+  "scope": "Archive captured after switching away and stopping RIMES; baseline and corrupt initial archive preserved privately. No user dictionary restore was needed.",
+  "embedded_tar_warning_count": 3,
+  "archive_diagnosis": "Live engine rotated dictionary MANIFEST/WAL during streaming tar; tar warnings were mixed into binary exec-out output"
+}

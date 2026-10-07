@@ -1,0 +1,79 @@
+[
+  {
+    "number": 62,
+    "title": "[Android] 在键盘中提供直接清空 Buffer 草稿的入口",
+    "url": "https://github.com/scholay/rimes/issues/62",
+    "state": "closed",
+    "state_reason": "completed",
+    "closed_at": "2026-10-07T01:35:07Z",
+    "comment_url": "https://github.com/scholay/rimes/issues/62#issuecomment-6028985172",
+    "comment_body": "本单固定范围已实现，按维护者要求以修复完成关闭。\n\n键盘常驻清空入口会同时清除本轮 Buffer 草稿、临时组字及待发送状态，宿主文字不受影响；清空后的空 Buffer 不会回放旧内容。\n\n最终包在真实 IME 综合回归（624项）及服务交付合同（269项）中通过清空、空 Buffer Return、失败保留和旧目标隔离检查。 核心70项、构建与Lint通过。最终包30分钟混合输入通过：1802秒、622轮、10,998项断言，无重复上屏、跨框提交或新增进程退出记录。\n\n本地开发包 `1.1.0 / code14`；生产提交 `535964a04ff385a2ce69c153216d4542c6277021`（包含 `f6ad487` 的追加修复）。APK SHA-256：`f30122212eff502dd89e209edaa49ce9c1bf6c3a6810ba661f565f7ce92e0b09`。源码和 APK 尚未推送或发布。\n\n验证报告：仓库内 `validation/community-feedback-closure-20261007/report.md`（本地提交，未发布）。原报告设备、其他厂商/旧 Android 与 16 KB 运行环境尚未复测；如原设备仍能复现，可附版本、宿主和步骤重开。后续功能继续留在 #3。\n",
+    "comment_readback_matches": true
+  },
+  {
+    "number": 63,
+    "title": "[Android] 退格键支持安全的长按重复删除",
+    "url": "https://github.com/scholay/rimes/issues/63",
+    "state": "closed",
+    "state_reason": "completed",
+    "closed_at": "2026-10-07T01:35:15Z",
+    "comment_url": "https://github.com/scholay/rimes/issues/63#issuecomment-6028986795",
+    "comment_body": "本单固定范围已实现，按维护者要求以修复完成关闭。\n\n长按退格已覆盖组字、完整 Buffer 块和宿主码点删除。重复删除受目标授权及 pending 门禁约束，忙时跳过当前 tick，不积压欠账；普通双指短按仍各执行一次，抬手和换框会取消长按。\n\n最终包长按退格111项、真实双指141项、原生触摸92项及真实IME社区回归624项通过；普通/两种并击布局的忙时门禁分别验证。 核心70项、构建与Lint通过。最终包30分钟混合输入通过：1802秒、622轮、10,998项断言，无重复上屏、跨框提交或新增进程退出记录。\n\n本地开发包 `1.1.0 / code14`；生产提交 `535964a04ff385a2ce69c153216d4542c6277021`（包含 `f6ad487` 的追加修复）。APK SHA-256：`f30122212eff502dd89e209edaa49ce9c1bf6c3a6810ba661f565f7ce92e0b09`。源码和 APK 尚未推送或发布。\n\n验证报告：仓库内 `validation/community-feedback-closure-20261007/report.md`（本地提交，未发布）。原报告设备、其他厂商/旧 Android 与 16 KB 运行环境尚未复测；如原设备仍能复现，可附版本、宿主和步骤重开。后续功能继续留在 #3。\n",
+    "comment_readback_matches": true
+  },
+  {
+    "number": 64,
+    "title": "[Android] 删除时翻译与 Buffer 插件功能栏闪烁",
+    "url": "https://github.com/scholay/rimes/issues/64",
+    "state": "closed",
+    "state_reason": "completed",
+    "closed_at": "2026-10-07T01:35:22Z",
+    "comment_url": "https://github.com/scholay/rimes/issues/64#issuecomment-6028988187",
+    "comment_body": "本单固定范围已实现，按维护者要求以修复完成关闭。\n\n删除路径保留空闲插件栏的启用状态、视图和几何。附着生产视图的合成引擎/连接检查与真实 IME 录屏分别验证；录屏结论只覆盖实际记录到的插件 ROI 帧，并不表示所有显示帧或所有宿主均已测试。\n\n最终包附着视图5,219项/235个请求绘制帧/18阶段通过；真实IME idle/Buffer两段录像分别76/90个记录帧，插件ROI前景对比度变化最大3.042灰度级、平坦背景最大0.099灰度级。仅覆盖记录帧，不等于所有显示vsync。 核心70项、构建与Lint通过。最终包30分钟混合输入通过：1802秒、622轮、10,998项断言，无重复上屏、跨框提交或新增进程退出记录。\n\n本地开发包 `1.1.0 / code14`；生产提交 `535964a04ff385a2ce69c153216d4542c6277021`（包含 `f6ad487` 的追加修复）。APK SHA-256：`f30122212eff502dd89e209edaa49ce9c1bf6c3a6810ba661f565f7ce92e0b09`。源码和 APK 尚未推送或发布。\n\n验证报告：仓库内 `validation/community-feedback-closure-20261007/report.md`（本地提交，未发布）。原报告设备、其他厂商/旧 Android 与 16 KB 运行环境尚未复测；如原设备仍能复现，可附版本、宿主和步骤重开。后续功能继续留在 #3。\n",
+    "comment_readback_matches": true
+  },
+  {
+    "number": 68,
+    "title": "[Android] 键盘底排被系统工具栏或导航区域截断",
+    "url": "https://github.com/scholay/rimes/issues/68",
+    "state": "closed",
+    "state_reason": "completed",
+    "closed_at": "2026-10-07T01:35:30Z",
+    "comment_url": "https://github.com/scholay/rimes/issues/68#issuecomment-6028989564",
+    "comment_body": "本单固定范围已实现，按维护者要求以修复完成关闭。\n\n键盘根视图按系统实际提供的高度压缩键位区，保留底排和安全间距。真机横竖屏的底排像素、点击及 26键/九键/两种并击布局已纳入回归。\n\n最终包布局400项、组件高度预算319项及真实IME社区回归624项通过；实际横竖屏底排的像素、按钮中心点击和底部边界均核对。 核心70项、构建与Lint通过。最终包30分钟混合输入通过：1802秒、622轮、10,998项断言，无重复上屏、跨框提交或新增进程退出记录。\n\n本地开发包 `1.1.0 / code14`；生产提交 `535964a04ff385a2ce69c153216d4542c6277021`（包含 `f6ad487` 的追加修复）。APK SHA-256：`f30122212eff502dd89e209edaa49ce9c1bf6c3a6810ba661f565f7ce92e0b09`。源码和 APK 尚未推送或发布。\n\n验证报告：仓库内 `validation/community-feedback-closure-20261007/report.md`（本地提交，未发布）。原报告设备、其他厂商/旧 Android 与 16 KB 运行环境尚未复测；如原设备仍能复现，可附版本、宿主和步骤重开。后续功能继续留在 #3。\n",
+    "comment_readback_matches": true
+  },
+  {
+    "number": 69,
+    "title": "[Android] 九宫格显示可读拼音并改善 Space 与功能键布局",
+    "url": "https://github.com/scholay/rimes/issues/69",
+    "state": "closed",
+    "state_reason": "completed",
+    "closed_at": "2026-10-07T01:35:38Z",
+    "comment_url": "https://github.com/scholay/rimes/issues/69#issuecomment-6028991042",
+    "comment_body": "本单固定范围已实现，按维护者要求以修复完成关闭。\n\n九键组字显示可读拼音；Space 和功能键按固定网格重新布局。使用真实 NUMBER/PHONE EditorInfo 验证直接数字输入、无中文组字和 Buffer，以及返回文字字段后恢复原键位偏好。\n\n最终包真实NUMBER/PHONE字段180项、布局400项及社区回归624项通过，实际九键输入64426显示ni'hao并确认你好。 核心70项、构建与Lint通过。最终包30分钟混合输入通过：1802秒、622轮、10,998项断言，无重复上屏、跨框提交或新增进程退出记录。\n\n本地开发包 `1.1.0 / code14`；生产提交 `535964a04ff385a2ce69c153216d4542c6277021`（包含 `f6ad487` 的追加修复）。APK SHA-256：`f30122212eff502dd89e209edaa49ce9c1bf6c3a6810ba661f565f7ce92e0b09`。源码和 APK 尚未推送或发布。\n\n验证报告：仓库内 `validation/community-feedback-closure-20261007/report.md`（本地提交，未发布）。原报告设备、其他厂商/旧 Android 与 16 KB 运行环境尚未复测；如原设备仍能复现，可附版本、宿主和步骤重开。后续功能继续留在 #3。\n",
+    "comment_readback_matches": true
+  },
+  {
+    "number": 70,
+    "title": "[Android] 改善常用标点、上滑数字与退格触摸可用性",
+    "url": "https://github.com/scholay/rimes/issues/70",
+    "state": "closed",
+    "state_reason": "completed",
+    "closed_at": "2026-10-07T01:35:46Z",
+    "comment_url": "https://github.com/scholay/rimes/issues/70#issuecomment-6028992380",
+    "comment_body": "本单固定范围已实现，按维护者要求以修复完成关闭。\n\n高频标点、数字和中英文上滑标点已补齐；上滑动作使用独立无障碍资源 ID，普通点击仍输出原字母。第二指取消本批次长按资格，普通重叠短按各保留一次；已进入保持/重复状态的手势取消后不补松手点击。自动引号配对不属于本单范围。\n\n最终包上滑/无障碍644项、真实双指141项、实际标点59项及社区回归624项通过，覆盖中英、组字确认、Buffer隔离和一次发送。 核心70项、构建与Lint通过。最终包30分钟混合输入通过：1802秒、622轮、10,998项断言，无重复上屏、跨框提交或新增进程退出记录。\n\n本地开发包 `1.1.0 / code14`；生产提交 `535964a04ff385a2ce69c153216d4542c6277021`（包含 `f6ad487` 的追加修复）。APK SHA-256：`f30122212eff502dd89e209edaa49ce9c1bf6c3a6810ba661f565f7ce92e0b09`。源码和 APK 尚未推送或发布。\n\n验证报告：仓库内 `validation/community-feedback-closure-20261007/report.md`（本地提交，未发布）。原报告设备、其他厂商/旧 Android 与 16 KB 运行环境尚未复测；如原设备仍能复现，可附版本、宿主和步骤重开。后续功能继续留在 #3。\n",
+    "comment_readback_matches": true
+  },
+  {
+    "number": 72,
+    "title": "[Android] 补齐已反馈的离线整词并保留用户词库",
+    "url": "https://github.com/scholay/rimes/issues/72",
+    "state": "closed",
+    "state_reason": "completed",
+    "closed_at": "2026-10-07T01:35:54Z",
+    "comment_url": "https://github.com/scholay/rimes/issues/72#issuecomment-6028993938",
+    "comment_body": "本单固定范围已实现，按维护者要求以修复完成关闭。\n\n已将反馈样本「力竭」补入 Android 离线词典：全拼 lijie、自然码 lijx 和九键 54543 可在真实引擎首屏中选择整词。系统词典与用户词库分离；此修复不代表所有词条、云预测或联想功能已完成。\n\n最终包实际Android JNI在三种方案首个9项候选页中均找到并提交整词「力竭」，且「理解」仍为首候选；原拼音91条/五笔1条的词条、编码及commits提交频次导出完全一致；两库各4个SST数据文件逐字节一致，前后WAL均为空（未单独解码动态权重d/t）。 核心70项、构建与Lint通过。最终包30分钟混合输入通过：1802秒、622轮、10,998项断言，无重复上屏、跨框提交或新增进程退出记录。\n\n本地开发包 `1.1.0 / code14`；生产提交 `535964a04ff385a2ce69c153216d4542c6277021`（包含 `f6ad487` 的追加修复）。APK SHA-256：`f30122212eff502dd89e209edaa49ce9c1bf6c3a6810ba661f565f7ce92e0b09`。源码和 APK 尚未推送或发布。\n\n验证报告：仓库内 `validation/community-feedback-closure-20261007/report.md`（本地提交，未发布）。原报告设备、其他厂商/旧 Android 与 16 KB 运行环境尚未复测；如原设备仍能复现，可附版本、宿主和步骤重开。后续功能继续留在 #3。\n",
+    "comment_readback_matches": true
+  }
+]
