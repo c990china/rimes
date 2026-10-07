@@ -1,0 +1,637 @@
+{
+  "format_version": 1,
+  "timestamp_epoch_ms": 1791309429617,
+  "version_name": "1.1.0",
+  "device": {
+    "manufacturer": "Xiaomi",
+    "model": "25098PN5AC",
+    "android_release": "16",
+    "api": 36,
+    "process_architecture": "aarch64",
+    "supported_abis": [
+      "arm64-v8a"
+    ]
+  },
+  "samples_per_profile": 200,
+  "warmup_phrases_per_profile": 20,
+  "learning_enabled": false,
+  "synthetic_user_directory": true,
+  "benchmark_user_subdirectory": "engine-benchmark-user-1c2b4970-36fb-48fc-a52f-9e7945334416",
+  "rimes_not_selected_as_default_ime": true,
+  "clock": "SystemClock.elapsedRealtimeNanos",
+  "scope": "Real packaged JNI and process-wide serial EngineWorker. Private schemas. No main-thread rendering, touch dispatch, InputConnection, host text or learning-enabled latency.",
+  "cold_condition": "Run after switching away from RIMES, in a fresh instrumentation target process. Native initialization is a process singleton; do not compare a reused-process result as cold.",
+  "native_metric": "Worker execution time including JNI immutable snapshot construction.",
+  "serial_metric": "Submission through worker execution and Future.get wakeup on instrumentation thread; not UI latency.",
+  "percentile_method": "Nearest rank: sorted[ceil(p * count) - 1]; all statistics in milliseconds.",
+  "startup": {
+    "existing_resource_version_directory": true,
+    "resource_prepare_serial": {
+      "unit": "ms",
+      "count": 1,
+      "mean": 52.017188,
+      "p50": 52.017188,
+      "p95": 52.017188,
+      "max": 52.017188
+    },
+    "resource_prepare_worker": {
+      "unit": "ms",
+      "count": 1,
+      "mean": 51.388177,
+      "p50": 51.388177,
+      "p95": 51.388177,
+      "max": 51.388177
+    },
+    "library_load_and_construct_worker": {
+      "unit": "ms",
+      "count": 1,
+      "mean": 3.60474,
+      "p50": 3.60474,
+      "p95": 3.60474,
+      "max": 3.60474
+    },
+    "native_initialize_worker": {
+      "unit": "ms",
+      "count": 1,
+      "mean": 0.080052,
+      "p50": 0.080052,
+      "p95": 0.080052,
+      "max": 0.080052
+    },
+    "native_initialize_serial": {
+      "unit": "ms",
+      "count": 1,
+      "mean": 0.171614,
+      "p50": 0.171614,
+      "p95": 0.171614,
+      "max": 0.171614
+    },
+    "ready_total": {
+      "unit": "ms",
+      "count": 1,
+      "mean": 56.04052,
+      "p50": 56.04052,
+      "p95": 56.04052,
+      "max": 56.04052
+    }
+  },
+  "profiles": [
+    {
+      "name": "pinyin",
+      "schema": "rimes_pinyin_private",
+      "input": "nihao",
+      "expected": "你好",
+      "first_use": {
+        "session_create_worker": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 4.589219,
+          "p50": 4.589219,
+          "p95": 4.589219,
+          "max": 4.589219
+        },
+        "schema_select_worker": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 0.481094,
+          "p50": 0.481094,
+          "p95": 0.481094,
+          "max": 0.481094
+        },
+        "key_native_snapshot": {
+          "unit": "ms",
+          "count": 5,
+          "mean": 0.0452916,
+          "p50": 0.043281,
+          "p95": 0.06677,
+          "max": 0.06677
+        },
+        "phrase_input_serial_round_trip": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 0.929375,
+          "p50": 0.929375,
+          "p95": 0.929375,
+          "max": 0.929375
+        },
+        "candidate_select_native_snapshot": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 0.017969,
+          "p50": 0.017969,
+          "p95": 0.017969,
+          "max": 0.017969
+        }
+      },
+      "session_create_native": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 2.869343995,
+        "p50": 3.069635,
+        "p95": 3.650573,
+        "max": 7.560521
+      },
+      "session_create_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 2.957306795,
+        "p50": 3.163906,
+        "p95": 3.740052,
+        "max": 7.686302
+      },
+      "schema_select_native": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.42947397,
+        "p50": 0.48625,
+        "p95": 0.555937,
+        "max": 0.666875
+      },
+      "schema_select_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.513897085,
+        "p50": 0.56599,
+        "p95": 0.688542,
+        "max": 0.963229
+      },
+      "key_native_snapshot": {
+        "unit": "ms",
+        "count": 1000,
+        "mean": 0.09234832700000001,
+        "p50": 0.093906,
+        "p95": 0.146823,
+        "max": 0.351354
+      },
+      "key_serial_round_trip": {
+        "unit": "ms",
+        "count": 1000,
+        "mean": 0.154338472,
+        "p50": 0.152708,
+        "p95": 0.223542,
+        "max": 0.426615
+      },
+      "key_queue_wait": {
+        "unit": "ms",
+        "count": 1000,
+        "mean": 0.035100715,
+        "p50": 0.035156,
+        "p95": 0.048542,
+        "max": 0.222187
+      },
+      "phrase_input_native_snapshot": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.461741635,
+        "p50": 0.467292,
+        "p95": 0.590833,
+        "max": 0.850105
+      },
+      "phrase_input_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.7977034150000001,
+        "p50": 0.80948,
+        "p95": 1.040886,
+        "max": 1.259895
+      },
+      "candidate_select_native_snapshot": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.031492455,
+        "p50": 0.031458,
+        "p95": 0.040416,
+        "max": 0.111458
+      },
+      "candidate_select_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.092845125,
+        "p50": 0.094583,
+        "p95": 0.124115,
+        "max": 0.203854
+      },
+      "successful_commits": 200
+    },
+    {
+      "name": "natural_code",
+      "schema": "rimes_ziranma_private",
+      "input": "nihk",
+      "expected": "你好",
+      "first_use": {
+        "session_create_worker": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 6.338438,
+          "p50": 6.338438,
+          "p95": 6.338438,
+          "max": 6.338438
+        },
+        "schema_select_worker": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 1.544219,
+          "p50": 1.544219,
+          "p95": 1.544219,
+          "max": 1.544219
+        },
+        "key_native_snapshot": {
+          "unit": "ms",
+          "count": 4,
+          "mean": 0.19351575,
+          "p50": 0.128177,
+          "p95": 0.265105,
+          "max": 0.265105
+        },
+        "phrase_input_serial_round_trip": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 0.923958,
+          "p50": 0.923958,
+          "p95": 0.923958,
+          "max": 0.923958
+        },
+        "candidate_select_native_snapshot": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 0.022657,
+          "p50": 0.022657,
+          "p95": 0.022657,
+          "max": 0.022657
+        }
+      },
+      "session_create_native": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 1.18886328,
+        "p50": 0.993489,
+        "p95": 1.670782,
+        "max": 9.86401
+      },
+      "session_create_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 1.210309155,
+        "p50": 1.008594,
+        "p95": 1.741719,
+        "max": 9.907395
+      },
+      "schema_select_native": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.23114010000000001,
+        "p50": 0.183698,
+        "p95": 0.358437,
+        "max": 2.175886
+      },
+      "schema_select_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.27086328499999995,
+        "p50": 0.20073,
+        "p95": 0.44401,
+        "max": 2.509688
+      },
+      "key_native_snapshot": {
+        "unit": "ms",
+        "count": 800,
+        "mean": 0.09390045500000001,
+        "p50": 0.089375,
+        "p95": 0.151458,
+        "max": 0.195104
+      },
+      "key_serial_round_trip": {
+        "unit": "ms",
+        "count": 800,
+        "mean": 0.11793320375,
+        "p50": 0.104531,
+        "p95": 0.177135,
+        "max": 0.234063
+      },
+      "key_queue_wait": {
+        "unit": "ms",
+        "count": 800,
+        "mean": 0.0129453225,
+        "p50": 0.013489,
+        "p95": 0.014948,
+        "max": 0.039219
+      },
+      "phrase_input_native_snapshot": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.37560182000000003,
+        "p50": 0.389062,
+        "p95": 0.402707,
+        "max": 0.588438
+      },
+      "phrase_input_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.47967604999999996,
+        "p50": 0.496406,
+        "p95": 0.514375,
+        "max": 0.712708
+      },
+      "candidate_select_native_snapshot": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.010171865,
+        "p50": 0.010209,
+        "p95": 0.01073,
+        "max": 0.023333
+      },
+      "candidate_select_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.033871645,
+        "p50": 0.034583,
+        "p95": 0.042343,
+        "max": 0.056198
+      },
+      "successful_commits": 200
+    },
+    {
+      "name": "wubi",
+      "schema": "rimes_wubi_private",
+      "input": "wq",
+      "expected": "你",
+      "first_use": {
+        "session_create_worker": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 4.943646,
+          "p50": 4.943646,
+          "p95": 4.943646,
+          "max": 4.943646
+        },
+        "schema_select_worker": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 0.977813,
+          "p50": 0.977813,
+          "p95": 0.977813,
+          "max": 0.977813
+        },
+        "key_native_snapshot": {
+          "unit": "ms",
+          "count": 2,
+          "mean": 0.129922,
+          "p50": 0.11151,
+          "p95": 0.148334,
+          "max": 0.148334
+        },
+        "phrase_input_serial_round_trip": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 0.413594,
+          "p50": 0.413594,
+          "p95": 0.413594,
+          "max": 0.413594
+        },
+        "candidate_select_native_snapshot": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 0.021979,
+          "p50": 0.021979,
+          "p95": 0.021979,
+          "max": 0.021979
+        }
+      },
+      "session_create_native": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 2.7449127599999996,
+        "p50": 3.106718,
+        "p95": 3.660729,
+        "max": 16.492552
+      },
+      "session_create_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 2.8435137850000003,
+        "p50": 3.181041,
+        "p95": 3.800209,
+        "max": 16.808698
+      },
+      "schema_select_native": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.444445875,
+        "p50": 0.580364,
+        "p95": 0.65125,
+        "max": 1.05
+      },
+      "schema_select_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.537740365,
+        "p50": 0.659271,
+        "p95": 0.783646,
+        "max": 4.830572
+      },
+      "key_native_snapshot": {
+        "unit": "ms",
+        "count": 400,
+        "mean": 0.02768646,
+        "p50": 0.019427,
+        "p95": 0.045156,
+        "max": 0.17474
+      },
+      "key_serial_round_trip": {
+        "unit": "ms",
+        "count": 400,
+        "mean": 0.051514575,
+        "p50": 0.045573,
+        "p95": 0.077291,
+        "max": 0.330729
+      },
+      "key_queue_wait": {
+        "unit": "ms",
+        "count": 400,
+        "mean": 0.013474715,
+        "p50": 0.014427,
+        "p95": 0.021042,
+        "max": 0.28276
+      },
+      "phrase_input_native_snapshot": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.05537292,
+        "p50": 0.037396,
+        "p95": 0.089427,
+        "max": 0.235261
+      },
+      "phrase_input_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.10782314,
+        "p50": 0.094531,
+        "p95": 0.158593,
+        "max": 0.432968
+      },
+      "candidate_select_native_snapshot": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.00951409,
+        "p50": 0.006198,
+        "p95": 0.015469,
+        "max": 0.038177
+      },
+      "candidate_select_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.03236461,
+        "p50": 0.031875,
+        "p95": 0.046458,
+        "max": 0.088906
+      },
+      "successful_commits": 200
+    },
+    {
+      "name": "nine_key_pinyin",
+      "schema": "rimes_pinyin9_private",
+      "input": "64426",
+      "expected": "你好",
+      "first_use": {
+        "session_create_worker": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 8.252604,
+          "p50": 8.252604,
+          "p95": 8.252604,
+          "max": 8.252604
+        },
+        "schema_select_worker": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 2.122396,
+          "p50": 2.122396,
+          "p95": 2.122396,
+          "max": 2.122396
+        },
+        "key_native_snapshot": {
+          "unit": "ms",
+          "count": 5,
+          "mean": 0.0761976,
+          "p50": 0.073229,
+          "p95": 0.119791,
+          "max": 0.119791
+        },
+        "phrase_input_serial_round_trip": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 0.5275,
+          "p50": 0.5275,
+          "p95": 0.5275,
+          "max": 0.5275
+        },
+        "candidate_select_native_snapshot": {
+          "unit": "ms",
+          "count": 1,
+          "mean": 0.018177,
+          "p50": 0.018177,
+          "p95": 0.018177,
+          "max": 0.018177
+        }
+      },
+      "session_create_native": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 1.101026045,
+        "p50": 0.973073,
+        "p95": 1.751667,
+        "max": 4.287187
+      },
+      "session_create_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 1.11987289,
+        "p50": 0.988229,
+        "p95": 1.784792,
+        "max": 4.338177
+      },
+      "schema_select_native": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.136695835,
+        "p50": 0.113594,
+        "p95": 0.262813,
+        "max": 0.458125
+      },
+      "schema_select_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.15684534,
+        "p50": 0.128698,
+        "p95": 0.30224,
+        "max": 0.516146
+      },
+      "key_native_snapshot": {
+        "unit": "ms",
+        "count": 1000,
+        "mean": 0.05156938,
+        "p50": 0.049271,
+        "p95": 0.078073,
+        "max": 0.093386
+      },
+      "key_serial_round_trip": {
+        "unit": "ms",
+        "count": 1000,
+        "mean": 0.076848061,
+        "p50": 0.073802,
+        "p95": 0.103646,
+        "max": 0.43651
+      },
+      "key_queue_wait": {
+        "unit": "ms",
+        "count": 1000,
+        "mean": 0.014122547000000001,
+        "p50": 0.013594,
+        "p95": 0.014636,
+        "max": 0.360156
+      },
+      "phrase_input_native_snapshot": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.2578469,
+        "p50": 0.257343,
+        "p95": 0.284219,
+        "max": 0.337812
+      },
+      "phrase_input_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.39521176,
+        "p50": 0.392968,
+        "p95": 0.433178,
+        "max": 0.75974
+      },
+      "candidate_select_native_snapshot": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.01466978,
+        "p50": 0.014688,
+        "p95": 0.015729,
+        "max": 0.034635
+      },
+      "candidate_select_serial_round_trip": {
+        "unit": "ms",
+        "count": 200,
+        "mean": 0.038933300000000004,
+        "p50": 0.038906,
+        "p95": 0.041823,
+        "max": 0.088437
+      },
+      "successful_commits": 200
+    }
+  ],
+  "memory": {
+    "pss_before_kib": 35421,
+    "pss_after_kib": 56473,
+    "native_allocated_before_bytes": 17030400,
+    "native_allocated_after_bytes": 17153328,
+    "java_used_before_bytes": 31067744,
+    "java_used_after_bytes": 47919088,
+    "scope": "Whole instrumentation target process. No forced GC; not an IME-only memory or leak measurement."
+  }
+}

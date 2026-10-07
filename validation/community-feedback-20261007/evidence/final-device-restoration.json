@@ -1,0 +1,17 @@
+{
+  "settings_restored": true,
+  "readback": {
+    "default_input_method": "org.scholay.rimes.android.debug/org.scholay.rimes.android.RimesInputMethodService",
+    "accelerometer_rotation": "0",
+    "user_rotation": "0",
+    "font_scale": "1.0",
+    "show_ime_with_hard_keyboard": "1"
+  },
+  "owned_preference_backup_removed": true,
+  "docker_restored_to_stopped": true,
+  "production_apk_retained": "1.1.0/code13",
+  "all_original_preference_maps_equal": true,
+  "user_dictionary_semantic_check": "PASS",
+  "dictionary_entry_exports_equal": true,
+  "dictionary_byte_preservation_scope": "Existing SST data files unchanged; LevelDB logs/manifests and user.yaml rotated. Final export-only entry/code/frequency comparison passed."
+}

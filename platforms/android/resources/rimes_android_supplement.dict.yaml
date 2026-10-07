@@ -1,0 +1,9 @@
+# RIMES Android additions, Apache-2.0; authored for reported offline vocabulary gaps.
+# Source: https://linux.do/t/topic/2988062/47 and /62 (2026-10-06).
+# A manual seed weight, below common homophones; user learning remains in pinyin_simp.
+---
+name: rimes_android_supplement
+version: "2026.10.07"
+sort: by_weight
+...
+力竭	li jie	150

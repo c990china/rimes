@@ -30,7 +30,10 @@ public class KeyboardLayoutTest {
         int letters=0;
         for(KeyboardLayout.Key key:keys) {
             if(key.action==KeyboardLayout.Action.TEXT) { letters++; assertEquals(39,key.width,0.01); }
-            if(key.action==KeyboardLayout.Action.SPACE) assertTrue(key.width>=390*0.45);
+            if(key.action==KeyboardLayout.Action.SPACE) {
+                assertTrue(key.width>=390*0.33);
+                assertEquals(195,key.x+key.width/2,0.01);
+            }
         }
         assertEquals(26,letters);
         assertEquals(19.5,keys.get(10).x,0.01);
@@ -46,7 +49,7 @@ public class KeyboardLayoutTest {
         }
         assertEquals(8,digits);
     }
-    @Test public void capsMatchTheIosStandardReferenceWithoutShrinkingTouchCells() {
+    @Test public void letterCapsKeepTheIosReferenceWhileFrequentControlsRemainReachable() {
         assertEquals(206,KeyboardLayout.height(false)); assertEquals(143,KeyboardLayout.height(true));
         List<KeyboardLayout.Key> qwerty=KeyboardLayout.keys(392,false,KeyboardLayout.Mode.QWERTY);
         KeyboardLayout.Key q=qwerty.get(0),a=qwerty.get(10),z=qwerty.get(19);
@@ -55,16 +58,32 @@ public class KeyboardLayoutTest {
         assertEquals(59.7,z.visualX,0.01); assertEquals(108,z.visualY,0.01);
         KeyboardLayout.Key shift=find(qwerty,KeyboardLayout.Action.SHIFT),space=find(qwerty,KeyboardLayout.Action.SPACE);
         assertEquals(45.08,shift.visualWidth,0.01);
-        assertEquals(128.4,space.visualX,0.01); assertEquals(176.64,space.visualWidth,0.01);
+        assertEquals(131.92,space.visualX,0.01); assertEquals(128.16,space.visualWidth,0.01);
         assertEquals(162,space.visualY,0.01);
         List<KeyboardLayout.Key> nine=KeyboardLayout.keys(392,false,KeyboardLayout.Mode.NINE_KEY);
         KeyboardLayout.Key enter=find(nine,KeyboardLayout.Action.RETURN),nineSpace=find(nine,KeyboardLayout.Action.SPACE);
         assertEquals(318.4,enter.visualX,0.01); assertEquals(108,enter.visualY,0.01);
         assertEquals(73.6,enter.visualWidth,0.01); assertEquals(98,enter.visualHeight,0.01);
-        assertEquals(159.2,nineSpace.visualX,0.01); assertEquals(153.2,nineSpace.visualWidth,0.01);
+        assertEquals(79.6,nineSpace.visualX,0.01); assertEquals(232.8,nineSpace.visualWidth,0.01);
         List<KeyboardLayout.Key> wide=KeyboardLayout.keys(840,true,KeyboardLayout.Mode.NINE_KEY);
         assertEquals(32,wide.get(0).visualHeight,0.01);
         assertEquals(69,find(wide,KeyboardLayout.Action.RETURN).visualHeight,0.01);
+    }
+    @Test public void dailyControlsHaveDirectMarksCenteredSpaceAndNoBackspaceDeadZone() {
+        for(int width:new int[]{280,392,840}) for(boolean landscape:new boolean[]{false,true}) {
+            List<KeyboardLayout.Key> q=KeyboardLayout.keys(width,landscape,KeyboardLayout.Mode.QWERTY);
+            assertTrue(q.stream().anyMatch(key -> key.action==KeyboardLayout.Action.PUNCTUATION && key.text.equals(",")));
+            assertTrue(q.stream().anyMatch(key -> key.action==KeyboardLayout.Action.PUNCTUATION && key.text.equals(".")));
+            KeyboardLayout.Key delete=find(q,KeyboardLayout.Action.DELETE);
+            KeyboardLayout.Key m=q.stream().filter(key -> key.text.equals("m")).findFirst().orElseThrow();
+            assertEquals(m.x+m.width,delete.x,0.01);
+            assertTrue(delete.visualWidth>=width*0.14f-0.01);
+            assertEquals(width/2f,find(q,KeyboardLayout.Action.SPACE).visualX+find(q,KeyboardLayout.Action.SPACE).visualWidth/2,0.01);
+            List<KeyboardLayout.Key> nine=KeyboardLayout.keys(width,landscape,KeyboardLayout.Mode.NINE_KEY);
+            assertEquals(width/2f,find(nine,KeyboardLayout.Action.SPACE).x+find(nine,KeyboardLayout.Action.SPACE).width/2,0.01);
+            assertEquals(KeyboardLayout.height(landscape)/2f,find(nine,KeyboardLayout.Action.DELETE).height,0.01);
+            assertEquals(KeyboardLayout.height(landscape)/4f,find(nine,KeyboardLayout.Action.NUMBERS).y,0.01);
+        }
     }
     private static String text(List<KeyboardLayout.Key> keys) {
         StringBuilder text=new StringBuilder();

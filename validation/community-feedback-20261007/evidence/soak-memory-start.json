@@ -1,0 +1,9 @@
+{
+  "scope": "Single process snapshot during synthetic 30-minute soak; not a memory-leak verdict",
+  "moment": "start",
+  "pid": 10955,
+  "pss_kib": 85347,
+  "rss_kib": 223292,
+  "views": 202,
+  "app_contexts": 4
+}

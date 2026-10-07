@@ -1,0 +1,22 @@
+{
+  "forum_url": "https://linux.do/t/topic/2988062",
+  "initial_visible_posts": 113,
+  "captured_posts": 114,
+  "initial_missing_ids": 0,
+  "final_refresh": "2026-10-07 03:14 JST",
+  "forum_refresh_status": "public JSON HTTP 403; new posts not confirmed",
+  "github_issues_total_at_refresh": 25,
+  "github_open_at_refresh": 18,
+  "github_closed_at_refresh": 7,
+  "created_android_issues": [
+    62,
+    63,
+    64,
+    68,
+    69,
+    70,
+    72
+  ],
+  "updated_existing_issue": 3,
+  "source_commit": "cf6390a95d4d6fd7ebf6a0447578984d7198ed5f"
+}

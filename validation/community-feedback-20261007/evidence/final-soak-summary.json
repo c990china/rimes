@@ -1,0 +1,44 @@
+{
+  "duration_seconds": 1800,
+  "cycles": 622,
+  "assertions": 10995,
+  "mixed_chords": true,
+  "result": "PASS",
+  "same_pid_at_three_snapshots": true,
+  "new_process_exit_records_during_soak": 0,
+  "historical_exit_record_count": 16,
+  "exit_record_comparison": "Full ApplicationExitInfo record blocks identical before and after soak; excludes persistence-header timestamps. Earlier setup failures are retained in private historical records, not erased.",
+  "memory_snapshots": [
+    {
+      "scope": "Single process snapshot during synthetic 30-minute soak; not a memory-leak verdict",
+      "moment": "start",
+      "pid": 10955,
+      "pss_kib": 85347,
+      "rss_kib": 223292,
+      "views": 202,
+      "app_contexts": 4
+    },
+    {
+      "scope": "Single process snapshot during synthetic 30-minute soak; not a memory-leak verdict",
+      "moment": "mid",
+      "pid": 10955,
+      "pss_kib": 92553,
+      "rss_kib": 230588,
+      "views": 202,
+      "app_contexts": 4
+    },
+    {
+      "scope": "Single process snapshot during synthetic 30-minute soak; not a memory-leak verdict",
+      "moment": "end",
+      "pid": 10955,
+      "pss_kib": 90469,
+      "rss_kib": 222376,
+      "views": 202,
+      "app_contexts": 4
+    }
+  ],
+  "limitations": [
+    "No complete frame trace or memory-leak verdict",
+    "Actual password entry delegated to OEM secure keyboard; RIMES password acceptance remains pending"
+  ]
+}
