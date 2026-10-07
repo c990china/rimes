@@ -3,19 +3,26 @@ package org.scholay.rimes.android;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.MotionEvent;
+import java.util.Objects;
+import java.util.function.BooleanSupplier;
 
 /** Native short click and long-press recognition, with cancellable held backspace repeats. */
 final class DeleteRepeatTouch {
     static final long REPEAT_MILLIS=75;
     private final KeyButton button;
+    private final BooleanSupplier canRepeat;
     private final Handler main=new Handler(Looper.getMainLooper());
     private boolean active,repeating;
     private int pointer=-1;
-    private long downTime=-1,generation;
+    private long downTime=-1,excludedDownTime=-1,generation;
     private Runnable pending;
 
     DeleteRepeatTouch(KeyButton button) {
-        this.button=button;
+        this(button,() -> true);
+    }
+    DeleteRepeatTouch(KeyButton button,BooleanSupplier canRepeat) {
+        this.button=Objects.requireNonNull(button);
+        this.canRepeat=Objects.requireNonNull(canRepeat);
         button.setOnTouchListener((view,event) -> observe(event));
         button.setOnLongClickListener(view -> beginRepeating());
     }
@@ -23,6 +30,14 @@ final class DeleteRepeatTouch {
     void cancel() {
         stop();
         button.cancelPendingInputEvents();
+    }
+    /** Deny long-press ownership to every split child of this raw multi-pointer stream. */
+    boolean suppressForStream(long streamDownTime) {
+        excludedDownTime=streamDownTime;
+        // An already consumed long-click must not become a release click after cancellation.
+        boolean consumed=active && repeating;
+        if(consumed) cancel(); else stop();
+        return consumed;
     }
     private void stop() {
         generation++; active=false; repeating=false; pointer=-1; downTime=-1;
@@ -34,6 +49,9 @@ final class DeleteRepeatTouch {
             // A completed prior tap can still have a legitimate native click in the queue.
             // Only an unfinished press needs native cancellation before a new stream starts.
             if(active) cancel(); else stop();
+            // ViewGroup can translate a sibling POINTER_DOWN to DOWN with the same raw time.
+            // Leave its ordinary Button press intact, but never reacquire repeat eligibility.
+            if(event.getDownTime()==excludedDownTime) return false;
             active=true; pointer=event.getPointerId(0); downTime=event.getDownTime();
         } else if(active && downTime==event.getDownTime()) {
             if(action==MotionEvent.ACTION_MOVE) {
@@ -62,12 +80,15 @@ final class DeleteRepeatTouch {
         if(!active || !button.isPressed() || !button.isEnabled() || !button.isShown()
                 || !button.isAttachedToWindow()) return false;
         repeating=true; long ticket=generation;
-        button.performClick();
+        // A busy serial engine must not accumulate held deletes behind its current work.
+        // This gate applies only to repeats; Button still delivers every ordinary short tap.
+        if(canRepeat.getAsBoolean()) button.performClick();
         if(valid(ticket)) {
             pending=new Runnable() {
                 @Override public void run() {
                     if(!valid(ticket)) { if(generation==ticket) stop(); return; }
-                    button.performClick();
+                    // Skip this tick while busy, with no debt to replay when work completes.
+                    if(canRepeat.getAsBoolean()) button.performClick();
                     // The action can synchronously retire a target or replace this surface.
                     if(valid(ticket)) main.postDelayed(this,REPEAT_MILLIS);
                 }

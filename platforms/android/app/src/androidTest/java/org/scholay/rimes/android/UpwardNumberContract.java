@@ -21,6 +21,7 @@ final class UpwardNumberContract {
     private KeyboardSurface surface;
     private KeyButton key;
     private KeyboardLayout.Mode mode=KeyboardLayout.Mode.QWERTY;
+    private boolean chinese;
     private KeyboardTheme theme=KeyboardTheme.ALL[0];
     private final List<String> letters=new ArrayList<>(),numbers=new ArrayList<>();
     private int checks,target;
@@ -50,7 +51,7 @@ final class UpwardNumberContract {
     }
     private void idle() { instrumentation.waitForIdleSync(); }
     private void check(boolean condition,String label) { checks++; if(!condition) throw new AssertionError("Upward number: "+label); }
-    private void render() { surface.render(mode,theme); }
+    private void render() { surface.render(mode,chinese,theme); }
     private void findKey(String text) {
         onMain(() -> {
             key=null;
@@ -86,13 +87,141 @@ final class UpwardNumberContract {
         SystemClock.sleep(UpwardNumberTouch.HOLD_MILLIS+30); idle();
         onMain(() -> check(letters.size()==before[0] && numbers.size()==before[1],label));
     }
-    private int numberAccessibilityAction() {
+    private int alternateAccessibilityAction(String value) {
         AccessibilityNodeInfo info=key.createAccessibilityNodeInfo();
         try {
+            String name="输入"+(value.length()==1 && value.charAt(0)>='0' && value.charAt(0)<='9'?"数字 ":"符号 ")+value;
             for(AccessibilityNodeInfo.AccessibilityAction item:info.getActionList())
-                if(item.getLabel()!=null && "输入数字 1".contentEquals(item.getLabel())) return item.getId();
+                if(item.getLabel()!=null && name.contentEquals(item.getLabel())) return item.getId();
             return 0;
         } finally { info.recycle(); }
+    }
+    private int numberAccessibilityAction() { return alternateAccessibilityAction("1"); }
+    private void standardAccessibilityClicks() {
+        String caps="qwertyuiopasdfghjklzxcvbnm";
+        String[] digits={"1","2","3","4","5","6","7","8","9","0"};
+        String[] english={",",".","?","!",":",";","/","(",")","\"","'","<",">","-","…","@"};
+        String[] han={"，","。","？","！","：","；","、","（","）","“","”","《","》","—","…","·"};
+        for(boolean chineseMode:new boolean[]{false,true}) {
+            onMain(() -> {chinese=chineseMode;render();});idle();
+            for(int i=0;i<caps.length();i++) {
+                String letter=caps.substring(i,i+1),alternate=i<10?digits[i]:(chineseMode?han:english)[i-10];
+                findKey(letter);int[] before=counts();
+                onMain(() -> check(key.performAccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK,null),"standard AX click remains native: "+letter));idle();
+                onMain(() -> {
+                    check(letters.size()==before[0]+1 && letter.equals(letters.get(letters.size()-1)) && numbers.size()==before[1],
+                            "standard AX click emits only its original letter in "+(chineseMode?"Chinese":"English")+": "+letter);
+                    int action=alternateAccessibilityAction(alternate);
+                    check(action==R.id.key_alternate_action && action>>>24==0x7f,
+                            "named alternate uses an application resource ID outside standard action IDs");
+                    check(key.performAccessibilityAction(action,null),"only the named alternate selects literal "+alternate);
+                });idle();
+                onMain(() -> check(letters.size()==before[0]+1 && numbers.size()==before[1]+1 && alternate.equals(numbers.get(numbers.size()-1)),
+                        "alternate AX action does not emit or replace a native letter: "+letter));
+            }
+        }
+        onMain(() -> {chinese=false;render();});idle();findKey("q");
+    }
+    private void expectHint(String value) {
+        onMain(() -> {
+            AccessibilityNodeInfo info=key.createAccessibilityNodeInfo();
+            try {check(info.getHintText()!=null && info.getHintText().toString().endsWith(value) && alternateAccessibilityAction(value)!=0,
+                    "current literal alternate is discoverable by hint and named action: "+value);}
+            finally {info.recycle();}
+        });
+    }
+    private void multiPointer(int action,float firstDy) {
+        multiPointer(action,firstDy,0);
+    }
+    private void multiPointer(int action,float firstDy,float secondDy) {
+        MotionEvent.PointerProperties first=new MotionEvent.PointerProperties(),second=new MotionEvent.PointerProperties();
+        first.id=0;second.id=1;first.toolType=second.toolType=MotionEvent.TOOL_TYPE_FINGER;
+        MotionEvent.PointerCoords a=new MotionEvent.PointerCoords(),b=new MotionEvent.PointerCoords();
+        a.x=startX;a.y=startY+firstDy*density;a.pressure=b.pressure=1;
+        b.x=startX+key.getWidth();b.y=startY+secondDy*density;
+        MotionEvent event=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,2,
+                new MotionEvent.PointerProperties[]{first,second},new MotionEvent.PointerCoords[]{a,b},0,0,1,1,0,0,
+                android.view.InputDevice.SOURCE_TOUCHSCREEN,0);
+        try {root.dispatchTouchEvent(event);} finally {event.recycle();}
+    }
+    private void secondPointerUp() {
+        MotionEvent.PointerProperties property=new MotionEvent.PointerProperties();property.id=1;property.toolType=MotionEvent.TOOL_TYPE_FINGER;
+        MotionEvent.PointerCoords point=new MotionEvent.PointerCoords();point.x=startX+key.getWidth();point.y=startY;point.pressure=1;
+        MotionEvent event=MotionEvent.obtain(down,SystemClock.uptimeMillis(),MotionEvent.ACTION_UP,1,
+                new MotionEvent.PointerProperties[]{property},new MotionEvent.PointerCoords[]{point},0,0,1,1,0,0,
+                android.view.InputDevice.SOURCE_TOUCHSCREEN,0);
+        try {root.dispatchTouchEvent(event);} finally {event.recycle();}
+    }
+    private void overlappingNativeTaps() {
+        findKey("q");
+        for(boolean firstLiftsFirst:new boolean[]{false,true}) {
+            int[] before=counts();press();
+            onMain(() -> {
+                multiPointer(MotionEvent.ACTION_POINTER_DOWN|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),0);
+                if(firstLiftsFirst) {multiPointer(MotionEvent.ACTION_POINTER_UP,0);secondPointerUp();}
+                else {multiPointer(MotionEvent.ACTION_POINTER_UP|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),0);emit(MotionEvent.ACTION_UP,0,0);}
+            });idle();
+            onMain(() -> check(numbers.size()==before[1] && letters.size()==before[0]+2
+                    && letters.subList(before[0],letters.size()).equals(firstLiftsFirst?List.of("q","w"):List.of("w","q")),
+                    "overlapping native two-thumb taps both click once in their release order"));
+        }
+        int[] suppressed=counts();press();
+        onMain(() -> multiPointer(MotionEvent.ACTION_POINTER_DOWN|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),0));
+        hold();onMain(() -> {
+            multiPointer(MotionEvent.ACTION_MOVE,-24,-24);
+            multiPointer(MotionEvent.ACTION_POINTER_UP|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),-24,-24);
+        });up(0,-24);
+        onMain(() -> check(numbers.size()==suppressed[1],"neither split pointer can rearm an alternate in the same multitouch stream"));
+    }
+    private void punctuationMappings() {
+        String caps="asdfghjklzxcvbnm";
+        String[] english={",",".","?","!",":",";","/","(",")","\"","'","<",">","-","…","@"};
+        String[] han={"，","。","？","！","：","；","、","（","）","“","”","《","》","—","…","·"};
+        for(boolean chineseMode:new boolean[]{false,true}) {
+            onMain(() -> {chinese=chineseMode;render();});idle();
+            for(int i=0;i<caps.length();i++) {
+                String expected=(chineseMode?han:english)[i];findKey(caps.substring(i,i+1));expectHint(expected);
+                int[] before=counts();press();hold();onMain(() -> emit(MotionEvent.ACTION_MOVE,0,-24));up(0,-24);
+                onMain(() -> check(letters.size()==before[0] && numbers.size()==before[1]+1 && expected.equals(numbers.get(numbers.size()-1)),
+                        "iOS punctuation mapping in "+(chineseMode?"Chinese":"English")+": "+expected));
+            }
+        }
+        onMain(() -> {mode=KeyboardLayout.Mode.NINE_KEY;render();});idle();
+        for(boolean chineseMode:new boolean[]{false,true}) {
+            onMain(() -> {chinese=chineseMode;render();});idle();
+            String[] values=chineseMode?new String[]{"，","。","？","！","：","；","、","…"}:new String[]{",",".","?","!",":",";","/","…"};
+            for(int i=0;i<8;i++) {
+                String expected=values[i];findKey(String.valueOf(i+2));expectHint(expected);
+                int[] before=counts();press();hold();up(0,-24);
+                onMain(() -> check(letters.size()==before[0] && numbers.size()==before[1]+1 && expected.equals(numbers.get(numbers.size()-1)),"nine-key literal mark "+expected));
+            }
+        }
+        onMain(() -> {mode=KeyboardLayout.Mode.QWERTY;chinese=true;render();});idle();findKey("a");
+        int[] multi=counts();press();hold();onMain(() -> {
+            emit(MotionEvent.ACTION_MOVE,0,-24);
+            multiPointer(MotionEvent.ACTION_POINTER_DOWN|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),-24);
+            check(!key.isPressed(),"second raw pointer cancels held key before child event splitting");
+            multiPointer(MotionEvent.ACTION_POINTER_UP|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),-24);
+        });up(0,-24);unchanged(multi,"two-pointer stream cannot submit either a symbol or a letter");
+        int[] retired=counts();press();hold();
+        KeyButton oldKey=key;int[] oldAction={0};
+        onMain(() -> {oldAction[0]=alternateAccessibilityAction("，");chinese=false;render();});up(0,-24);
+        unchanged(retired,"language change retires an armed Chinese mark rather than retargeting it to English");
+        onMain(() -> check(!oldKey.performAccessibilityAction(oldAction[0],null),"detached Chinese AX alternate cannot use the new mode"));
+        findKey("a");expectHint(",");int[] ax=counts();
+        onMain(() -> check(key.performAccessibilityAction(alternateAccessibilityAction(","),null),"current English mark AX action is accepted"));idle();
+        onMain(() -> check(numbers.size()==ax[1]+1 && ",".equals(numbers.get(numbers.size()-1)),"named punctuation AX action inserts once"));
+        int[] shortHold=counts();press();SystemClock.sleep(UpwardNumberTouch.HOLD_MILLIS-130);up(0,-18);
+        onMain(() -> check(numbers.size()==shortHold[1],"upward release before the hold deadline never selects punctuation"));
+        for(KeyboardLayout.Mode excluded:new KeyboardLayout.Mode[]{KeyboardLayout.Mode.NUMERIC,KeyboardLayout.Mode.SYMBOLS,KeyboardLayout.Mode.EMOJI}) {
+            onMain(() -> {mode=excluded;render();});idle();findKey(excluded==KeyboardLayout.Mode.NUMERIC?"1":excluded==KeyboardLayout.Mode.SYMBOLS?"[":"😀");
+            onMain(() -> {
+                AccessibilityNodeInfo info=key.createAccessibilityNodeInfo();
+                try {check(info.getHintText()==null,"number/symbol/emoji pages never inherit letter alternates: "+excluded);}
+                finally {info.recycle();}
+            });
+        }
+        onMain(() -> {mode=KeyboardLayout.Mode.QWERTY;render();});idle();findKey("q");
     }
     private void run() {
         onMain(() -> {
@@ -164,6 +293,7 @@ final class UpwardNumberContract {
             int[] before=counts(); press(); hold(); onMain(() -> emit(MotionEvent.ACTION_MOVE,0,-24)); up(0,-24);
             onMain(() -> check(letters.size()==before[0] && numbers.size()==before[1]+1 && numbers.get(numbers.size()-1).equals(number),"top-row mapping "+letter+" → "+number));
         }
+        overlappingNativeTaps();standardAccessibilityClicks();punctuationMappings();
         int[] detached=counts(); press(); hold(); onMain(() -> {emit(MotionEvent.ACTION_MOVE,0,-24);activity.setContentView(new LinearLayout(activity));});
         unchanged(detached,"detaching an armed keyboard cannot leave an insertion callback");
     }

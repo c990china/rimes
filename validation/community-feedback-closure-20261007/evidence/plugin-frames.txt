@@ -1,0 +1,2 @@
+PASS attached plugin frame contract checks=5219 frames=235 phases=18
+REPORT files/plugin-frames.json; scope=attached-synthetic/local-software-raster, not real IME IPC/compositor

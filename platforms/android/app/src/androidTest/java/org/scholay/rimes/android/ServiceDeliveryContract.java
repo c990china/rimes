@@ -76,6 +76,7 @@ final class ServiceDeliveryContract {
                 contract.clearReadyAndRetained();
                 for(String guard:new String[]{"disabled","not-permitted","private","connection","no-target"}) contract.clearDenied(guard);
                 contract.nineKeyCompositionProjection();
+                contract.repeatDeleteAuthorization();
             } catch(Throwable error) { failure.set(error); }
         });
         if(failure.get()!=null) throw new AssertionError("Service delivery contract failed",failure.get());
@@ -518,23 +519,61 @@ final class ServiceDeliveryContract {
     private void pendingDeleteRemainsOrdered(Instrumentation instrumentation) throws Exception {
         AtomicReference<Fixture> reference=new AtomicReference<>(); RecordingEngine engine=new RecordingEngine("");
         engine.plan('n',new RimeEngine.Snapshot(true,"n","n",1,"",new String[]{"你"},new String[]{"ni"},0,0,true)); engine.plan(0xff08,RimeEngine.Snapshot.EMPTY);
-        onMain(instrumentation,() -> {
-            Fixture fixture=new Fixture(false); reference.set(fixture);
-            set(fixture.service,"engine",engine); set(fixture.service,"session",1L); set(fixture.service,"ready",true);
-            invoke(fixture.service,"type",new Class<?>[]{String.class},"n");
-            check((Integer)get(fixture.service,"pending")==1 && !((RimeEngine.Snapshot)get(fixture.service,"snapshot")).composing(),"preceding key is pending while main snapshot is still idle");
-            invoke(fixture.service,"delete",new Class<?>[0]);
-            check((Integer)get(fixture.service,"pending")==2 && SOURCE.equals(fixture.buffer.text()),"pending Delete queues behind the unseen composition instead of deleting the Buffer");
+        CountDownLatch started=new CountDownLatch(1),release=new CountDownLatch(1);
+        Future<?> barrier=EngineWorker.QUEUE.submit(() -> {
+            started.countDown();
+            try { if(!release.await(10,TimeUnit.SECONDS)) throw new AssertionError("ordered delete worker release timed out"); }
+            catch(InterruptedException error) { Thread.currentThread().interrupt(); throw new AssertionError(error); }
         });
         try {
+            check(started.await(10,TimeUnit.SECONDS),"ordered delete fixture actually blocks the serial worker");
+            onMain(instrumentation,() -> {
+                Fixture fixture=new Fixture(false); reference.set(fixture);
+                set(fixture.service,"engine",engine); set(fixture.service,"session",1L); set(fixture.service,"ready",true);
+                check((Boolean)invoke(fixture.service,"canRepeatDelete",new Class<?>[0]),"idle live target permits a held delete");
+                invoke(fixture.service,"type",new Class<?>[]{String.class},"n");
+                check((Integer)get(fixture.service,"pending")==1 && !((RimeEngine.Snapshot)get(fixture.service,"snapshot")).composing(),"preceding key is pending while main snapshot is still idle");
+                check(!(Boolean)invoke(fixture.service,"canRepeatDelete",new Class<?>[0]),"real service suppresses held repeats while a preceding key is pending");
+                invoke(fixture.service,"delete",new Class<?>[0]);
+                check((Integer)get(fixture.service,"pending")==2 && SOURCE.equals(fixture.buffer.text()),"ordinary pending Delete still queues behind unseen composition instead of deleting the Buffer");
+            });
+            SystemClock.sleep(DeleteRepeatTouch.REPEAT_MILLIS*4);
+            onMain(instrumentation,() -> {
+                Fixture fixture=reference.get();
+                check(engine.processed.isEmpty() && (Integer)get(fixture.service,"pending")==2,
+                        "controlled blockage leaves exactly the preceding key and one ordinary Delete queued");
+                check(!(Boolean)invoke(fixture.service,"canRepeatDelete",new Class<?>[0]),"repeat availability remains false across actual timer intervals while blocked");
+            });
+            release.countDown(); barrier.get(10,TimeUnit.SECONDS);
             engineIdle(instrumentation);
             onMain(instrumentation,() -> {
                 Fixture fixture=reference.get();
                 check(engine.processed.size()==2 && engine.processed.get(0)=='n' && engine.processed.get(1)==0xff08,"real serial worker processes the composing key before Backspace");
                 check(SOURCE.equals(fixture.buffer.text()) && fixture.connection.attempts==0 && fixture.connection.deletions==0,"queued Backspace edits composition without consuming confirmed source or host");
                 check((Integer)get(fixture.service,"pending")==0 && !((RimeEngine.Snapshot)get(fixture.service,"snapshot")).composing(),"ordered completion returns to idle without stale pending state");
+                check((Boolean)invoke(fixture.service,"canRepeatDelete",new Class<?>[0]),"completion reopens held-delete availability without changing ordinary order");
             });
-        } finally { onMain(instrumentation,() -> { if(reference.get()!=null) reference.get().close(); }); engineIdle(instrumentation); }
+        } finally { release.countDown(); onMain(instrumentation,() -> { if(reference.get()!=null) reference.get().close(); }); engineIdle(instrumentation); }
+    }
+
+    private void repeatDeleteAuthorization() throws Exception {
+        try(Fixture fixture=new Fixture(false)) {
+            check((Boolean)invoke(fixture.service,"canRepeatDelete",new Class<?>[0]),"valid idle target permits repeat generation");
+            char[] full=new char[BufferSession.MAX_CHARACTERS]; java.util.Arrays.fill(full,'x');
+            fixture.buffer.clear(); fixture.buffer.appendCommittedBlock(new String(full));
+            invoke(fixture.service,"type",new Class<?>[]{String.class},"保留😀");
+            check(!fixture.retained().isEmpty() && !(Boolean)invoke(fixture.service,"canRepeatDelete",new Class<?>[0]),
+                    "an actual capacity-retained result pauses repeats instead of repeatedly retrying delivery");
+            invoke(fixture.service,"delete",new Class<?>[0]);
+            check("保留😀".equals(fixture.buffer.text()) && fixture.retained().isEmpty()
+                    && (Boolean)invoke(fixture.service,"canRepeatDelete",new Class<?>[0]),
+                    "ordinary Delete still frees a block and retries the retained result once");
+            set(fixture.service,"target",null);
+            check(!(Boolean)invoke(fixture.service,"canRepeatDelete",new Class<?>[0]),"missing target forbids repeat generation");
+            set(fixture.service,"target",fixture.connection); fixture.bind(new Connection(context));
+            check(!(Boolean)invoke(fixture.service,"canRepeatDelete",new Class<?>[0]),"framework binding mismatch forbids repeat generation");
+            check(fixture.connection.attempts==0,"availability checks never insert into a retired connection");
+        }
     }
 
     private final class Fixture implements AutoCloseable {

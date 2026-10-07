@@ -1,0 +1,5 @@
+START accessibility
+START host
+START contract
+PASS CLOSURE_PUNCTUATION QWERTY/nine-key Chinese/English, composition and Buffer
+PASS input contract; assertions=59

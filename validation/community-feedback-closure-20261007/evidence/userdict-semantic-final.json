@@ -1,0 +1,130 @@
+{
+  "result": "PASS",
+  "engine": {
+    "api_version": "1.17.0",
+    "host_library_sha256": "f1e66e4b47621bbc33c2888550d4d394f41f89a099751be82b2878a7c62a8257",
+    "probe_sha256": "8cba899a1e3526f956cd22376330b1990b6f1b46d89ed857971532b529a60719",
+    "final_api_version": "1.17.0",
+    "same_probe_and_library": true,
+    "final_probe_exit_code": 0
+  },
+  "scope": "Official librime levers export_user_dict on private copies only; no sessions, keys, maintenance, or learning. Every exported phrase, code, and persisted commits frequency is compared.",
+  "canonicalization": "Nonempty noncomment exported lines byte-sorted, each followed by LF; complete code and frequency fields included.",
+  "frequency_semantics": {
+    "verified": "Third TSV column is persisted commits count for each exact phrase/code pair, as defined by librime 1.17.0 TableDb formatter.",
+    "not_separately_decoded": "Internal dynamics d/t and deleted-entry tombstones are omitted by this official export. SST byte equality and empty WAL are separate supplementary evidence; export equality alone is not a claim about those fields."
+  },
+  "dictionaries": {
+    "pinyin_simp": {
+      "before": {
+        "exists": true,
+        "entries": 91,
+        "unique_entry_texts": 91,
+        "canonical_sha256": "4a4e7790949b4e1151acab922c9aac7d958228ad95f1089aff684f0d11ee3e9b",
+        "entry_text_multiset_sha256": "2ddcf184befdd1e67ccca6da465d79987af54bd38e2cf377babd1ee0098084de",
+        "entry_code_pairs_sha256": "499f738854ee8805f015800d634602052532d763182dddb2bd08f12b89325e55",
+        "entry_code_frequency_sha256": "4a4e7790949b4e1151acab922c9aac7d958228ad95f1089aff684f0d11ee3e9b"
+      },
+      "final": {
+        "exists": true,
+        "entries": 91,
+        "unique_entry_texts": 91,
+        "canonical_sha256": "4a4e7790949b4e1151acab922c9aac7d958228ad95f1089aff684f0d11ee3e9b",
+        "entry_text_multiset_sha256": "2ddcf184befdd1e67ccca6da465d79987af54bd38e2cf377babd1ee0098084de",
+        "entry_code_pairs_sha256": "499f738854ee8805f015800d634602052532d763182dddb2bd08f12b89325e55",
+        "entry_code_frequency_sha256": "4a4e7790949b4e1151acab922c9aac7d958228ad95f1089aff684f0d11ee3e9b"
+      },
+      "comparison": {
+        "all_exported_lines_equal": true,
+        "entry_text_multiset_equal": true,
+        "entry_code_pairs_equal": true,
+        "entry_code_frequency_equal": true
+      },
+      "raw_storage_evidence": {
+        "before": {
+          "sst_data_files": 4,
+          "sst_collection_sha256": "03732d58117577de4742f5fa0218e7b2165f8c10bb02ce04936538507681172a",
+          "wal_files": 1,
+          "wal_total_bytes": 0,
+          "nonempty_wal_files": 0
+        },
+        "final": {
+          "sst_data_files": 4,
+          "sst_collection_sha256": "03732d58117577de4742f5fa0218e7b2165f8c10bb02ce04936538507681172a",
+          "wal_files": 1,
+          "wal_total_bytes": 0,
+          "nonempty_wal_files": 0
+        },
+        "sst_data_files_byte_equal": true,
+        "both_archives_have_no_nonempty_wal": true,
+        "sst_direct_byte_comparison_equal": true,
+        "sst_direct_comparison_files": 4
+      }
+    },
+    "wubi86": {
+      "before": {
+        "exists": true,
+        "entries": 1,
+        "unique_entry_texts": 1,
+        "canonical_sha256": "c4020bea342d0ed22173a39fc9eae5e6f0dc332f8c6df0a702f503e51d3e7baf",
+        "entry_text_multiset_sha256": "0c5969b08659fb731d35b1676cce3455b5a791feba593627b40ce31a747a2a1e",
+        "entry_code_pairs_sha256": "c70b819e1ffea83fd7f088a84e332685051e51bbabd687d4eca6e01bb3d942b8",
+        "entry_code_frequency_sha256": "c4020bea342d0ed22173a39fc9eae5e6f0dc332f8c6df0a702f503e51d3e7baf"
+      },
+      "final": {
+        "exists": true,
+        "entries": 1,
+        "unique_entry_texts": 1,
+        "canonical_sha256": "c4020bea342d0ed22173a39fc9eae5e6f0dc332f8c6df0a702f503e51d3e7baf",
+        "entry_text_multiset_sha256": "0c5969b08659fb731d35b1676cce3455b5a791feba593627b40ce31a747a2a1e",
+        "entry_code_pairs_sha256": "c70b819e1ffea83fd7f088a84e332685051e51bbabd687d4eca6e01bb3d942b8",
+        "entry_code_frequency_sha256": "c4020bea342d0ed22173a39fc9eae5e6f0dc332f8c6df0a702f503e51d3e7baf"
+      },
+      "comparison": {
+        "all_exported_lines_equal": true,
+        "entry_text_multiset_equal": true,
+        "entry_code_pairs_equal": true,
+        "entry_code_frequency_equal": true
+      },
+      "raw_storage_evidence": {
+        "before": {
+          "sst_data_files": 4,
+          "sst_collection_sha256": "f9a748bab518fd1915b39d72dabde15f4cbcd195173715afdb587287dfaa09e2",
+          "wal_files": 1,
+          "wal_total_bytes": 0,
+          "nonempty_wal_files": 0
+        },
+        "final": {
+          "sst_data_files": 4,
+          "sst_collection_sha256": "f9a748bab518fd1915b39d72dabde15f4cbcd195173715afdb587287dfaa09e2",
+          "wal_files": 1,
+          "wal_total_bytes": 0,
+          "nonempty_wal_files": 0
+        },
+        "sst_data_files_byte_equal": true,
+        "both_archives_have_no_nonempty_wal": true,
+        "sst_direct_byte_comparison_equal": true,
+        "sst_direct_comparison_files": 4
+      }
+    }
+  },
+  "pristine": {
+    "baseline_extracted_copy_unchanged": true,
+    "final_extracted_copy_unchanged": true,
+    "source_archives_size_mtime_permissions_unchanged": true,
+    "only_no_backup_rime_user_extracted": true,
+    "preferences_read_or_extracted": false
+  },
+  "clone_side_effect_boundary": {
+    "baseline_changed_file_count": 14,
+    "final_changed_file_count": 14,
+    "explanation": "Initialization/LevelDB recovery and export may rewrite clone metadata, manifests and internal logs. All probe changes were confined to disposable export clones and their private output/log directories; pristine copies and source archives remained unchanged.",
+    "raw_exports_fingerprints_and_logs": "Retained privately under 0700 directory; raw files 0600. Not included in safe report. No real words, preferences, keys, or private paths printed."
+  },
+  "archive_integrity": {
+    "final_archive_bytes": 28160,
+    "final_archive_512_byte_aligned": true,
+    "selected_regular_files": 21,
+    "initial_live_capture_excluded": "The initial malformed live capture was retained privately and excluded. This result uses the subsequent complete archive only; incomplete pristine/export clones remain retained for diagnostic provenance."
+  }
+}

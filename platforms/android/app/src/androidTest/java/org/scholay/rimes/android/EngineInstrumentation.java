@@ -73,6 +73,9 @@ public final class EngineInstrumentation extends Instrumentation {
             if(arguments!=null && "delivery".equals(arguments.getString("mode"))) {
                 result.putString("stream","PASS service delivery checks="+ServiceDeliveryContract.run(this)+"\n"); finish(-1,result); return;
             }
+            if(arguments!=null && "plugin-frames".equals(arguments.getString("mode"))) {
+                result.putString("stream",PluginFrameContract.run(this)); finish(-1,result); return;
+            }
             if(arguments!=null && "benchmark".equals(arguments.getString("mode"))) {
                 result.putString("stream",EngineBenchmark.run(this,arguments)); finish(-1,result); return;
             }

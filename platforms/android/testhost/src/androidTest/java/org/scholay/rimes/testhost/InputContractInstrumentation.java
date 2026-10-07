@@ -35,7 +35,14 @@ public final class InputContractInstrumentation extends Instrumentation {
             }
             removeMonitor(monitor); check(host!=null,"validation host launch within 15 seconds");
             waitForIdleSync(); report("START contract");
-            if("community".equals(arguments.getString("mode"))) communityContract();
+            // OEMs can deny an implicit show after an instrumentation process restart.
+            // Begin every contract with a real editor touch so IME ownership is observable.
+            touchHostField();
+            if("closure-fields".equals(arguments.getString("mode"))) closureFields();
+            else if("delete-video".equals(arguments.getString("mode"))) deleteVideoContract();
+            else if("closure-punctuation".equals(arguments.getString("mode"))) closurePunctuation();
+            else if("closure-thumbs".equals(arguments.getString("mode"))) closureThumbs();
+            else if("community".equals(arguments.getString("mode"))) communityContract();
             else if("chord".equals(arguments.getString("mode"))) chordContract();
             else if("touch".equals(arguments.getString("mode"))) nativeTouchContract();
             else if("password".equals(arguments.getString("mode"))) { focus(host.first); pinyin(); passwordContract(); }
@@ -683,7 +690,9 @@ public final class InputContractInstrumentation extends Instrumentation {
         SystemClock.sleep(40);
     }
     private void finalRightUp(long downTime,String label) {
-        android.graphics.Rect r=bounds(label);
+        finalRightUp(downTime,bounds(label));
+    }
+    private void finalRightUp(long downTime,android.graphics.Rect r) {
         android.view.MotionEvent.PointerProperties property=new android.view.MotionEvent.PointerProperties(); property.id=1; property.toolType=android.view.MotionEvent.TOOL_TYPE_FINGER;
         android.view.MotionEvent.PointerCoords coord=new android.view.MotionEvent.PointerCoords(); coord.x=r.exactCenterX(); coord.y=r.exactCenterY(); coord.pressure=1; coord.size=1;
         android.view.MotionEvent event=android.view.MotionEvent.obtain(downTime,SystemClock.uptimeMillis(),android.view.MotionEvent.ACTION_UP,1,new android.view.MotionEvent.PointerProperties[]{property},new android.view.MotionEvent.PointerCoords[]{coord},0,0,1,1,0,0,android.view.InputDevice.SOURCE_TOUCHSCREEN,0);
@@ -700,7 +709,7 @@ public final class InputContractInstrumentation extends Instrumentation {
     private void chooseChord(boolean split) { tap("键位布局"); tap(split?"布局 分体并击":"布局 正交并击"); tap("键位布局"); waitButton("D"); }
     /** New community feedback contract; existing modes retain their independent assertions. */
     private void communityContract() throws Exception {
-        touchHostField(); focusAny(host.first); layout("26"); pinyin();
+        focusAny(host.first); layout("26"); pinyin();
         int start=assertions;
         type("nihao"); waitButton("你好"); touch("，"); expect(host.first,"你好，","footer comma confirms current Chinese before punctuation");
         type("nihao"); waitButton("你好"); touch("。"); expect(host.first,"你好，你好。","footer period confirms current Chinese before punctuation");
@@ -752,6 +761,129 @@ public final class InputContractInstrumentation extends Instrumentation {
         chooseChord(false); communityScreenshot("orthogonal-chord");
         chooseChord(true); communityScreenshot("split-chord"); layout("26");
         report("PASS COMMUNITY real native/WebView composition, fixed punctuation, nine-key phonetics/geometry, Clear, held deletion, literal swipe, footer pixels/touches, sampled stable idle plugin pixels");
+    }
+    /** Actual EditorInfo classes, not a text field with a numeric key page. */
+    private void closureFields() throws Exception {
+        focusAny(host.first); layout("9"); pinyin();
+        try {
+            for(String selected:new String[]{"9","26"}) {
+                layout(selected);
+                for(int kind:new int[]{android.text.InputType.TYPE_CLASS_NUMBER,android.text.InputType.TYPE_CLASS_PHONE}) {
+                    runOnMainSync(() -> { host.second.setInputType(kind); host.second.setText(""); host.focus(host.second);
+                        host.getSystemService(InputMethodManager.class).restartInput(host.second); });
+                    waitButton("6"); type("64426"); expect(host.second,"64426","NUMBER/PHONE commits literal digits");
+                    java.util.concurrent.atomic.AtomicInteger composing=new java.util.concurrent.atomic.AtomicInteger();
+                    runOnMainSync(() -> composing.set(android.view.inputmethod.BaseInputConnection.getComposingSpanStart(host.second.getText())));
+                    check(composing.get()==-1,"NUMBER/PHONE has no composing span");
+                    check(find("你好",false)==null && find("九键 2 ABC",false)==null,"NUMBER/PHONE does not show Chinese candidates or phonetic keypad");
+                    check(find("Buffer 插件：翻译",false)==null,"NUMBER/PHONE hides plugin shortcuts");
+                    AccessibilityNodeInfo buffer=find("Buffer off",false);
+                    check(buffer==null || !buffer.isEnabled(),"NUMBER/PHONE denies Buffer activation");
+                    touch("Delete"); expect(host.second,"6442","NUMBER/PHONE direct delete remains usable");
+                    // Do not reselect layout when returning to a text editor.
+                    focusAny(host.first);
+                    if(selected.equals("9")) { waitButton("九键 2 ABC"); nine("64426"); expect(host.first,"ni'hao","text restores nine-key phonetic composition"); }
+                    else { waitButton("q"); type("nihao"); }
+                    tap("Space"); expect(host.first,"你好","text restores selected Chinese layout after numeric target");
+                    expectStable(host.second,"6442","retired numeric target receives no Chinese replay");
+                    report("CLOSURE_FIELDS layout="+selected+" inputType="+kind+" direct=true composing=false restored=true");
+                }
+            }
+        } finally {
+            runOnMainSync(() -> host.second.setInputType(android.text.InputType.TYPE_CLASS_TEXT));
+            focusAny(host.first); layout("26");
+        }
+        report("PASS CLOSURE_FIELDS real NUMBER/PHONE EditorInfo and preserved nine-key/QWERTY preferences");
+    }
+    /** Records actual IME presentation; only ROI statistics may enter public evidence. */
+    private void deleteVideoContract() throws Exception {
+        boolean buffered=Boolean.parseBoolean(arguments.getString("buffered","false"));
+        focusAny(host.first); layout("26"); pinyin();
+        if(buffered) { tap("中"); tap("Buffer off"); for(int block=0;block<24;block++) { tap("a"); tap("Space"); } }
+        else runOnMainSync(() -> {host.first.setText("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz");host.first.setSelection(host.first.length());});
+        SystemClock.sleep(400);
+        String[] labels={"Buffer 插件：翻译","Buffer 插件：快问","Buffer 插件：润色"};
+        for(int attempt=0;find(labels[0],false)==null && attempt<8;attempt++) {
+            for(AccessibilityWindowInfo window:getUiAutomation().getWindows()) if(scrollPluginBar(window.getRoot(),labels[0],AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD)) break;
+            SystemClock.sleep(80);
+        }
+        android.graphics.Rect roi=new android.graphics.Rect();for(String label:labels) roi.union(bounds(label));
+        android.graphics.Rect[] frames=new android.graphics.Rect[labels.length];for(int i=0;i<labels.length;i++)frames[i]=bounds(labels[i]);
+        String state=buffered?"buffer":"idle",path="/data/local/tmp/rimes-delete-"+state+".mp4";
+        org.json.JSONObject metadata=new org.json.JSONObject().put("state",state).put("roi",new org.json.JSONArray(new int[]{roi.left,roi.top,roi.width(),roi.height()}));
+        report("DELETE_VIDEO_ROI "+metadata.toString());
+        try(android.os.ParcelFileDescriptor recording=getUiAutomation().executeShellCommand("screenrecord --bit-rate 12000000 --time-limit 18 "+path)) {
+            SystemClock.sleep(1800);
+            touch("Delete"); SystemClock.sleep(600);
+            for(int i=0;i<8;i++) {touch("Delete");}
+            SystemClock.sleep(400);
+            android.graphics.Rect key=bounds("Delete");long down=communityDown(key);SystemClock.sleep(communityHoldMillis()+750);communityUp(down,key);
+            for(int i=0;i<labels.length;i++) {
+                AccessibilityNodeInfo chip=find(labels[i],false);android.graphics.Rect actual=new android.graphics.Rect();
+                check(chip!=null && chip.isVisibleToUser() && chip.isEnabled(),"recorded delete keeps visible enabled plugin");chip.getBoundsInScreen(actual);check(frames[i].equals(actual),"recorded delete keeps plugin bounds");
+            }
+            try(java.io.InputStream input=new android.os.ParcelFileDescriptor.AutoCloseInputStream(recording)) { while(input.read()!=-1) {} }
+        }
+        try(java.io.FileOutputStream output=getTargetContext().openFileOutput("delete-video-"+state+".json",0)) {output.write(metadata.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));}
+        if(buffered) expectStable(host.first,"","recorded Buffer deletion does not mutate host");
+        report("PASS DELETE_VIDEO state="+state+" actualIME=true operations=single,8-clicks,held scope=recorded-frames-only");
+    }
+    private void closurePunctuation() throws Exception {
+        focusAny(host.first); layout("26"); pinyin();
+        type("nihao"); waitButton("你好"); communitySwipeNumber("a");expect(host.first,"你好，","upward comma confirms composing Chinese");
+        communitySwipeNumber("s");expect(host.first,"你好，。","upward period uses Chinese mode");
+        focusAny(host.first); tap("Buffer off");type("nihao");waitButton("你好");communitySwipeNumber("d");
+        waitLabel("Buffer 你好？",true);expect(host.first,"","upward punctuation stays in Buffer");touch("Insert");expect(host.first,"你好？","Buffer punctuation sends exactly once");
+        focusAny(host.first);tap("中");communitySwipeNumber("a");communitySwipeNumber("s");expect(host.first,",.","upward marks use English mode");tap("英");
+        focusAny(host.first);layout("9");nine("64426");waitButton("你好");communitySwipeNumber("九键 2 ABC");expect(host.first,"你好，","nine-key alternate confirms Chinese and marks");
+        focusAny(host.first);layout("26");
+        report("PASS CLOSURE_PUNCTUATION QWERTY/nine-key Chinese/English, composition and Buffer");
+    }
+    /** Raw InputDispatcher streams exercise native split clicks on the actual ordinary IME. */
+    private void closureThumbs() {
+        focusAny(host.first); layout("26"); pinyin(); tap("中");
+        android.graphics.Rect q=bounds("q"),p=bounds("p"),delete=bounds("Delete");
+        for(boolean rightFirst:new boolean[]{false,true}) {
+            runOnMainSync(() -> host.first.setText(""));
+            SystemClock.sleep(400); // Let the host's synthetic selection update retire before DOWN.
+            long down=SystemClock.uptimeMillis();
+            inject(down,android.view.MotionEvent.ACTION_DOWN,q);
+            check(SystemClock.uptimeMillis()-down<200,"second finger arrives before alternate hold deadline");
+            inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),q,p);
+            inject(down,android.view.MotionEvent.ACTION_POINTER_UP|(rightFirst?1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT:0),q,p);
+            if(rightFirst) inject(down,android.view.MotionEvent.ACTION_UP,q); else finalRightUp(down,p);
+            expect(host.first,rightFirst?"pq":"qp","ordinary overlapping short taps each commit exactly once");
+            expectStable(host.first,rightFirst?"pq":"qp","ordinary overlapping short taps remain committed exactly once");
+        }
+        runOnMainSync(() -> host.first.setText(""));
+        SystemClock.sleep(400);
+        long down=SystemClock.uptimeMillis();
+        inject(down,android.view.MotionEvent.ACTION_DOWN,q);
+        inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),q,p);
+        SystemClock.sleep(700);
+        inject(down,android.view.MotionEvent.ACTION_POINTER_UP,q,p); finalRightUp(down,p);
+        expect(host.first,"qp","split siblings cannot reacquire an alternate after a long hold");
+        expectStable(host.first,"qp","split sibling commits remain stable after release");
+        runOnMainSync(() -> {host.first.setText("abc");host.first.setSelection(3);});
+        SystemClock.sleep(400);
+        down=SystemClock.uptimeMillis();
+        inject(down,android.view.MotionEvent.ACTION_DOWN,delete);
+        inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),delete,q);
+        SystemClock.sleep(communityHoldMillis()+200);
+        expect(host.first,"abc","two-finger stream never starts held repeats");
+        inject(down,android.view.MotionEvent.ACTION_POINTER_UP,delete,q); finalRightUp(down,q);
+        expect(host.first,"abq","overlapping ordinary Delete and letter each commit once");
+        expectStable(host.first,"abq","overlapping Delete and letter commits remain stable after release");
+        runOnMainSync(() -> host.first.setText(""));
+        SystemClock.sleep(400);
+        down=SystemClock.uptimeMillis();
+        inject(down,android.view.MotionEvent.ACTION_DOWN,q);SystemClock.sleep(400);
+        inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),q,p);
+        inject(down,android.view.MotionEvent.ACTION_POINTER_UP,q,p);finalRightUp(down,p);
+        expectStable(host.first,"","second finger cancels an armed alternate without release clicks");
+        touch("p");expect(host.first,"p","fresh ordinary stream remains usable after cancellation");
+        tap("英");
+        report("PASS CLOSURE_THUMBS actual ordinary IME split short taps, both release orders, hold suppression and armed cancellation");
     }
     private long communityDown(android.graphics.Rect rect) {
         long down=SystemClock.uptimeMillis(); inject(down,android.view.MotionEvent.ACTION_DOWN,rect); return down;

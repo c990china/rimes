@@ -1,0 +1,9 @@
+{
+  "number": 3,
+  "title": "【移动端】iOS 已上架；继续跟进 Android 输入法前端",
+  "url": "https://github.com/scholay/rimes/issues/3",
+  "state": "open",
+  "comment_url": "https://github.com/scholay/rimes/issues/3#issuecomment-6028998062",
+  "comment_body": "本轮7个具体Android bug（#62、#63、#64、#68、#69、#70、#72）已逐项实现并按维护者要求关闭。追加补齐了长按删除的引擎忙时门禁、中英上滑标点及普通双指短按回归。\n\n本地开发包 `1.1.0 / code14`，生产源码 `535964a04ff385a2ce69c153216d4542c6277021`，APK SHA-256 `f30122212eff502dd89e209edaa49ce9c1bf6c3a6810ba661f565f7ce92e0b09`。最终包30分钟混合输入通过：1802秒、622轮、10,998项断言，无重复上屏、跨框提交或新增进程退出记录。 原偏好、默认输入法及用户词库已恢复核对。代码和APK未推送或发布。\n\n本总单继续开放，保留自定义Rime/并击方案导入、额外方案及预测等后续工作。原报告设备、其他厂商/旧Android、16KB系统及RIMES实际密码输入仍未扩大验收，详细证据在本地 `validation/community-feedback-closure-20261007/report.md`。\n",
+  "comment_readback_matches": true
+}

@@ -4,16 +4,17 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 import org.scholay.rimes.core.KeyboardLayout;
 import org.scholay.rimes.core.KeyboardGeometry;
+import org.scholay.rimes.core.OrdinaryKeyAlternates;
 
 /** Measured geometry owns every key width. Candidate refreshes never rebuild the touch surface. */
 final class KeyboardSurface extends ViewGroup {
-    private static final String[] NUMBER_HINTS={"1","2","3","4","5","6","7","8","9","0"};
     interface Handler {
         String label(KeyboardLayout.Key key);
         String description(KeyboardLayout.Key key);
@@ -22,6 +23,8 @@ final class KeyboardSurface extends ViewGroup {
         void press(KeyboardLayout.Key key);
         /** Literal alternate text must bypass Rime's candidate-number shortcuts. */
         default void onAlternate(String text) {}
+        /** Held repeats skip a busy interval; ordinary taps keep their serial ordering. */
+        default boolean canRepeatDelete() { return true; }
     }
     private KeyboardLayout.Mode mode;
     private boolean chinese;
@@ -30,27 +33,26 @@ final class KeyboardSurface extends ViewGroup {
     private KeyboardTheme theme=KeyboardTheme.ALL[0];
     private int themeUiMode=-1;
     private final List<DeleteRepeatTouch> deleteRepeats=new ArrayList<>();
-    private final List<UpwardNumberTouch> numberSwipes=new ArrayList<>();
+    private final List<UpwardNumberTouch> alternates=new ArrayList<>();
     private final Paint hintPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
     KeyboardSurface(Context context,Handler handler) { super(context); this.handler=handler; setLayoutDirection(LAYOUT_DIRECTION_LTR); }
     void render(KeyboardLayout.Mode mode,KeyboardTheme theme) { render(mode,false,theme); }
     void render(KeyboardLayout.Mode mode,boolean chinese,KeyboardTheme theme) {
-        // Only number/symbol page geometry varies by language.
-        chinese&=mode==KeyboardLayout.Mode.NUMERIC || mode==KeyboardLayout.Mode.SYMBOLS;
+        // Letter-key alternates also depend on language; retire them when it changes.
         int uiMode=getResources().getConfiguration().uiMode;
         boolean rebuild=this.mode!=mode || this.chinese!=chinese;
         if(rebuild || this.theme!=theme || themeUiMode!=uiMode) cancelTouches();
         this.theme=theme;
         themeUiMode=uiMode;
         if(rebuild) {
-            this.mode=mode; this.chinese=chinese; removeAllViews(); deleteRepeats.clear(); numberSwipes.clear();
+            this.mode=mode; this.chinese=chinese; removeAllViews(); deleteRepeats.clear(); alternates.clear();
             frames=KeyboardLayout.keys(400,landscape(),mode,chinese);
             for(KeyboardLayout.Key key:frames) {
                 KeyButton button=new KeyButton(getContext());
                 button.setOnClickListener(v -> handler.press(key));
-                if(key.action==KeyboardLayout.Action.DELETE) deleteRepeats.add(new DeleteRepeatTouch(button));
-                String number=numberFor(key);
-                if(number!=null) numberSwipes.add(new UpwardNumberTouch(button,number,() -> handler.onAlternate(number),this::invalidate));
+                if(key.action==KeyboardLayout.Action.DELETE) deleteRepeats.add(new DeleteRepeatTouch(button,handler::canRepeatDelete));
+                String alternate=alternateFor(key);
+                if(alternate!=null) alternates.add(new UpwardNumberTouch(button,alternate,() -> handler.onAlternate(alternate),this::invalidate));
                 addView(button);
             }
             requestLayout();
@@ -71,7 +73,7 @@ final class KeyboardSurface extends ViewGroup {
             if(!android.text.TextUtils.equals(button.getContentDescription(),description)) button.setContentDescription(description);
             boolean enabled=handler.enabled(key);
             if(button.isEnabled() && !enabled && key.action==KeyboardLayout.Action.DELETE) cancelDeleteRepeats();
-            if(button.isEnabled() && !enabled && numberFor(key)!=null) cancelNumberSwipes();
+            if(button.isEnabled() && !enabled && alternateFor(key)!=null) cancelAlternates();
             button.setEnabled(enabled);
             button.setSelected(handler.selected(key)); button.theme(theme);
         }
@@ -80,10 +82,23 @@ final class KeyboardSurface extends ViewGroup {
         // Visibility callbacks can occur inside View's constructor, before field initialization.
         if(deleteRepeats!=null) for(DeleteRepeatTouch repeat:deleteRepeats) repeat.cancel();
     }
-    private void cancelNumberSwipes() {
-        if(numberSwipes!=null) for(UpwardNumberTouch swipe:numberSwipes) swipe.cancel();
+    private void cancelAlternates() {
+        if(alternates!=null) for(UpwardNumberTouch swipe:alternates) swipe.cancel();
     }
-    private void cancelTouches() { cancelDeleteRepeats(); cancelNumberSwipes(); }
+    private void cancelTouches() { cancelDeleteRepeats(); cancelAlternates(); }
+    @Override public boolean onInterceptTouchEvent(MotionEvent event) {
+        if(event.getActionMasked()==MotionEvent.ACTION_POINTER_DOWN) {
+            // Preserve overlapping ordinary native taps. Retire hold eligibility on
+            // every sibling before ViewGroup splits this pointer into a new DOWN.
+            // A hold which already won consumes the remainder without a release click.
+            boolean consume=false;long stream=event.getDownTime();
+            for(UpwardNumberTouch swipe:alternates) consume|=swipe.suppressForStream(stream);
+            for(DeleteRepeatTouch repeat:deleteRepeats) consume|=repeat.suppressForStream(stream);
+            if(consume) return true;
+        }
+        return super.onInterceptTouchEvent(event);
+    }
+    @Override public boolean onTouchEvent(MotionEvent event) { return true; }
     @Override public void onCancelPendingInputEvents() {
         super.onCancelPendingInputEvents(); cancelTouches();
     }
@@ -98,26 +113,24 @@ final class KeyboardSurface extends ViewGroup {
     @Override protected void onDetachedFromWindow() {
         cancelTouches(); super.onDetachedFromWindow();
     }
-    private String numberFor(KeyboardLayout.Key key) {
-        if(mode!=KeyboardLayout.Mode.QWERTY || key.action!=KeyboardLayout.Action.TEXT || key.text.length()!=1) return null;
-        int index="qwertyuiop".indexOf(key.text);
-        return index<0?null:NUMBER_HINTS[index];
+    private String alternateFor(KeyboardLayout.Key key) {
+        return key.action==KeyboardLayout.Action.TEXT?OrdinaryKeyAlternates.text(mode,key.text,chinese):null;
     }
     @Override protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        if(mode!=KeyboardLayout.Mode.QWERTY || frames==null) return;
+        if(frames==null) return;
         float density=getResources().getDisplayMetrics().density;
         KeyboardTheme.Palette palette=theme.palette(getContext()); int swipeIndex=0;
         for(int i=0;i<frames.size();i++) {
-            KeyboardLayout.Key key=frames.get(i); String number=numberFor(key);
-            if(number==null) continue;
-            View button=getChildAt(i); UpwardNumberTouch swipe=numberSwipes.get(swipeIndex++);
+            KeyboardLayout.Key key=frames.get(i); String alternate=alternateFor(key);
+            if(alternate==null) continue;
+            View button=getChildAt(i); UpwardNumberTouch swipe=alternates.get(swipeIndex++);
             hintPaint.setTextSize(Math.min(11,key.visualHeight*0.24f)*density);
             hintPaint.setColor(button.isPressed()?palette.accentInk:palette.ink);
             hintPaint.setAlpha(swipe.selected()?255:button.isEnabled()?140:56);
-            float x=(key.visualX+key.visualWidth-4)*density-hintPaint.measureText(number);
+            float x=(key.visualX+key.visualWidth-4)*density-hintPaint.measureText(alternate);
             float baseline=(key.visualY+2)*density-hintPaint.ascent();
-            canvas.drawText(number,x,baseline,hintPaint);
+            canvas.drawText(alternate,x,baseline,hintPaint);
         }
     }
     private boolean landscape() { return getResources().getConfiguration().orientation==Configuration.ORIENTATION_LANDSCAPE; }

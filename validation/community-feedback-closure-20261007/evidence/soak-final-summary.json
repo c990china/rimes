@@ -1,0 +1,41 @@
+{
+  "result": "PASS",
+  "duration_seconds": 1802,
+  "cycles": 622,
+  "assertions": 10998,
+  "mixed_chords": true,
+  "same_pid_at_three_snapshots": true,
+  "exit_records_identical": true,
+  "historical_exit_record_count": 16,
+  "new_process_exit_records_during_soak": 0,
+  "memory_snapshots": [
+    {
+      "moment": "start",
+      "pid": "8520",
+      "scope": "Whole process snapshot during synthetic soak; not a memory-leak verdict",
+      "pss_kib": 122988,
+      "views": 202,
+      "app_contexts": 4
+    },
+    {
+      "moment": "mid",
+      "pid": "8520",
+      "scope": "Whole process snapshot during synthetic soak; not a memory-leak verdict",
+      "pss_kib": 127869,
+      "views": 202,
+      "app_contexts": 4
+    },
+    {
+      "moment": "end",
+      "pid": "8520",
+      "scope": "Whole process snapshot during synthetic soak; not a memory-leak verdict",
+      "pss_kib": 125730,
+      "views": 202,
+      "app_contexts": 4
+    }
+  ],
+  "limitations": [
+    "Synthetic native-host soak; not every application, compositor frame or a memory-leak diagnosis",
+    "RIMES actual password input delegated to OEM secure keyboard remains unverified"
+  ]
+}
