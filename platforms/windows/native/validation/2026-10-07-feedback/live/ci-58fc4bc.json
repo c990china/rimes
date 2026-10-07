@@ -1,0 +1,31 @@
+{
+  "queriedUtc": "2026-10-07T00:45:11.110381+00:00",
+  "expectedCommit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+  "allRunsMatchCommit": true,
+  "runs": [
+    {
+      "id": 37552982859,
+      "name": "CI",
+      "html_url": "https://github.com/scholay/rimes/actions/runs/37552982859",
+      "head_sha": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+      "head_branch": "codex/windows-feedback-20261007",
+      "status": "completed",
+      "conclusion": "success",
+      "event": "pull_request",
+      "created_at": "2026-10-07T00:38:01Z",
+      "updated_at": "2026-10-07T00:44:06Z"
+    },
+    {
+      "id": 37552982866,
+      "name": "Windows IME",
+      "html_url": "https://github.com/scholay/rimes/actions/runs/37552982866",
+      "head_sha": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+      "head_branch": "codex/windows-feedback-20261007",
+      "status": "completed",
+      "conclusion": "success",
+      "event": "pull_request",
+      "created_at": "2026-10-07T00:38:01Z",
+      "updated_at": "2026-10-07T00:40:58Z"
+    }
+  ]
+}

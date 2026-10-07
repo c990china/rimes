@@ -1,0 +1,25 @@
+{
+  "capturedUtc": "2026-10-07T00:38:14.4176699Z",
+  "computer": "YOUNG-HOME",
+  "observation": "Read-only process metadata after operator launched ms-settings:appsfeatures and observed no rendered window",
+  "processes": [
+    {
+      "name": "SystemSettings",
+      "pid": 21184,
+      "session": 3,
+      "mainWindowTitle": "",
+      "mainWindowHandle": 0
+    }
+  ],
+  "processCount": 1,
+  "desktopUiInspected": false,
+  "commandExitCode": 0,
+  "interpretation": "Historical metadata taken during delayed Settings startup. UWP process MainWindowHandle=0 alone does not establish rendering state or cause. The desktop operator subsequently confirmed the modern Installed Apps window rendered and passed the RIMES discovery check.",
+  "subsequentDesktopObservation": {
+    "rendered": true,
+    "rimesDiscoveryPassed": true,
+    "evidence": "installed-apps.jpg",
+    "observedBy": "parent desktop operator",
+    "processMetadataProvesRendering": false
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "sourceReports": "%TASK_ROOT%/candidate-58fc4bc",
+  "normalizedEvidence": "%VALIDATION_ROOT%/live",
+  "checks": [
+    {
+      "file": "live-install-preview2-result.json",
+      "rawSHA256": "b1ee1573bb95e72158ba714389bf566c85ddbc5dcc97b4e28e3d10adb2da9ba7",
+      "normalizedSHA256": "9f9821971bba887ef727a46581afbfda1c5ff7d7fee8d749dfebe76a547404fc",
+      "normalization": "UTF-8 without BOM; CRLF to LF; user/task paths replaced with documented placeholders; JSON formatted",
+      "rawSourceFile": "live-install-preview2-result.json",
+      "rawSourceSHA256Verified": true
+    },
+    {
+      "file": "live-install-preview2.txt",
+      "rawSHA256": "592424ca5297a1a7de907b13ce0df3b87fc212f174ded6c90e5ddd440e6b98ba",
+      "normalizedSHA256": "9ae0843b5f144d9b06e0b048ad138775bb8a394036fd9f82dd7522fa838d85b2",
+      "normalization": "UTF-8 without BOM; CRLF to LF; user/task paths replaced with documented placeholders; log exported as .txt",
+      "rawSourceFile": "live-install-preview2.log",
+      "rawSourceSHA256Verified": true
+    },
+    {
+      "file": "live-verify-preview2.txt",
+      "rawSHA256": "08692ab1de3bbccd40dcf633bba1f3bdfb4a1a8626d539fd3942192e80f5f540",
+      "normalizedSHA256": "12b78412795e2e44e183cb35d414cdc2cc669139f9817cdd0fb27aa8bbabd418",
+      "normalization": "UTF-8 without BOM; CRLF to LF; user/task paths replaced with documented placeholders; log exported as .txt; trailing spaces/tabs removed; exactly one final LF",
+      "rawSourceFile": "live-verify-preview2.log",
+      "rawSourceSHA256Verified": true
+    }
+  ],
+  "installationPerformedByThisAgent": false,
+  "hashSemantics": {
+    "rawSHA256": "Original source report bytes before encoding normalization, path redaction or extension change; rechecked against task-local raw report and retained unchanged.",
+    "normalizedSHA256": "Current reviewable evidence bytes named by file, after normalization/redaction; not a package or executable SHA."
+  },
+  "pathPlaceholders": {
+    "%TASK_ROOT%": "Isolated task artifact directory on the originating machine; local download and Young task roots are distinct locations.",
+    "%VALIDATION_ROOT%": "Repository platforms/windows/native/validation/2026-10-07-feedback directory.",
+    "%SOURCE_ROOT%": "Source checkout root.",
+    "%USERPROFILE%": "User home directory on the originating operating system.",
+    "%APPDATA%": "Windows roaming application data directory.",
+    "%LOCALAPPDATA%": "Windows local application data directory."
+  }
+}

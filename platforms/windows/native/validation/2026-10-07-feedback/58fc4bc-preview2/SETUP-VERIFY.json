@@ -1,0 +1,10 @@
+{
+  "verified": true,
+  "installed": false,
+  "version": "1.1.0-preview.2",
+  "commit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+  "signing": "unsigned",
+  "files": 109,
+  "setupSHA256": "b961abbd1361ae15b6ac40813778c9a8194172aaf656d1d32f063afb2d9a29f8",
+  "payloadSHA256": "e83f8c28061d6503dd05cb99915c319450dfd58febb80a59dbab1d21d3b31b64"
+}

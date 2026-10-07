@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "commit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+  "sourceSnapshot": "3f575ebc9f2b5604c91c5b9edeabaf9fd7d87abdffc585e742167648ed67297d",
+  "version": "1.1.0-preview.2",
+  "internalCandidate": true,
+  "installed": false,
+  "publicRelease": false,
+  "startedAt": "2026-10-07T08:40:12.1752910+08:00",
+  "checks": [
+    "source-manifest",
+    "identity-and-metadata-x64",
+    "identity-and-metadata-x86",
+    "verified-existing-runtime-package",
+    "package-stage-zip-and-setup",
+    "setup-verification-only-no-install"
+  ],
+  "package": {
+    "Archive": "%TASK_ROOT%\\candidate-58fc4bc\\RIMES-Windows-1.1.0-preview.2.zip",
+    "SHA256": "e83f8c28061d6503dd05cb99915c319450dfd58febb80a59dbab1d21d3b31b64",
+    "Commit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+    "Version": "1.1.0-preview.2",
+    "Signing": "unsigned",
+    "Staging": "%TASK_ROOT%\\candidate-58fc4bc\\RIMES-Windows-1.1.0-preview.2",
+    "Setup": {
+      "Path": "%TASK_ROOT%\\candidate-58fc4bc\\RIMES-Windows-1.1.0-preview.2-Setup.exe",
+      "SHA256": "b961abbd1361ae15b6ac40813778c9a8194172aaf656d1d32f063afb2d9a29f8",
+      "PayloadSHA256": "e83f8c28061d6503dd05cb99915c319450dfd58febb80a59dbab1d21d3b31b64",
+      "Version": "1.1.0-preview.2",
+      "Signing": "unsigned",
+      "Installs": "x64 Broker and x64/x86 TSF; VC++ runtimes included"
+    }
+  },
+  "assets": [
+    {
+      "name": "RIMES-Windows-1.1.0-preview.2.zip",
+      "bytes": 49021827,
+      "sha256": "e83f8c28061d6503dd05cb99915c319450dfd58febb80a59dbab1d21d3b31b64"
+    },
+    {
+      "name": "RIMES-Windows-1.1.0-preview.2-Setup.exe",
+      "bytes": 49143296,
+      "sha256": "b961abbd1361ae15b6ac40813778c9a8194172aaf656d1d32f063afb2d9a29f8"
+    }
+  ],
+  "output": "%TASK_ROOT%\\candidate-58fc4bc",
+  "finishedAt": "2026-10-07T08:40:26.0600803+08:00"
+}

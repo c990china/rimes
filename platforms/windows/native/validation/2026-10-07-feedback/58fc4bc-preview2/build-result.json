@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "commit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+  "startedAt": "2026-10-07T08:35:35.8603783+08:00",
+  "phases": [
+    "source-manifest",
+    "build-and-ctest-x64",
+    "build-and-ctest-x86",
+    "product-x64",
+    "e2e-x64",
+    "product-x86",
+    "e2e-x86"
+  ],
+  "sourceSnapshot": "3f575ebc9f2b5604c91c5b9edeabaf9fd7d87abdffc585e742167648ed67297d",
+  "installerChecks": 19,
+  "finishedAt": "2026-10-07T08:39:43.2163738+08:00"
+}

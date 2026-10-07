@@ -1,0 +1,46 @@
+{
+  "observedAt": "2026-10-07T08:58:31.1152328+08:00",
+  "readOnly": true,
+  "expectedCommit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+  "installedCommit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+  "installedVersion": "1.1.0-preview.2",
+  "active": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.2-58fc4bcf8319-ecab591174ef",
+  "requiresSignOut": true,
+  "manifestCommit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+  "brokerInstanceCount": 1,
+  "brokers": [
+    {
+      "processId": 66352,
+      "sessionId": 3,
+      "path": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.2-58fc4bcf8319-ecab591174ef\\x64\\RimesBroker.exe",
+      "fileSHA256": "af2b439ea677fd7480cf7088598e2942a8ca012821a84e9e23bc9bc3f0a53b60",
+      "hashScope": "current file bytes at the executable path",
+      "matchesActiveX64Broker": true
+    }
+  ],
+  "testHosts": [
+    {
+      "processId": 5068,
+      "sessionId": 3,
+      "path": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.2-58fc4bcf8319-ecab591174ef\\x64\\RimesTsfTestHost.exe",
+      "fileSHA256": "e37d7f5386e099071cb5775caef1ba1991cf3089f5accbfa57effc5d9557bb04",
+      "hashScope": "current file bytes at the executable path",
+      "matchesActiveX64Host": true,
+      "loadedTsfModules": [
+        {
+          "module": "RimesTsf.dll",
+          "path": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.2-58fc4bcf8319-ecab591174ef\\x64\\RimesTsf.dll",
+          "fileSHA256": "f10016168fb411a6efee488f466679ed115b143891513eaaee3d084ddb3167d1",
+          "hashScope": "current file bytes at the loaded module path",
+          "matchesActiveX64Tsf": true
+        }
+      ]
+    }
+  ],
+  "unavailableProcesses": [],
+  "verified": true,
+  "windowOrInputContentRead": false,
+  "processesStartedOrStopped": false,
+  "evidenceScope": "Process IDs/session IDs, installed executable/module paths and on-disk SHA256 only; no window, input, webpage, command line, or credential contents.",
+  "rawReportSHA256": "8f1fcbbcee5f28cd85cb9688b8e37de51e8ffe73bb003f508440264160e22cfe"
+}

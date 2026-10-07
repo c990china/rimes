@@ -1,0 +1,160 @@
+{
+  "formatVersion": 1,
+  "commit": "58fc4bcf8319c8a640037267b6af43e52f79ca5b",
+  "preparedUtc": "2026-10-07T01:02:16.949965+00:00",
+  "scope": "Reviewable evidence exports only; no source, package, binary, installation or desktop change.",
+  "priorEvidenceManifestSHA256": "4f7fd4dd19c5c67f4c781632c11cbc5c433db6cafa6622a6275071d293e5951d",
+  "hashSemantics": {
+    "priorEvidenceSHA256": "Existing exported evidence bytes immediately before this privacy cleanup; not necessarily the original raw report bytes.",
+    "normalizedEvidenceSHA256": "Current exported evidence bytes after documented path redaction, UTF-8/LF normalization and optional .log to .txt extension change.",
+    "artifactHashes": "Original ZIP/EXE/PACKAGE and downloaded raw-report hashes within build/package records remain unchanged; they do not describe sanitized exports.",
+    "SHA256SUMS": "Current reviewable files in this directory; excludes SHA256SUMS itself to avoid recursion."
+  },
+  "pathPlaceholders": {
+    "%TASK_ROOT%": "Isolated task artifact directory on the originating machine; local download and Young task roots are distinct locations.",
+    "%VALIDATION_ROOT%": "Repository platforms/windows/native/validation/2026-10-07-feedback directory.",
+    "%SOURCE_ROOT%": "Source checkout root.",
+    "%USERPROFILE%": "User home directory on the originating operating system.",
+    "%APPDATA%": "Windows roaming application data directory.",
+    "%LOCALAPPDATA%": "Windows local application data directory."
+  },
+  "files": [
+    {
+      "priorEvidenceFile": "BUILD-INFO.json",
+      "evidenceFile": "BUILD-INFO.json",
+      "priorEvidenceSHA256": "86adcb2903c69c79ee95b1c1d8c2cf3a5880b64609e46b5bf46994294cf16aea",
+      "normalizedEvidenceSHA256": "5233a88fc3b65d466eac54b63138d102f4e82989beaa2feffe5b158f1ddfd0b1",
+      "renamed": false,
+      "contentChanged": true
+    },
+    {
+      "priorEvidenceFile": "installer-sandbox.json",
+      "evidenceFile": "installer-sandbox.json",
+      "priorEvidenceSHA256": "8606c02037d8d301ba6d6364a573b49740de99fca33c5efc56dd5b0b427b103d",
+      "normalizedEvidenceSHA256": "7d6f020c25bd2ed4f0cd8e42bb7c721133cb61bb380fd694ce2e9f54d1cb6ce6",
+      "renamed": false,
+      "contentChanged": true
+    },
+    {
+      "priorEvidenceFile": "settings-runtime-diagnostic.json",
+      "evidenceFile": "settings-runtime-diagnostic.json",
+      "priorEvidenceSHA256": "b8d8eeb9318b31b7e4abcc5ca66d403b7888538879147fbce66cbc9529817938",
+      "normalizedEvidenceSHA256": "b8d8eeb9318b31b7e4abcc5ca66d403b7888538879147fbce66cbc9529817938",
+      "renamed": false,
+      "contentChanged": false
+    },
+    {
+      "priorEvidenceFile": "product-data.log",
+      "evidenceFile": "product-data.txt",
+      "priorEvidenceSHA256": "b774dd17966f6904557d40d14018bbee6487a7bdafe0a8d88f3b109d53ef656a",
+      "normalizedEvidenceSHA256": "5c96768f86849c26f083e12c288da710a27defb9b13473c3c591aec237a2a549",
+      "renamed": true,
+      "contentChanged": true
+    },
+    {
+      "priorEvidenceFile": "source-identity.json",
+      "evidenceFile": "source-identity.json",
+      "priorEvidenceSHA256": "d49dbd01044b14ed1a8b48910502cb8faafa6a188451ee0673b061b9ea212d7b",
+      "normalizedEvidenceSHA256": "d49dbd01044b14ed1a8b48910502cb8faafa6a188451ee0673b061b9ea212d7b",
+      "renamed": false,
+      "contentChanged": false
+    },
+    {
+      "priorEvidenceFile": "local-artifact-verification.json",
+      "evidenceFile": "local-artifact-verification.json",
+      "priorEvidenceSHA256": "52ffd701c27fc11b30ad31c5a32e38fb1685afe5f709dc5ec31f2924f8fcb56e",
+      "normalizedEvidenceSHA256": "b830e20610cfa2e99d472cb043e6724c9db4904e6ebb7a7d6c51375bcc6a2209",
+      "renamed": false,
+      "contentChanged": true
+    },
+    {
+      "priorEvidenceFile": "ctest-x64.xml",
+      "evidenceFile": "ctest-x64.xml",
+      "priorEvidenceSHA256": "6a4655cb3a08e136b67309a06771692672f82426ec7b9ff58f524d171fed4bd6",
+      "normalizedEvidenceSHA256": "bc715fbd03307308a83e58f8c9fd05021ecefb07b673fcd276e3fb3a7959c297",
+      "renamed": false,
+      "contentChanged": true
+    },
+    {
+      "priorEvidenceFile": "setup-result.log",
+      "evidenceFile": "setup-result.txt",
+      "priorEvidenceSHA256": "ef26156e7b7d926952cd8a336da79da984354ce68d4a2ca212ba1a4947b46b73",
+      "normalizedEvidenceSHA256": "65b4e1fefc6c5dde8f3e3ec9c3423dd9457b63eef6ce06f7ab1ac61115e43e2d",
+      "renamed": true,
+      "contentChanged": true
+    },
+    {
+      "priorEvidenceFile": "settings-old-close-guard.log",
+      "evidenceFile": "settings-old-close-guard.txt",
+      "priorEvidenceSHA256": "e69c764cca0984f82d44f0e41fc36fa3813fe3e1190670b8d5235f3bfedd7b16",
+      "normalizedEvidenceSHA256": "4a0ebd8ba2aa3f4302d37d84752458dbd4cff144d72d5585654f5705ccbf0261",
+      "renamed": true,
+      "contentChanged": true,
+      "postNormalization": "Trailing spaces/tabs removed; exactly one final LF."
+    },
+    {
+      "priorEvidenceFile": "package-result.json",
+      "evidenceFile": "package-result.json",
+      "priorEvidenceSHA256": "18d2ed26f0e07c413412e3dfa1300b88e68e5592beb17bca489341d0063d38c1",
+      "normalizedEvidenceSHA256": "38d2f85997e71166fc60ca2a852c0b281f5132d7db034ecab0be9c4071bf543c",
+      "renamed": false,
+      "contentChanged": true
+    },
+    {
+      "priorEvidenceFile": "ctest-x86.xml",
+      "evidenceFile": "ctest-x86.xml",
+      "priorEvidenceSHA256": "6bd8056cfd6f6906c16b720f397914ccc037fd9b5939d672b9ded6621bac36da",
+      "normalizedEvidenceSHA256": "7f8b8de58e72c59fe8a06de0f78dd3178e86e336aab1db9a401b071d96dca568",
+      "renamed": false,
+      "contentChanged": true
+    },
+    {
+      "priorEvidenceFile": "SETUP-VERIFY.json",
+      "evidenceFile": "SETUP-VERIFY.json",
+      "priorEvidenceSHA256": "2f2e721045fc384d871c87a3de30db0dc8a82c7cb8a460de3d8af14fe9aec7e7",
+      "normalizedEvidenceSHA256": "2f2e721045fc384d871c87a3de30db0dc8a82c7cb8a460de3d8af14fe9aec7e7",
+      "renamed": false,
+      "contentChanged": false
+    },
+    {
+      "priorEvidenceFile": "settings-restored.log",
+      "evidenceFile": "settings-restored.txt",
+      "priorEvidenceSHA256": "f5b156d4759c4d594ce3b59597b3246c28ac12704cc4241a264d6ad659b9ee9f",
+      "normalizedEvidenceSHA256": "087434de5261407bd292340f9ce61946c8b3c6d75b598c94d92e0638a7e6713a",
+      "renamed": true,
+      "contentChanged": true
+    },
+    {
+      "priorEvidenceFile": "e2e-x64.json",
+      "evidenceFile": "e2e-x64.json",
+      "priorEvidenceSHA256": "e83ee1ebe7bea1889e250e31d0d38d402cce094609aa31a45b047f303d730e52",
+      "normalizedEvidenceSHA256": "2e76d70d61e76744734626a8d852acda6f07c4bc0ea7c367aed28bb2ed21ae03",
+      "renamed": false,
+      "contentChanged": true
+    },
+    {
+      "priorEvidenceFile": "e2e-x86.json",
+      "evidenceFile": "e2e-x86.json",
+      "priorEvidenceSHA256": "7b5b9f9ecee5a5446d976ec428135d3271ebcde38043772f7a216fb3290c3d69",
+      "normalizedEvidenceSHA256": "6541dfaf861dc078f7222174252e317b034ef082d38dc8f06f96868e58c2239d",
+      "renamed": false,
+      "contentChanged": true
+    },
+    {
+      "priorEvidenceFile": "settings-fixed.log",
+      "evidenceFile": "settings-fixed.txt",
+      "priorEvidenceSHA256": "f5b156d4759c4d594ce3b59597b3246c28ac12704cc4241a264d6ad659b9ee9f",
+      "normalizedEvidenceSHA256": "087434de5261407bd292340f9ce61946c8b3c6d75b598c94d92e0638a7e6713a",
+      "renamed": true,
+      "contentChanged": true
+    },
+    {
+      "priorEvidenceFile": "build-result.json",
+      "evidenceFile": "build-result.json",
+      "priorEvidenceSHA256": "cb6aa6cd9994756739aff033d0b7d4af3603f81245e3bc94901e481984823f75",
+      "normalizedEvidenceSHA256": "cb6aa6cd9994756739aff033d0b7d4af3603f81245e3bc94901e481984823f75",
+      "renamed": false,
+      "contentChanged": false
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "capturedUtc": "2026-10-07T00:37:30.4896428Z",
+  "computer": "YOUNG-HOME",
+  "observation": "Read-only identity and installed Verify after interactive uninstall Cancel",
+  "sourceCommit": "f5057d3ba467ec9a04a67e5e0664b1d8c5224741",
+  "version": "1.1.0-preview.1",
+  "activeState": {
+    "active": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.1-f5057d3ba467-eb634b2cb3d5",
+    "previous": "C:\\Program Files\\RIMES\\versions\\1.1.0-f9ec959d08b6-413df6534c5c",
+    "commit": "f5057d3ba467ec9a04a67e5e0664b1d8c5224741",
+    "requiresSignOut": true
+  },
+  "installedVerify": {
+    "passed": true,
+    "failure": null,
+    "version": "1.1.0-preview.1",
+    "commit": "f5057d3ba467ec9a04a67e5e0664b1d8c5224741",
+    "requiresSignOut": true
+  },
+  "activeFiles": [
+    {
+      "path": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.1-f5057d3ba467-eb634b2cb3d5\\x64\\RimesBroker.exe",
+      "bytes": 834048,
+      "sha256": "94110bcfb6442706bb85f42ca956621fd60cb7c137686ff39b0cf69d99c375fd",
+      "fileVersion": "1.1.0.0"
+    },
+    {
+      "path": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.1-f5057d3ba467-eb634b2cb3d5\\x64\\RimesTsf.dll",
+      "bytes": 388096,
+      "sha256": "600399c8092958800a74aceeebc75e4ff67b20ac781ffb3a05365e7ef2dd3ad1",
+      "fileVersion": "1.1.0.0"
+    },
+    {
+      "path": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.1-f5057d3ba467-eb634b2cb3d5\\x86\\RimesTsf.dll",
+      "bytes": 347648,
+      "sha256": "0242853405faa7b24ab80bdc74f2d7174f8c5232d4190a5b658e29ed37411290",
+      "fileVersion": "1.1.0.0"
+    }
+  ],
+  "brokerProcessCount": 1,
+  "brokers": [
+    {
+      "pid": 29020,
+      "session": 3,
+      "binary": {
+        "path": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.1-f5057d3ba467-eb634b2cb3d5\\x64\\RimesBroker.exe",
+        "bytes": 834048,
+        "sha256": "94110bcfb6442706bb85f42ca956621fd60cb7c137686ff39b0cf69d99c375fd",
+        "fileVersion": "1.1.0.0"
+      },
+      "matchesActive": true
+    }
+  ],
+  "testHostCount": 0,
+  "testHosts": [],
+  "autostart": {
+    "command": "\"C:\\Program Files\\RIMES\\versions\\1.1.0-preview.1-f5057d3ba467-eb634b2cb3d5\\x64\\RimesBroker.exe\"",
+    "matchesActive": true
+  },
+  "installedApp": {
+    "displayName": "RIMES",
+    "displayVersion": "1.1.0-preview.1",
+    "installLocation": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.1-f5057d3ba467-eb634b2cb3d5",
+    "uninstallDirectory": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.1-f5057d3ba467-eb634b2cb3d5",
+    "uninstallCommand": "\"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -NoProfile -STA -WindowStyle Hidden -ExecutionPolicy Bypass -File \"C:\\Program Files\\RIMES\\versions\\1.1.0-preview.1-f5057d3ba467-eb634b2cb3d5\\Uninstall-App.ps1\" -InstallRoot \"C:\\Program Files\\RIMES\""
+  },
+  "settingsShortcut": {
+    "path": "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\RIMES\\RIMES Settings.lnk",
+    "target": "C:\\Program Files\\RIMES\\versions\\1.1.0-preview.1-f5057d3ba467-eb634b2cb3d5\\x64\\RimesBroker.exe",
+    "arguments": "--settings",
+    "matchesActive": true
+  },
+  "userDataPresent": true,
+  "boundaries": {
+    "actualUninstallPerformed": false,
+    "desktopUiObservedByThisScript": false,
+    "rebootTested": false,
+    "dayLongSoakTested": false,
+    "brokerServingLaunched": false,
+    "diagnosticExecutablesInvoked": "Installed Verify only: registrar verify and Broker --help/--print-paths"
+  },
+  "localCandidateComparison": {
+    "evidenceFile": "../BUILD-INFO.json",
+    "commit": "f5057d3ba467ec9a04a67e5e0664b1d8c5224741",
+    "version": "1.1.0-preview.1",
+    "binaryChecks": [
+      {
+        "relativePath": "x64/RimesBroker.exe",
+        "matchesCandidateBuildInfo": true
+      },
+      {
+        "relativePath": "x64/RimesTsf.dll",
+        "matchesCandidateBuildInfo": true
+      },
+      {
+        "relativePath": "x86/RimesTsf.dll",
+        "matchesCandidateBuildInfo": true
+      }
+    ],
+    "allMatched": true
+  },
+  "commandExitCode": 0
+}
