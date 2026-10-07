@@ -130,16 +130,48 @@ final class UpwardNumberContract {
             finally {info.recycle();}
         });
     }
-    private void multiPointer(int action) {
+    private void multiPointer(int action,float firstDy) {
+        multiPointer(action,firstDy,0);
+    }
+    private void multiPointer(int action,float firstDy,float secondDy) {
         MotionEvent.PointerProperties first=new MotionEvent.PointerProperties(),second=new MotionEvent.PointerProperties();
         first.id=0;second.id=1;first.toolType=second.toolType=MotionEvent.TOOL_TYPE_FINGER;
         MotionEvent.PointerCoords a=new MotionEvent.PointerCoords(),b=new MotionEvent.PointerCoords();
-        a.x=startX;a.y=startY-24*density;a.pressure=b.pressure=1;
-        b.x=startX+key.getWidth();b.y=startY;
+        a.x=startX;a.y=startY+firstDy*density;a.pressure=b.pressure=1;
+        b.x=startX+key.getWidth();b.y=startY+secondDy*density;
         MotionEvent event=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,2,
                 new MotionEvent.PointerProperties[]{first,second},new MotionEvent.PointerCoords[]{a,b},0,0,1,1,0,0,
                 android.view.InputDevice.SOURCE_TOUCHSCREEN,0);
         try {root.dispatchTouchEvent(event);} finally {event.recycle();}
+    }
+    private void secondPointerUp() {
+        MotionEvent.PointerProperties property=new MotionEvent.PointerProperties();property.id=1;property.toolType=MotionEvent.TOOL_TYPE_FINGER;
+        MotionEvent.PointerCoords point=new MotionEvent.PointerCoords();point.x=startX+key.getWidth();point.y=startY;point.pressure=1;
+        MotionEvent event=MotionEvent.obtain(down,SystemClock.uptimeMillis(),MotionEvent.ACTION_UP,1,
+                new MotionEvent.PointerProperties[]{property},new MotionEvent.PointerCoords[]{point},0,0,1,1,0,0,
+                android.view.InputDevice.SOURCE_TOUCHSCREEN,0);
+        try {root.dispatchTouchEvent(event);} finally {event.recycle();}
+    }
+    private void overlappingNativeTaps() {
+        findKey("q");
+        for(boolean firstLiftsFirst:new boolean[]{false,true}) {
+            int[] before=counts();press();
+            onMain(() -> {
+                multiPointer(MotionEvent.ACTION_POINTER_DOWN|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),0);
+                if(firstLiftsFirst) {multiPointer(MotionEvent.ACTION_POINTER_UP,0);secondPointerUp();}
+                else {multiPointer(MotionEvent.ACTION_POINTER_UP|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),0);emit(MotionEvent.ACTION_UP,0,0);}
+            });idle();
+            onMain(() -> check(numbers.size()==before[1] && letters.size()==before[0]+2
+                    && letters.subList(before[0],letters.size()).equals(firstLiftsFirst?List.of("q","w"):List.of("w","q")),
+                    "overlapping native two-thumb taps both click once in their release order"));
+        }
+        int[] suppressed=counts();press();
+        onMain(() -> multiPointer(MotionEvent.ACTION_POINTER_DOWN|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),0));
+        hold();onMain(() -> {
+            multiPointer(MotionEvent.ACTION_MOVE,-24,-24);
+            multiPointer(MotionEvent.ACTION_POINTER_UP|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),-24,-24);
+        });up(0,-24);
+        onMain(() -> check(numbers.size()==suppressed[1],"neither split pointer can rearm an alternate in the same multitouch stream"));
     }
     private void punctuationMappings() {
         String caps="asdfghjklzxcvbnm";
@@ -167,9 +199,9 @@ final class UpwardNumberContract {
         onMain(() -> {mode=KeyboardLayout.Mode.QWERTY;chinese=true;render();});idle();findKey("a");
         int[] multi=counts();press();hold();onMain(() -> {
             emit(MotionEvent.ACTION_MOVE,0,-24);
-            multiPointer(MotionEvent.ACTION_POINTER_DOWN|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT));
+            multiPointer(MotionEvent.ACTION_POINTER_DOWN|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),-24);
             check(!key.isPressed(),"second raw pointer cancels held key before child event splitting");
-            multiPointer(MotionEvent.ACTION_POINTER_UP|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT));
+            multiPointer(MotionEvent.ACTION_POINTER_UP|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),-24);
         });up(0,-24);unchanged(multi,"two-pointer stream cannot submit either a symbol or a letter");
         int[] retired=counts();press();hold();
         KeyButton oldKey=key;int[] oldAction={0};
@@ -261,7 +293,7 @@ final class UpwardNumberContract {
             int[] before=counts(); press(); hold(); onMain(() -> emit(MotionEvent.ACTION_MOVE,0,-24)); up(0,-24);
             onMain(() -> check(letters.size()==before[0] && numbers.size()==before[1]+1 && numbers.get(numbers.size()-1).equals(number),"top-row mapping "+letter+" → "+number));
         }
-        standardAccessibilityClicks();punctuationMappings();
+        overlappingNativeTaps();standardAccessibilityClicks();punctuationMappings();
         int[] detached=counts(); press(); hold(); onMain(() -> {emit(MotionEvent.ACTION_MOVE,0,-24);activity.setContentView(new LinearLayout(activity));});
         unchanged(detached,"detaching an armed keyboard cannot leave an insertion callback");
     }

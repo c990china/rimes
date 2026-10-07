@@ -38,6 +38,7 @@ public final class InputContractInstrumentation extends Instrumentation {
             if("closure-fields".equals(arguments.getString("mode"))) closureFields();
             else if("delete-video".equals(arguments.getString("mode"))) deleteVideoContract();
             else if("closure-punctuation".equals(arguments.getString("mode"))) closurePunctuation();
+            else if("closure-thumbs".equals(arguments.getString("mode"))) closureThumbs();
             else if("community".equals(arguments.getString("mode"))) communityContract();
             else if("chord".equals(arguments.getString("mode"))) chordContract();
             else if("touch".equals(arguments.getString("mode"))) nativeTouchContract();
@@ -791,7 +792,7 @@ public final class InputContractInstrumentation extends Instrumentation {
     private void deleteVideoContract() throws Exception {
         boolean buffered=Boolean.parseBoolean(arguments.getString("buffered","false"));
         focusAny(host.first); layout("26"); pinyin();
-        if(buffered) { tap("中"); tap("Buffer off"); type("a a a a a a a a a a a a a a a a a a a a a a a a "); }
+        if(buffered) { tap("中"); tap("Buffer off"); for(int block=0;block<24;block++) { tap("a"); tap("Space"); } }
         else runOnMainSync(() -> {host.first.setText("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz");host.first.setSelection(host.first.length());});
         SystemClock.sleep(400);
         String[] labels={"Buffer 插件：翻译","Buffer 插件：快问","Buffer 插件：润色"};
@@ -830,6 +831,43 @@ public final class InputContractInstrumentation extends Instrumentation {
         focusAny(host.first);layout("9");nine("64426");waitButton("你好");communitySwipeNumber("九键 2 ABC");expect(host.first,"你好，","nine-key alternate confirms Chinese and marks");
         focusAny(host.first);layout("26");
         report("PASS CLOSURE_PUNCTUATION QWERTY/nine-key Chinese/English, composition and Buffer");
+    }
+    /** Raw InputDispatcher streams exercise native split clicks on the actual ordinary IME. */
+    private void closureThumbs() {
+        focusAny(host.first); layout("26"); pinyin(); tap("中");
+        for(boolean rightFirst:new boolean[]{false,true}) {
+            runOnMainSync(() -> host.first.setText(""));
+            long down=SystemClock.uptimeMillis();
+            inject(down,android.view.MotionEvent.ACTION_DOWN,"q");
+            inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),"q","p");
+            inject(down,android.view.MotionEvent.ACTION_POINTER_UP|(rightFirst?1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT:0),"q","p");
+            if(rightFirst) inject(down,android.view.MotionEvent.ACTION_UP,"q"); else finalRightUp(down,"p");
+            expectStable(host.first,rightFirst?"pq":"qp","ordinary overlapping short taps each commit exactly once");
+        }
+        runOnMainSync(() -> host.first.setText(""));
+        long down=SystemClock.uptimeMillis();
+        inject(down,android.view.MotionEvent.ACTION_DOWN,"q");
+        inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),"q","p");
+        SystemClock.sleep(700);
+        inject(down,android.view.MotionEvent.ACTION_POINTER_UP,"q","p"); finalRightUp(down,"p");
+        expectStable(host.first,"qp","split siblings cannot reacquire an alternate after a long hold");
+        runOnMainSync(() -> {host.first.setText("abc");host.first.setSelection(3);});
+        down=SystemClock.uptimeMillis();
+        inject(down,android.view.MotionEvent.ACTION_DOWN,"Delete");
+        inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),"Delete","q");
+        SystemClock.sleep(communityHoldMillis()+200);
+        expect(host.first,"abc","two-finger stream never starts held repeats");
+        inject(down,android.view.MotionEvent.ACTION_POINTER_UP,"Delete","q"); finalRightUp(down,"q");
+        expectStable(host.first,"abq","overlapping ordinary Delete and letter each commit once");
+        runOnMainSync(() -> host.first.setText(""));
+        down=SystemClock.uptimeMillis();
+        inject(down,android.view.MotionEvent.ACTION_DOWN,"q");SystemClock.sleep(400);
+        inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),"q","p");
+        inject(down,android.view.MotionEvent.ACTION_POINTER_UP,"q","p");finalRightUp(down,"p");
+        expectStable(host.first,"","second finger cancels an armed alternate without release clicks");
+        touch("p");expect(host.first,"p","fresh ordinary stream remains usable after cancellation");
+        tap("英");
+        report("PASS CLOSURE_THUMBS actual ordinary IME split short taps, both release orders, hold suppression and armed cancellation");
     }
     private long communityDown(android.graphics.Rect rect) {
         long down=SystemClock.uptimeMillis(); inject(down,android.view.MotionEvent.ACTION_DOWN,rect); return down;

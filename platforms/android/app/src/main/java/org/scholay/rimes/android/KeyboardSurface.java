@@ -86,9 +86,15 @@ final class KeyboardSurface extends ViewGroup {
     }
     private void cancelTouches() { cancelDeleteRepeats(); cancelAlternates(); }
     @Override public boolean onInterceptTouchEvent(MotionEvent event) {
-        // Retire the raw stream before ViewGroup splits the second pointer into
-        // a fresh DOWN on an untouched sibling. Chord uses its separate surface.
-        if(event.getActionMasked()==MotionEvent.ACTION_POINTER_DOWN) { cancelPendingInputEvents(); return true; }
+        if(event.getActionMasked()==MotionEvent.ACTION_POINTER_DOWN) {
+            // Preserve overlapping ordinary native taps. Retire hold eligibility on
+            // every sibling before ViewGroup splits this pointer into a new DOWN.
+            // A hold which already won consumes the remainder without a release click.
+            boolean consume=false;long stream=event.getDownTime();
+            for(UpwardNumberTouch swipe:alternates) consume|=swipe.suppressForStream(stream);
+            for(DeleteRepeatTouch repeat:deleteRepeats) consume|=repeat.suppressForStream(stream);
+            if(consume) return true;
+        }
         return super.onInterceptTouchEvent(event);
     }
     @Override public boolean onTouchEvent(MotionEvent event) { return true; }

@@ -33,7 +33,7 @@ final class DeleteRepeatContract {
     private KeyButton delete;
     private final List<Long> deleteTimes=new ArrayList<>();
     private final List<Integer> deleteTargets=new ArrayList<>();
-    private int checks,deletes,target;
+    private int checks,deletes,target,letterClicks;
     private boolean enabled=true;
     private long down;
     private final Handler main=new Handler(Looper.getMainLooper());
@@ -41,6 +41,7 @@ final class DeleteRepeatContract {
     private int pendingWork,peakPendingWork;
     private boolean targetAvailable=true;
     private final AtomicReference<Throwable> workerFailure=new AtomicReference<>();
+    private final float[][] pairCoordinates=new float[2][2];
 
     private DeleteRepeatContract(Instrumentation instrumentation,Activity activity) {
         this.instrumentation=instrumentation; this.activity=activity;
@@ -104,6 +105,63 @@ final class DeleteRepeatContract {
         try { root.dispatchTouchEvent(event); } finally { event.recycle(); }
     }
     private void release() { onMain(() -> emit(MotionEvent.ACTION_UP,false)); idle(); }
+    private void pairDown(boolean deleteFirst) {
+        SystemClock.sleep(2);
+        onMain(() -> {
+            KeyButton letter=null;
+            for(int i=0;i<surface.getChildCount();i++) {
+                KeyButton candidate=(KeyButton)surface.getChildAt(i);
+                if("q".contentEquals(candidate.getContentDescription())) {letter=candidate;break;}
+            }
+            check(letter!=null,"two-pointer fixture has an ordinary sibling letter");
+            KeyButton first=deleteFirst?delete:letter,second=deleteFirst?letter:delete;
+            pairCoordinates[0][0]=surface.getLeft()+first.getLeft()+first.getWidth()/2f;
+            pairCoordinates[0][1]=surface.getTop()+first.getTop()+first.getHeight()/2f;
+            pairCoordinates[1][0]=surface.getLeft()+second.getLeft()+second.getWidth()/2f;
+            pairCoordinates[1][1]=surface.getTop()+second.getTop()+second.getHeight()/2f;
+            down=SystemClock.uptimeMillis(); emitPair(MotionEvent.ACTION_DOWN,0);
+        });
+    }
+    private void emitPair(int action,int... ids) {
+        MotionEvent.PointerProperties[] properties=new MotionEvent.PointerProperties[ids.length];
+        MotionEvent.PointerCoords[] positions=new MotionEvent.PointerCoords[ids.length];
+        for(int i=0;i<ids.length;i++) {
+            properties[i]=new MotionEvent.PointerProperties(); properties[i].id=ids[i];
+            properties[i].toolType=MotionEvent.TOOL_TYPE_FINGER;
+            positions[i]=new MotionEvent.PointerCoords(); positions[i].x=pairCoordinates[ids[i]][0];
+            positions[i].y=pairCoordinates[ids[i]][1]; positions[i].pressure=1; positions[i].size=1;
+        }
+        MotionEvent event=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,ids.length,properties,positions,
+                0,0,1,1,0,0,android.view.InputDevice.SOURCE_TOUCHSCREEN,0);
+        try {root.dispatchTouchEvent(event);} finally {event.recycle();}
+    }
+    private void pairSecondDown() {
+        onMain(() -> emitPair(MotionEvent.ACTION_POINTER_DOWN|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),0,1));
+    }
+    private void pairUp() {
+        onMain(() -> {emitPair(MotionEvent.ACTION_POINTER_UP,0,1);emitPair(MotionEvent.ACTION_UP,1);}); idle();
+    }
+    private void runMultiPointer() {
+        int before=count(); int[] shortStart={before,0}; onMain(() -> shortStart[1]=letterClicks);
+        pairDown(true); SystemClock.sleep(20); pairSecondDown(); pairUp();
+        onMain(() -> check(deletes==shortStart[0]+1 && letterClicks==shortStart[1]+1,
+                "overlapping delete and letter short taps each retain their native click"));
+        assertStopped(shortStart[0]+1,"short two-pointer stream leaves no repeat timer");
+
+        int[] heldStart={count(),0}; onMain(() -> heldStart[1]=letterClicks);
+        pairDown(false); SystemClock.sleep(20); pairSecondDown();
+        SystemClock.sleep(ViewConfiguration.getLongPressTimeout()+DeleteRepeatTouch.REPEAT_MILLIS*3); idle();
+        onMain(() -> check(deletes==heldStart[0] && letterClicks==heldStart[1],
+                "a split sibling DOWN cannot acquire repeat eligibility in an excluded raw stream"));
+        pairUp(); onMain(() -> check(deletes==heldStart[0]+1 && letterClicks==heldStart[1]+1,
+                "suppressed long-press eligibility still preserves both native release clicks"));
+        assertStopped(heldStart[0]+1,"suppressed sibling press never replays held deletes after release");
+
+        int[] consumedStart={count(),0}; onMain(() -> consumedStart[1]=letterClicks);
+        pairDown(true); awaitDeletes(consumedStart[0]+2); pairSecondDown(); int consumed=count();
+        pairUp(); assertStopped(consumed,"a second finger retires an already repeating delete with no release click");
+        onMain(() -> check(letterClicks==consumedStart[1],"consumed held stream cannot type its untouched sibling"));
+    }
     private void awaitDeletes(int expected) {
         long deadline=SystemClock.uptimeMillis()+ViewConfiguration.getLongPressTimeout()+1500;
         while(count()<expected && SystemClock.uptimeMillis()<deadline) SystemClock.sleep(10);
@@ -198,7 +256,7 @@ final class DeleteRepeatContract {
                         if(workerGate!=null) queueWork();
                         // Real service deletion refreshes candidate/Buffer labels on this same surface.
                         render();
-                    }
+                    } else if(key.action==KeyboardLayout.Action.TEXT) letterClicks++;
                 }
             });
             root.addView(surface,new LinearLayout.LayoutParams(Math.round(320*activity.getResources().getDisplayMetrics().density),
@@ -231,6 +289,7 @@ final class DeleteRepeatContract {
         });
         assertStopped(heldEnd,"held release stops timers without an extra deletion");
         runBackpressure("ordinary");
+        runMultiPointer();
 
         before=count(); press();
         onMain(() -> { emit(MotionEvent.ACTION_MOVE,true); emit(MotionEvent.ACTION_MOVE,false); });

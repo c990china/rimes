@@ -14,7 +14,7 @@ final class DeleteRepeatTouch {
     private final Handler main=new Handler(Looper.getMainLooper());
     private boolean active,repeating;
     private int pointer=-1;
-    private long downTime=-1,generation;
+    private long downTime=-1,excludedDownTime=-1,generation;
     private Runnable pending;
 
     DeleteRepeatTouch(KeyButton button) {
@@ -31,6 +31,14 @@ final class DeleteRepeatTouch {
         stop();
         button.cancelPendingInputEvents();
     }
+    /** Deny long-press ownership to every split child of this raw multi-pointer stream. */
+    boolean suppressForStream(long streamDownTime) {
+        excludedDownTime=streamDownTime;
+        // An already consumed long-click must not become a release click after cancellation.
+        boolean consumed=active && repeating;
+        if(consumed) cancel(); else stop();
+        return consumed;
+    }
     private void stop() {
         generation++; active=false; repeating=false; pointer=-1; downTime=-1;
         if(pending!=null) { main.removeCallbacks(pending); pending=null; }
@@ -41,6 +49,9 @@ final class DeleteRepeatTouch {
             // A completed prior tap can still have a legitimate native click in the queue.
             // Only an unfinished press needs native cancellation before a new stream starts.
             if(active) cancel(); else stop();
+            // ViewGroup can translate a sibling POINTER_DOWN to DOWN with the same raw time.
+            // Leave its ordinary Button press intact, but never reacquire repeat eligibility.
+            if(event.getDownTime()==excludedDownTime) return false;
             active=true; pointer=event.getPointerId(0); downTime=event.getDownTime();
         } else if(active && downTime==event.getDownTime()) {
             if(action==MotionEvent.ACTION_MOVE) {

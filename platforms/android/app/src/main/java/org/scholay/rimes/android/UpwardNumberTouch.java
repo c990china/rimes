@@ -17,7 +17,7 @@ final class UpwardNumberTouch {
     private final float density;
     private boolean active,eligible,armed,selected;
     private int pointer=-1;
-    private long downTime=-1,beganAt,generation;
+    private long downTime=-1,beganAt,generation,excludedDownTime=-1;
     private float originX,originY;
     private Runnable pending;
     final String alternate;
@@ -43,6 +43,13 @@ final class UpwardNumberTouch {
         });
     }
     boolean selected() { return active && armed && selected; }
+    /** Multitouch cancels only hold eligibility; overlapping native taps remain independent. */
+    boolean suppressForStream(long stream) {
+        excludedDownTime=stream;
+        boolean consume=active && armed;
+        if(consume) cancel(); else stop();
+        return consume;
+    }
     private void insertAlternate() { button.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP); insert.run(); }
     void cancel() { stop(); button.cancelPendingInputEvents(); }
     private void stop() {
@@ -72,6 +79,7 @@ final class UpwardNumberTouch {
         if(action==MotionEvent.ACTION_DOWN) {
             // Preserve the legitimate pending native click of a previously completed tap.
             if(active) cancel(); else stop();
+            if(event.getDownTime()==excludedDownTime) return false;
             active=true; eligible=true; pointer=event.getPointerId(0); downTime=event.getDownTime();
             beganAt=event.getEventTime(); originX=event.getX(); originY=event.getY(); long ticket=generation;
             pending=() -> { if(active && generation==ticket) { pending=null; arm(SystemClock.uptimeMillis()); } };
