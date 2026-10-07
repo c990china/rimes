@@ -685,7 +685,9 @@ public final class InputContractInstrumentation extends Instrumentation {
         SystemClock.sleep(40);
     }
     private void finalRightUp(long downTime,String label) {
-        android.graphics.Rect r=bounds(label);
+        finalRightUp(downTime,bounds(label));
+    }
+    private void finalRightUp(long downTime,android.graphics.Rect r) {
         android.view.MotionEvent.PointerProperties property=new android.view.MotionEvent.PointerProperties(); property.id=1; property.toolType=android.view.MotionEvent.TOOL_TYPE_FINGER;
         android.view.MotionEvent.PointerCoords coord=new android.view.MotionEvent.PointerCoords(); coord.x=r.exactCenterX(); coord.y=r.exactCenterY(); coord.pressure=1; coord.size=1;
         android.view.MotionEvent event=android.view.MotionEvent.obtain(downTime,SystemClock.uptimeMillis(),android.view.MotionEvent.ACTION_UP,1,new android.view.MotionEvent.PointerProperties[]{property},new android.view.MotionEvent.PointerCoords[]{coord},0,0,1,1,0,0,android.view.InputDevice.SOURCE_TOUCHSCREEN,0);
@@ -834,36 +836,45 @@ public final class InputContractInstrumentation extends Instrumentation {
     }
     /** Raw InputDispatcher streams exercise native split clicks on the actual ordinary IME. */
     private void closureThumbs() {
-        focusAny(host.first); layout("26"); pinyin(); tap("中");
+        touchHostField(); focusAny(host.first); layout("26"); pinyin(); tap("中");
+        android.graphics.Rect q=bounds("q"),p=bounds("p"),delete=bounds("Delete");
         for(boolean rightFirst:new boolean[]{false,true}) {
             runOnMainSync(() -> host.first.setText(""));
+            SystemClock.sleep(400); // Let the host's synthetic selection update retire before DOWN.
             long down=SystemClock.uptimeMillis();
-            inject(down,android.view.MotionEvent.ACTION_DOWN,"q");
-            inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),"q","p");
-            inject(down,android.view.MotionEvent.ACTION_POINTER_UP|(rightFirst?1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT:0),"q","p");
-            if(rightFirst) inject(down,android.view.MotionEvent.ACTION_UP,"q"); else finalRightUp(down,"p");
-            expectStable(host.first,rightFirst?"pq":"qp","ordinary overlapping short taps each commit exactly once");
+            inject(down,android.view.MotionEvent.ACTION_DOWN,q);
+            check(SystemClock.uptimeMillis()-down<200,"second finger arrives before alternate hold deadline");
+            inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),q,p);
+            inject(down,android.view.MotionEvent.ACTION_POINTER_UP|(rightFirst?1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT:0),q,p);
+            if(rightFirst) inject(down,android.view.MotionEvent.ACTION_UP,q); else finalRightUp(down,p);
+            expect(host.first,rightFirst?"pq":"qp","ordinary overlapping short taps each commit exactly once");
+            expectStable(host.first,rightFirst?"pq":"qp","ordinary overlapping short taps remain committed exactly once");
         }
         runOnMainSync(() -> host.first.setText(""));
+        SystemClock.sleep(400);
         long down=SystemClock.uptimeMillis();
-        inject(down,android.view.MotionEvent.ACTION_DOWN,"q");
-        inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),"q","p");
+        inject(down,android.view.MotionEvent.ACTION_DOWN,q);
+        inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),q,p);
         SystemClock.sleep(700);
-        inject(down,android.view.MotionEvent.ACTION_POINTER_UP,"q","p"); finalRightUp(down,"p");
-        expectStable(host.first,"qp","split siblings cannot reacquire an alternate after a long hold");
+        inject(down,android.view.MotionEvent.ACTION_POINTER_UP,q,p); finalRightUp(down,p);
+        expect(host.first,"qp","split siblings cannot reacquire an alternate after a long hold");
+        expectStable(host.first,"qp","split sibling commits remain stable after release");
         runOnMainSync(() -> {host.first.setText("abc");host.first.setSelection(3);});
+        SystemClock.sleep(400);
         down=SystemClock.uptimeMillis();
-        inject(down,android.view.MotionEvent.ACTION_DOWN,"Delete");
-        inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),"Delete","q");
+        inject(down,android.view.MotionEvent.ACTION_DOWN,delete);
+        inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),delete,q);
         SystemClock.sleep(communityHoldMillis()+200);
         expect(host.first,"abc","two-finger stream never starts held repeats");
-        inject(down,android.view.MotionEvent.ACTION_POINTER_UP,"Delete","q"); finalRightUp(down,"q");
-        expectStable(host.first,"abq","overlapping ordinary Delete and letter each commit once");
+        inject(down,android.view.MotionEvent.ACTION_POINTER_UP,delete,q); finalRightUp(down,q);
+        expect(host.first,"abq","overlapping ordinary Delete and letter each commit once");
+        expectStable(host.first,"abq","overlapping Delete and letter commits remain stable after release");
         runOnMainSync(() -> host.first.setText(""));
+        SystemClock.sleep(400);
         down=SystemClock.uptimeMillis();
-        inject(down,android.view.MotionEvent.ACTION_DOWN,"q");SystemClock.sleep(400);
-        inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),"q","p");
-        inject(down,android.view.MotionEvent.ACTION_POINTER_UP,"q","p");finalRightUp(down,"p");
+        inject(down,android.view.MotionEvent.ACTION_DOWN,q);SystemClock.sleep(400);
+        inject(down,android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT),q,p);
+        inject(down,android.view.MotionEvent.ACTION_POINTER_UP,q,p);finalRightUp(down,p);
         expectStable(host.first,"","second finger cancels an armed alternate without release clicks");
         touch("p");expect(host.first,"p","fresh ordinary stream remains usable after cancellation");
         tap("英");
