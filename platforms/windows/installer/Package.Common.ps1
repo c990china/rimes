@@ -219,3 +219,15 @@ function Remove-OwnedSettingsShortcut([string]$InstallRoot) {
     try {$shortcut=$shell.CreateShortcut($path);if(Test-OwnedSettingsShortcut $InstallRoot $shortcut){Remove-Item -LiteralPath $path -Force}}
     finally {if($shortcut){[Runtime.InteropServices.Marshal]::FinalReleaseComObject($shortcut) | Out-Null};[Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell) | Out-Null}
 }
+function Get-RimesActiveVersion([string]$Root) {
+    # Recovery path for a lost state.json: return the newest version directory that
+    # still verifies against PACKAGE.json, so ownership checks are not relaxed.
+    $versions=[IO.Path]::GetFullPath((Join-Path $Root 'versions')).TrimEnd('\')
+    if(-not (Test-Path -LiteralPath $versions)){return $null}
+    foreach($directory in @(Get-ChildItem -LiteralPath $versions -Directory | Sort-Object Name -Descending)){
+        if(-not (Test-Path -LiteralPath (Join-Path $directory.FullName 'PACKAGE.json'))){continue}
+        try{Read-VerifiedPackage $directory.FullName | Out-Null}catch{continue}
+        return $directory.FullName
+    }
+    return $null
+}
