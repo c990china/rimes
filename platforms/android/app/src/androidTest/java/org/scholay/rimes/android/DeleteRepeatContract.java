@@ -3,6 +3,7 @@ package org.scholay.rimes.android;
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.os.Looper;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,6 +13,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.scholay.rimes.core.KeyboardLayout;
 import org.scholay.rimes.core.ChordLayout;
 import org.scholay.rimes.core.ChordGesture;
@@ -29,9 +33,15 @@ final class DeleteRepeatContract {
     private KeyButton delete;
     private final List<Long> deleteTimes=new ArrayList<>();
     private final List<Integer> deleteTargets=new ArrayList<>();
-    private int checks,deletes,target;
+    private int checks,deletes,target,letterClicks;
     private boolean enabled=true;
     private long down;
+    private final Handler main=new Handler(Looper.getMainLooper());
+    private CountDownLatch workerGate,workerStarted;
+    private int pendingWork,peakPendingWork;
+    private boolean targetAvailable=true;
+    private final AtomicReference<Throwable> workerFailure=new AtomicReference<>();
+    private final float[][] pairCoordinates=new float[2][2];
 
     private DeleteRepeatContract(Instrumentation instrumentation,Activity activity) {
         this.instrumentation=instrumentation; this.activity=activity;
@@ -95,6 +105,63 @@ final class DeleteRepeatContract {
         try { root.dispatchTouchEvent(event); } finally { event.recycle(); }
     }
     private void release() { onMain(() -> emit(MotionEvent.ACTION_UP,false)); idle(); }
+    private void pairDown(boolean deleteFirst) {
+        SystemClock.sleep(2);
+        onMain(() -> {
+            KeyButton letter=null;
+            for(int i=0;i<surface.getChildCount();i++) {
+                KeyButton candidate=(KeyButton)surface.getChildAt(i);
+                if("q".contentEquals(candidate.getContentDescription())) {letter=candidate;break;}
+            }
+            check(letter!=null,"two-pointer fixture has an ordinary sibling letter");
+            KeyButton first=deleteFirst?delete:letter,second=deleteFirst?letter:delete;
+            pairCoordinates[0][0]=surface.getLeft()+first.getLeft()+first.getWidth()/2f;
+            pairCoordinates[0][1]=surface.getTop()+first.getTop()+first.getHeight()/2f;
+            pairCoordinates[1][0]=surface.getLeft()+second.getLeft()+second.getWidth()/2f;
+            pairCoordinates[1][1]=surface.getTop()+second.getTop()+second.getHeight()/2f;
+            down=SystemClock.uptimeMillis(); emitPair(MotionEvent.ACTION_DOWN,0);
+        });
+    }
+    private void emitPair(int action,int... ids) {
+        MotionEvent.PointerProperties[] properties=new MotionEvent.PointerProperties[ids.length];
+        MotionEvent.PointerCoords[] positions=new MotionEvent.PointerCoords[ids.length];
+        for(int i=0;i<ids.length;i++) {
+            properties[i]=new MotionEvent.PointerProperties(); properties[i].id=ids[i];
+            properties[i].toolType=MotionEvent.TOOL_TYPE_FINGER;
+            positions[i]=new MotionEvent.PointerCoords(); positions[i].x=pairCoordinates[ids[i]][0];
+            positions[i].y=pairCoordinates[ids[i]][1]; positions[i].pressure=1; positions[i].size=1;
+        }
+        MotionEvent event=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,ids.length,properties,positions,
+                0,0,1,1,0,0,android.view.InputDevice.SOURCE_TOUCHSCREEN,0);
+        try {root.dispatchTouchEvent(event);} finally {event.recycle();}
+    }
+    private void pairSecondDown() {
+        onMain(() -> emitPair(MotionEvent.ACTION_POINTER_DOWN|(1<<MotionEvent.ACTION_POINTER_INDEX_SHIFT),0,1));
+    }
+    private void pairUp() {
+        onMain(() -> {emitPair(MotionEvent.ACTION_POINTER_UP,0,1);emitPair(MotionEvent.ACTION_UP,1);}); idle();
+    }
+    private void runMultiPointer() {
+        int before=count(); int[] shortStart={before,0}; onMain(() -> shortStart[1]=letterClicks);
+        pairDown(true); SystemClock.sleep(20); pairSecondDown(); pairUp();
+        onMain(() -> check(deletes==shortStart[0]+1 && letterClicks==shortStart[1]+1,
+                "overlapping delete and letter short taps each retain their native click"));
+        assertStopped(shortStart[0]+1,"short two-pointer stream leaves no repeat timer");
+
+        int[] heldStart={count(),0}; onMain(() -> heldStart[1]=letterClicks);
+        pairDown(false); SystemClock.sleep(20); pairSecondDown();
+        SystemClock.sleep(ViewConfiguration.getLongPressTimeout()+DeleteRepeatTouch.REPEAT_MILLIS*3); idle();
+        onMain(() -> check(deletes==heldStart[0] && letterClicks==heldStart[1],
+                "a split sibling DOWN cannot acquire repeat eligibility in an excluded raw stream"));
+        pairUp(); onMain(() -> check(deletes==heldStart[0]+1 && letterClicks==heldStart[1]+1,
+                "suppressed long-press eligibility still preserves both native release clicks"));
+        assertStopped(heldStart[0]+1,"suppressed sibling press never replays held deletes after release");
+
+        int[] consumedStart={count(),0}; onMain(() -> consumedStart[1]=letterClicks);
+        pairDown(true); awaitDeletes(consumedStart[0]+2); pairSecondDown(); int consumed=count();
+        pairUp(); assertStopped(consumed,"a second finger retires an already repeating delete with no release click");
+        onMain(() -> check(letterClicks==consumedStart[1],"consumed held stream cannot type its untouched sibling"));
+    }
     private void awaitDeletes(int expected) {
         long deadline=SystemClock.uptimeMillis()+ViewConfiguration.getLongPressTimeout()+1500;
         while(count()<expected && SystemClock.uptimeMillis()<deadline) SystemClock.sleep(10);
@@ -103,6 +170,75 @@ final class DeleteRepeatContract {
     private void assertStopped(int expected,String label) {
         SystemClock.sleep(DeleteRepeatTouch.REPEAT_MILLIS*3); idle();
         onMain(() -> check(deletes==expected,label));
+    }
+    private boolean canRepeatDelete() { return targetAvailable && pendingWork==0; }
+    /** One actual serial-worker operation per generated delete; completions return on main. */
+    private void queueWork() {
+        CountDownLatch release=workerGate,started=workerStarted;
+        pendingWork++; peakPendingWork=Math.max(peakPendingWork,pendingWork);
+        EngineWorker.QUEUE.execute(() -> {
+            started.countDown();
+            try {
+                if(!release.await(10,TimeUnit.SECONDS)) throw new AssertionError("repeat worker release timed out");
+            } catch(Throwable error) {
+                if(error instanceof InterruptedException) Thread.currentThread().interrupt();
+                workerFailure.compareAndSet(null,error);
+            } finally { main.post(() -> pendingWork--); }
+        });
+    }
+    private void workerIdle() {
+        try { EngineWorker.QUEUE.submit(() -> {}).get(10,TimeUnit.SECONDS); }
+        catch(Exception error) { throw new AssertionError("repeat worker did not become idle",error); }
+        idle();
+        if(workerFailure.get()!=null) throw new AssertionError("controlled repeat worker failed",workerFailure.get());
+    }
+    private void awaitWorker() {
+        try { check(workerStarted.await(10,TimeUnit.SECONDS),"controlled repeat operation really blocks the serial worker"); }
+        catch(InterruptedException error) { Thread.currentThread().interrupt(); throw new AssertionError(error); }
+    }
+    private void runBackpressure(String layout) {
+        CountDownLatch[] release={null};
+        try {
+            onMain(() -> {
+                workerGate=new CountDownLatch(1); workerStarted=new CountDownLatch(1); release[0]=workerGate;
+                queueWork(); // A preceding composing key is blocked before this held delete.
+            }); awaitWorker();
+            int before=count(); int ordinaryTapStart=before; press(); release();
+            onMain(() -> check(deletes==ordinaryTapStart+1 && pendingWork==2,
+                    layout+" short tap stays ordered behind busy work instead of using the repeat gate"));
+            int blocked=count(); press();
+            SystemClock.sleep(ViewConfiguration.getLongPressTimeout()+DeleteRepeatTouch.REPEAT_MILLIS*4); idle();
+            onMain(() -> check(deletes==blocked && pendingWork==2,
+                    layout+" a busy first long-click and timer ticks add no queued deletes"));
+            release(); release[0].countDown(); workerIdle();
+            assertStopped(blocked,layout+" release while busy leaves no delete debt after the worker resumes");
+            onMain(() -> check(pendingWork==0,layout+" queued ordinary work completes exactly once"));
+
+            onMain(() -> {
+                workerGate=new CountDownLatch(1); workerStarted=new CountDownLatch(1); release[0]=workerGate; peakPendingWork=0;
+            });
+            before=count(); int heldStart=before; press(); awaitDeletes(before+1); awaitWorker();
+            SystemClock.sleep(DeleteRepeatTouch.REPEAT_MILLIS*4); idle();
+            onMain(() -> check(deletes==heldStart+1 && pendingWork==1 && peakPendingWork==1,
+                    layout+" the first held delete blocks and subsequent timer ticks cannot grow the queue"));
+            release[0].countDown(); workerIdle(); awaitDeletes(heldStart+3);
+            int[] stopped={0}; onMain(() -> { stopped[0]=deletes; emit(MotionEvent.ACTION_UP,false); }); workerIdle();
+            assertStopped(stopped[0],layout+" held delete resumes after completion but stops immediately on UP");
+            onMain(() -> check(peakPendingWork==1,layout+" resumed timer permits at most one operation in flight"));
+
+            onMain(() -> {
+                workerGate=new CountDownLatch(1); workerStarted=new CountDownLatch(1); release[0]=workerGate;
+            });
+            before=count(); press(); awaitDeletes(before+1); awaitWorker();
+            onMain(() -> { root.cancelPendingInputEvents(); target++; targetAvailable=false; });
+            int retired=count(); release[0].countDown(); workerIdle(); release();
+            assertStopped(retired,layout+" retired busy press cannot resume on worker completion or late UP");
+            onMain(() -> targetAvailable=true);
+        } finally {
+            if(release[0]!=null) release[0].countDown();
+            onMain(() -> root.cancelPendingInputEvents()); workerIdle();
+            onMain(() -> {workerGate=null;workerStarted=null;targetAvailable=true;});
+        }
     }
     private void run() {
         onMain(() -> {
@@ -113,12 +249,14 @@ final class DeleteRepeatContract {
                 @Override public String description(KeyboardLayout.Key key) { return label(key); }
                 @Override public boolean enabled(KeyboardLayout.Key key) { return key.action!=KeyboardLayout.Action.DELETE || enabled; }
                 @Override public boolean selected(KeyboardLayout.Key key) { return false; }
+                @Override public boolean canRepeatDelete() { return DeleteRepeatContract.this.canRepeatDelete(); }
                 @Override public void press(KeyboardLayout.Key key) {
                     if(key.action==KeyboardLayout.Action.DELETE) {
                         deletes++; deleteTimes.add(SystemClock.uptimeMillis()); deleteTargets.add(target);
+                        if(workerGate!=null) queueWork();
                         // Real service deletion refreshes candidate/Buffer labels on this same surface.
                         render();
-                    }
+                    } else if(key.action==KeyboardLayout.Action.TEXT) letterClicks++;
                 }
             });
             root.addView(surface,new LinearLayout.LayoutParams(Math.round(320*activity.getResources().getDisplayMetrics().density),
@@ -150,6 +288,8 @@ final class DeleteRepeatContract {
                     "repeats are paced instead of flooding the main queue");
         });
         assertStopped(heldEnd,"held release stops timers without an extra deletion");
+        runBackpressure("ordinary");
+        runMultiPointer();
 
         before=count(); press();
         onMain(() -> { emit(MotionEvent.ACTION_MOVE,true); emit(MotionEvent.ACTION_MOVE,false); });
@@ -224,12 +364,15 @@ final class DeleteRepeatContract {
                 @Override public void onPreview(ChordGesture.Preview preview) {}
                 @Override public void onControl(ChordLayout.Action action) {
                     if(action!=ChordLayout.Action.DELETE) throw new AssertionError("Unexpected utility action");
-                    deletes++; deleteTimes.add(SystemClock.uptimeMillis()); deleteTargets.add(target); render();
+                    deletes++; deleteTimes.add(SystemClock.uptimeMillis()); deleteTargets.add(target);
+                    if(workerGate!=null) queueWork();
+                    render();
                 }
                 @Override public String label(ChordLayout.Action action) { return action==ChordLayout.Action.DELETE?"Delete":"Emoji"; }
                 @Override public String description(ChordLayout.Action action) { return label(action); }
+                @Override public boolean canRepeatDelete() { return DeleteRepeatContract.this.canRepeatDelete(); }
             });
-            DeleteRepeatTouch repeat=new DeleteRepeatTouch(chordSurface.utilityButton(ChordLayout.Action.DELETE));
+            DeleteRepeatTouch repeat=new DeleteRepeatTouch(chordSurface.utilityButton(ChordLayout.Action.DELETE),chordSurface::canRepeatDelete);
             chordSurface.setUtilityRetirementListener(repeat::cancel);
             float density=activity.getResources().getDisplayMetrics().density;
             root.addView(chordSurface,new LinearLayout.LayoutParams(Math.round(320*density),Math.round(70*density)));
@@ -245,6 +388,7 @@ final class DeleteRepeatContract {
         before=count(); press(); awaitDeletes(before+3);
         int[] beforeUp={0}; onMain(() -> {beforeUp[0]=deletes;emit(MotionEvent.ACTION_UP,false);}); idle();
         assertStopped(beforeUp[0],"chord held utility UP never adds a click");
+        runBackpressure("chord");
 
         before=count(); press(); awaitDeletes(before+2);
         onMain(() -> {root.cancelPendingInputEvents();target++;}); int retired=count(); release();
@@ -266,7 +410,7 @@ final class DeleteRepeatContract {
         onMain(() -> chordSurface.setUtilityRetirementListener(null)); int replaced=count(); release();
         assertStopped(replaced,"removing a host utility attachment retires its timer");
         onMain(() -> {
-            DeleteRepeatTouch repeat=new DeleteRepeatTouch(chordSurface.utilityButton(ChordLayout.Action.DELETE));
+            DeleteRepeatTouch repeat=new DeleteRepeatTouch(chordSurface.utilityButton(ChordLayout.Action.DELETE),chordSurface::canRepeatDelete);
             chordSurface.setUtilityRetirementListener(repeat::cancel);
         });
         before=count(); press(); awaitDeletes(before+2);

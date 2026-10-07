@@ -8,7 +8,7 @@ import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-/** iOS-style hold-then-up alternate; ordinary taps remain native Button clicks. */
+/** iOS-style hold/up literal digit or mark; ordinary taps remain native Button clicks. */
 final class UpwardNumberTouch {
     static final long HOLD_MILLIS=320;
     private final KeyButton button;
@@ -17,32 +17,40 @@ final class UpwardNumberTouch {
     private final float density;
     private boolean active,eligible,armed,selected;
     private int pointer=-1;
-    private long downTime=-1,beganAt,generation;
+    private long downTime=-1,beganAt,generation,excludedDownTime=-1;
     private float originX,originY;
     private Runnable pending;
-    final String number;
+    final String alternate;
 
-    UpwardNumberTouch(KeyButton button,String number,Runnable insert,Runnable repaint) {
-        this.button=button; this.number=number; this.insert=insert; this.repaint=repaint;
+    UpwardNumberTouch(KeyButton button,String alternate,Runnable insert,Runnable repaint) {
+        this.button=button; this.alternate=alternate; this.insert=insert; this.repaint=repaint;
         density=button.getResources().getDisplayMetrics().density;
+        String kind=alternate.length()==1 && alternate.charAt(0)>='0' && alternate.charAt(0)<='9'?"数字 ":"符号 ";
         button.setOnTouchListener((view,event) -> observe(event));
-        int accessibilityAction=View.generateViewId();
+        int accessibilityAction=R.id.key_alternate_action;
         button.setAccessibilityDelegate(new View.AccessibilityDelegate() {
             @Override public void onInitializeAccessibilityNodeInfo(View host,AccessibilityNodeInfo info) {
                 super.onInitializeAccessibilityNodeInfo(host,info);
-                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(accessibilityAction,"输入数字 "+number));
-                info.setHintText("按住向上滑动输入数字 "+number);
+                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(accessibilityAction,"输入"+kind+alternate));
+                info.setHintText("按住向上滑动输入"+kind+alternate);
             }
             @Override public boolean performAccessibilityAction(View host,int action,android.os.Bundle arguments) {
                 if(action!=accessibilityAction) return super.performAccessibilityAction(host,action,arguments);
                 if(!button.isEnabled() || !button.isShown() || !button.isAttachedToWindow()) return false;
                 if(active) cancel(); else stop();
-                insertNumber(); return true;
+                insertAlternate(); return true;
             }
         });
     }
     boolean selected() { return active && armed && selected; }
-    private void insertNumber() { button.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP); insert.run(); }
+    /** Multitouch cancels only hold eligibility; overlapping native taps remain independent. */
+    boolean suppressForStream(long stream) {
+        excludedDownTime=stream;
+        boolean consume=active && armed;
+        if(consume) cancel(); else stop();
+        return consume;
+    }
+    private void insertAlternate() { button.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP); insert.run(); }
     void cancel() { stop(); button.cancelPendingInputEvents(); }
     private void stop() {
         boolean visible=armed || selected;
@@ -71,6 +79,7 @@ final class UpwardNumberTouch {
         if(action==MotionEvent.ACTION_DOWN) {
             // Preserve the legitimate pending native click of a previously completed tap.
             if(active) cancel(); else stop();
+            if(event.getDownTime()==excludedDownTime) return false;
             active=true; eligible=true; pointer=event.getPointerId(0); downTime=event.getDownTime();
             beganAt=event.getEventTime(); originX=event.getX(); originY=event.getY(); long ticket=generation;
             pending=() -> { if(active && generation==ticket) { pending=null; arm(SystemClock.uptimeMillis()); } };
@@ -92,7 +101,7 @@ final class UpwardNumberTouch {
         }
         if(action==MotionEvent.ACTION_UP) {
             move(x,y,event.getEventTime());
-            if(armed && selected) { cancel(); insertNumber(); return true; }
+            if(armed && selected) { cancel(); insertAlternate(); return true; }
             if(armed && !inside(x,y)) { cancel(); return true; }
             stop(); return false;
         }

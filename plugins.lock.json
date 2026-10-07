@@ -12,7 +12,7 @@
     "native/android/BufferPluginExecutor.java": "2466ac8a21034b12a9c0cbb6783c1da5b3776adc0216eadd86d4715900cc36e2",
     "native/android/BufferPluginPanel.java": "dca9c178963eb499c25522ea4a3852e66950a2261e5f50fc2334e97dc194edd7",
     "native/android/ChordPreview.java": "5fb23faae5a7e67ed736f5671fcf35ed6b06666c884147d313970c57e7032ff9",
-    "native/android/ChordSurface.java": "b2a3300c467dadd3bb5b5f928db7d3459b7f6a18b94746cdecd0d9021da4df29",
+    "native/android/ChordSurface.java": "ff2a460cd844c54167c0b80163a168c77f4083a6da73916077c5494e21bb23cc",
     "native/android/OfflineDictionary.java": "f1f5fd399243f22bd78fef82e023161bb3f97484521c4dbbba38914d664a8d87",
     "native/android/OpenAiChatCodec.java": "0ea916e2b42477130c57d246e2fd1c7811a331cf791e97655088a479aba08bae",
     "native/ios/Support/BufferPlugins.swift": "52317c3575e042b4991a53542c845928e147c2a7709892b7725c05516a8b1eaf",
@@ -93,6 +93,6 @@
     "source-map.json": "5ae358c2fe0c6a5e389dc89dca8bec3f1e7ca7ac0dc8ac2bf43f69af1d464912"
   },
   "repository": "https://github.com/scholay/rimes-plugins",
-  "revision": "c276dce6cf19a62fa055affc8e274036d8ffcf1d",
+  "revision": "aecf9c1f505ac83934b01c28c59a29f99707d199",
   "schemaVersion": 1
 }

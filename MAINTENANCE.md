@@ -28,6 +28,13 @@
 - Windows [PR #73](https://github.com/scholay/rimes/pull/73) 保持草稿，等待真实桌面验收；不把 CI 通过当成桌面验收完成。
 - `platforms/ios/AppStore/submission-1.1.0/` 的本地提交材料保留在工作区，不纳入源码提交。此次分支维护不创建发布标签、不上传商店版本。
 
+## 2026-10-07 后续反馈收敛
+
+- Windows [PR #73](https://github.com/scholay/rimes/pull/73) 已在补齐桌面验收后合入；修复 Shift 字符、设置与托盘入口、系统卸载入口以及打开设置时保留 Buffer。验收覆盖及仍待验证的登录启动、长期日用范围见 [Windows 记录](platforms/windows/native/validation/2026-10-07-feedback.md)。
+- Android 纳入截至 `68552cc` 的 code14 修复与验收记录，保留原提交；官方插件固定 `aecf9c1f505ac83934b01c28c59a29f99707d199`。集成时撤去旧的字母页语言归一化，确保中英上滑标点正确，并保留主线数字页首个句末标点自动返回行为。
+- 集成本机 Android 70 项核心测试、Debug APK、app/testhost instrumentation 编译、两模块 Lint、原生资源完整性及双 ABI 16 KB 对齐检查通过。原 code14 真机/30 分钟记录对应其确切源提交；本次主线整合没有重装手机或发布安装包。
+- 外部 [PR #77](https://github.com/scholay/rimes/pull/77) 暂留待审：丢失 state.json 时按目录名选择恢复版本，尚需验证与实际注册路径的一致性，以及同现有卸载入口和回滚逻辑的兼容性。
+
 ## 代码边界
 
 2026-09-29 起按 [平台路线图](PLATFORM-ROADMAP.md) 开发：Windows 对标 macOS、Android 对标

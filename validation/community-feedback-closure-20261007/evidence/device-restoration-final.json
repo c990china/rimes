@@ -1,0 +1,24 @@
+{
+  "settings_restored": true,
+  "readback": {
+    "default_input_method": "org.scholay.rimes.android.debug/org.scholay.rimes.android.RimesInputMethodService",
+    "accelerometer_rotation": "0",
+    "user_rotation": "0",
+    "font_scale": "1.0",
+    "show_ime_with_hard_keyboard": "1"
+  },
+  "all_original_preference_maps_equal": true,
+  "preference_file_count": 2,
+  "owned_preference_backup_removed": true,
+  "production_apk_retained": "1.1.0/code14",
+  "installed_apk_sha256": "f30122212eff502dd89e209edaa49ce9c1bf6c3a6810ba661f565f7ce92e0b09",
+  "installed_apk_matches_delivery": true,
+  "owned_device_video_files_removed": true,
+  "user_dictionary_semantic_check": "PASS",
+  "docker_not_started_this_turn": true,
+  "quiescent_archive_integrity": "PASS",
+  "quiescent_original_preference_maps_equal": true,
+  "dictionary_entry_code_commit_frequency_exports_equal": true,
+  "dictionary_sst_data_byte_identical": true,
+  "dictionary_wal_empty_before_and_after": true
+}

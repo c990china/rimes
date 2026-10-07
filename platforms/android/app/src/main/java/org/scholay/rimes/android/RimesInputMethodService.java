@@ -439,6 +439,7 @@ public final class RimesInputMethodService extends InputMethodService {
         if(retained.isEmpty()) { updateComposition(); if(deferredSettingsPair!=null) applySettingsPair(deferredSettingsPair); }
         render();
     }
+    private boolean canRepeatDelete() { return ownsTarget() && pending==0 && retained.isEmpty(); }
     private void delete() {
         invalidatePlugin();
         if(!retained.isEmpty()) { if(buffer.isEnabled()) { buffer.deleteLastBlock(); retryRetained(); } return; }
@@ -608,7 +609,8 @@ public final class RimesInputMethodService extends InputMethodService {
                     || key.action==KeyboardLayout.Action.PUNCTUATION && key.text.isEmpty() && punctuationOpen
                     || key.action==KeyboardLayout.Action.RETURN && returnSelected();
         }
-        @Override public void onAlternate(String number) { punctuate(number); }
+        @Override public void onAlternate(String text) { punctuate(text); }
+        @Override public boolean canRepeatDelete() { return RimesInputMethodService.this.canRepeatDelete(); }
         @Override public void press(KeyboardLayout.Key key) {
             if(punctuationOpen && key.action!=KeyboardLayout.Action.PUNCTUATION) { punctuationOpen=false; render(); }
             switch(key.action) {
@@ -735,8 +737,9 @@ public final class RimesInputMethodService extends InputMethodService {
             public void onControl(ChordLayout.Action action) { if(action==ChordLayout.Action.DELETE) delete(); else { settleAndSwitch(() -> { emoji=true; numeric=false; }); } }
             public String label(ChordLayout.Action action) { return action==ChordLayout.Action.DELETE?"⌫":"☺"; }
             public String description(ChordLayout.Action action) { return action==ChordLayout.Action.DELETE?getString(R.string.backspace):"表情"; }
+            public boolean canRepeatDelete() { return RimesInputMethodService.this.canRepeatDelete(); }
         }); surfaceContainer.addView(chords,new FrameLayout.LayoutParams(-1,-1));
-        DeleteRepeatTouch chordDelete=new DeleteRepeatTouch(chords.utilityButton(ChordLayout.Action.DELETE));
+        DeleteRepeatTouch chordDelete=new DeleteRepeatTouch(chords.utilityButton(ChordLayout.Action.DELETE),chords::canRepeatDelete);
         chords.setUtilityRetirementListener(chordDelete::cancel);
         appearancePanel=new KeyboardAppearancePanel(this,this::chooseLayout,settings::setTheme);
         appearancePanel.schemes(schema,this::chooseSchema);

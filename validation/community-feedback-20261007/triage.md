@@ -1,3 +1,5 @@
+> 此页保留 code13 阶段的历史验收与当时 issue 状态。维护者要求闭单后，已追加 code14 修复及重新验收；#62、#63、#64、#68、#69、#70、#72现已按修复完成关闭，#3仍开放。最新结果见[code14完成与关闭报告](../community-feedback-closure-20261007/report.md)。
+
 # Android 社区反馈分诊 — 2026-10-07
 
 来源为 [Linux.do 主题 2988062](https://linux.do/t/topic/2988062) 和 [scholay/rimes GitHub issues](https://github.com/scholay/rimes/issues)。本页记录报告、去重与验收要求；**不表示这些问题已修复或已在报告者手机复测**。

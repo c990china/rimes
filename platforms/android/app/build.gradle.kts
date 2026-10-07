@@ -20,7 +20,7 @@ android {
         targetSdk = 37
         testInstrumentationRunner = "org.scholay.rimes.android.EngineInstrumentation"
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
-        versionCode = 13
+        versionCode = 14
         versionName = rimesVersion
     }
     ndkVersion = "29.0.14206865"
