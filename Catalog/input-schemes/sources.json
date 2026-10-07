@@ -1,0 +1,4386 @@
+{
+ "schemaVersion": 1,
+ "packageFormat": 1,
+ "comment": "Curated upstream sources for RIMES scheme packages. Revisions are pinned; scripts/input-schemes/scheme_build.py builds from them.",
+ "providers": {
+  "prelude": {
+   "repo": "rime/rime-prelude",
+   "revision": "082425ea0684bca36474415d4a0e8db9b016487e",
+   "revisionDate": "2026-05-09",
+   "license": "LGPL-3.0",
+   "provides": [
+    "default.yaml",
+    "key_bindings.yaml",
+    "punctuation.yaml",
+    "symbols.yaml"
+   ]
+  },
+  "essay": {
+   "repo": "rime/rime-essay",
+   "revision": "054920de4f54c9e5994276a96a4fc2a35cb51aa3",
+   "revisionDate": "2026-09-23",
+   "license": "LGPL-3.0",
+   "provides": [
+    "essay.txt"
+   ]
+  },
+  "essay-simp": {
+   "repo": "rime/rime-essay-simp",
+   "revision": "dc06d4c96ae72ad46b29e3aa824a5d1e8f721fd0",
+   "revisionDate": "2022-01-14",
+   "license": "LGPL-3.0",
+   "provides": [
+    "essay-zh-hans.txt"
+   ]
+  },
+  "luna-pinyin": {
+   "repo": "rime/rime-luna-pinyin",
+   "revision": "56b934b099dfbeab842320f13aa8b461a6ab3e42",
+   "revisionDate": "2026-07-12",
+   "license": "LGPL-3.0",
+   "provides": [
+    "luna_pinyin.dict.yaml",
+    "luna_pinyin.schema.yaml",
+    "luna_pinyin_fluency.schema.yaml",
+    "luna_pinyin_simp.schema.yaml",
+    "luna_pinyin_tw.schema.yaml",
+    "luna_quanpin.schema.yaml",
+    "pinyin.yaml"
+   ]
+  },
+  "stroke": {
+   "repo": "rime/rime-stroke",
+   "revision": "1e8fff9b9494ddec23b0cbc526bcfd8171a6fd48",
+   "revisionDate": "2026-08-26",
+   "license": "LGPL-3.0",
+   "provides": [
+    "stroke.dict.yaml",
+    "stroke.schema.yaml"
+   ]
+  },
+  "pinyin-simp": {
+   "repo": "rime/rime-pinyin-simp",
+   "revision": "0c6861ef7420ee780270ca6d993d18d4101049d0",
+   "revisionDate": "2024-12-29",
+   "license": "Apache-2.0",
+   "provides": [
+    "pinyin_simp.dict.yaml",
+    "pinyin_simp.schema.yaml"
+   ]
+  },
+  "terra-pinyin": {
+   "repo": "rime/rime-terra-pinyin",
+   "revision": "723e51bc266cf9464530c1ddedb856aa18e3da34",
+   "revisionDate": "2026-09-18",
+   "license": "LGPL-3.0",
+   "provides": [
+    "terra_pinyin.dict.yaml",
+    "terra_pinyin.schema.yaml",
+    "terra_pinyin_12345.schema.yaml"
+   ]
+  },
+  "cangjie": {
+   "repo": "rime/rime-cangjie",
+   "revision": "52d90a1b1312e74042b38c1cbc8142defbc53171",
+   "revisionDate": "2026-06-01",
+   "license": "LGPL-3.0",
+   "provides": [
+    "cangjie5.base.dict.yaml",
+    "cangjie5.dict.yaml",
+    "cangjie5.extended.dict.yaml",
+    "cangjie5.schema.yaml",
+    "cangjie5.stem.dict.yaml",
+    "cangjie5_char.dict.yaml",
+    "cangjie5_express.schema.yaml"
+   ]
+  },
+  "bopomofo": {
+   "repo": "rime/rime-bopomofo",
+   "revision": "6085c9a38a4a728047862b33d67eee18aa86f3b9",
+   "revisionDate": "2026-05-09",
+   "license": "LGPL-3.0",
+   "provides": [
+    "bopomofo.schema.yaml",
+    "bopomofo_express.schema.yaml",
+    "bopomofo_tw.schema.yaml",
+    "detenele.schema.yaml",
+    "zhuyin.yaml"
+   ]
+  },
+  "cantonese": {
+   "repo": "rime/rime-cantonese",
+   "revision": "259f0e48bba840c3a2e0d117539e96937f3d89bc",
+   "revisionDate": "2026-08-13",
+   "license": "CC-BY-4.0",
+   "provides": [
+    "essay-cantonese.txt",
+    "jyut6ping3.chars.dict.yaml",
+    "jyut6ping3.dict.yaml",
+    "jyut6ping3.lettered.dict.yaml",
+    "jyut6ping3.maps.dict.yaml",
+    "jyut6ping3.phrase.dict.yaml",
+    "jyut6ping3.schema.yaml",
+    "jyut6ping3.words.dict.yaml",
+    "jyut6ping3_ipa.schema.yaml",
+    "opencc/HKVariantsFull.txt",
+    "opencc/t2hkf.json",
+    "symbols_cantonese.yaml"
+   ]
+  },
+  "double-pinyin": {
+   "repo": "rime/rime-double-pinyin",
+   "revision": "01a13287cbd27819be1c34fa1ddc1b3643d5001b",
+   "revisionDate": "2025-09-23",
+   "license": "GPL-3.0",
+   "provides": [
+    "double_pinyin.schema.yaml",
+    "double_pinyin_abc.schema.yaml",
+    "double_pinyin_flypy.schema.yaml",
+    "double_pinyin_mspy.schema.yaml",
+    "double_pinyin_pyjj.schema.yaml",
+    "double_pinyin_st.schema.yaml"
+   ]
+  },
+  "wubi": {
+   "repo": "rime/rime-wubi",
+   "revision": "152a0d3f3efe40cae216d1e3b338242446848d07",
+   "revisionDate": "2023-10-25",
+   "license": "LGPL-3.0",
+   "provides": [
+    "wubi86.dict.yaml",
+    "wubi86.schema.yaml",
+    "wubi_pinyin.schema.yaml",
+    "wubi_trad.schema.yaml"
+   ]
+  },
+  "quick": {
+   "repo": "rime/rime-quick",
+   "revision": "5dcdb9e353d314239e9c8cddc0f42d52da4837bb",
+   "revisionDate": "2026-07-17",
+   "license": "LGPL-3.0",
+   "provides": [
+    "quick5.dict.yaml",
+    "quick5.schema.yaml",
+    "quick5.supplement.dict.yaml"
+   ]
+  },
+  "emoji": {
+   "repo": "rime/rime-emoji",
+   "revision": "d1dbb424124fc50452a179300c7f287dbcc0db64",
+   "revisionDate": "2026-03-25",
+   "license": "LGPL-3.0",
+   "provides": [
+    "emoji_suggestion.yaml",
+    "opencc/emoji.json",
+    "opencc/emoji_category.txt",
+    "opencc/emoji_word.txt"
+   ]
+  },
+  "easy-en": {
+   "repo": "BlindingDark/rime-easy-en",
+   "revision": "54a4a07289412efc54134092c0d945f895a71ed3",
+   "revisionDate": "2025-02-28",
+   "license": "LGPL-3.0",
+   "provides": [
+    "easy_en.dict.yaml",
+    "easy_en.schema.yaml",
+    "easy_en.yaml",
+    "lua/easy_en.lua"
+   ]
+  },
+  "melt": {
+   "repo": "tumuyan/rime-melt",
+   "revision": "17fb3fa5e99a79daf8756b6daf78b65ecd1f3708",
+   "revisionDate": "2026-06-30",
+   "license": "Apache-2.0",
+   "provides": [
+    "custom/pinyin_simp_custom.dict.yaml",
+    "liangfen.dict.yaml",
+    "liangfen.schema.yaml",
+    "lua/melt_autocap.lua",
+    "lua/melt_helpers.lua",
+    "lua/melt_jpcharset.lua",
+    "lua/melt_longword.lua",
+    "lua/melt_oo_filter.lua",
+    "lua/melt_oo_processor.lua",
+    "lua/melt_oo_state.lua",
+    "lua/melt_oo_translator.lua",
+    "lua/melt_quick.lua",
+    "lua/melt_save_word.lua",
+    "melt_eng.dict.yaml",
+    "melt_eng.schema.yaml",
+    "melt_mult_language.dict.yaml",
+    "melt_pinyin.dict.yaml",
+    "melt_pinyin.schema.yaml",
+    "opencc/PYCharacters.txt",
+    "opencc/PYPhrases.txt",
+    "opencc/pinyin.json",
+    "others/whitelist.txt",
+    "others/修复-AI.txt",
+    "others/修复-村县镇乡路村縣鎮鄉路.txt",
+    "others/修复-混合词条.txt",
+    "others/废词-AI.txt",
+    "others/废词-属.txt",
+    "others/废词-村县镇乡路村縣鎮鄉路.txt",
+    "others/废词-村县镇乡路村縣鎮鄉路2.txt",
+    "others/废词-混合词条.txt",
+    "others/废词.txt",
+    "pinyin_simp.main.dict.yaml",
+    "pinyin_simp_base.dict.yaml",
+    "pinyin_simp_chengyu.dict.yaml",
+    "pinyin_simp_gushi.dict.yaml",
+    "pinyin_simp_liuxing.dict.yaml",
+    "pinyin_simp_moe.dict.yaml",
+    "pinyin_simp_wiki.dict.yaml"
+   ]
+  },
+  "radical-pinyin": {
+   "repo": "mirtlecn/rime-radical-pinyin",
+   "revision": "87e73d7182916f3db9dbc0b6a4d18a78a775b298",
+   "revisionDate": "2026-06-18",
+   "license": "GPL-3.0",
+   "provides": [
+    "lua/search.lua",
+    "radical.schema.yaml",
+    "radical_flypy.dict.yaml",
+    "radical_pinyin.dict.yaml",
+    "radical_pinyin.schema.yaml",
+    "src/requirements.txt"
+   ]
+  },
+  "loengfan": {
+   "repo": "CanCLID/rime-loengfan",
+   "revision": "987ac95b02f957e8764a2f45222a4006c188ed50",
+   "revisionDate": "2022-03-03",
+   "license": "CC-BY-4.0",
+   "provides": [
+    ".build/override.txt",
+    ".build/radicals.txt",
+    "loengfan.dict.yaml",
+    "loengfan.schema.yaml"
+   ]
+  },
+  "jyutping": {
+   "repo": "rime/rime-jyutping",
+   "revision": "ee5e72b2b50a6708162a0402b91f257323bf852b",
+   "revisionDate": "2025-12-30",
+   "license": "LGPL-3.0",
+   "provides": [
+    "hkcantonese.schema.yaml",
+    "jyutping.dict.yaml",
+    "jyutping.lettered.dict.yaml",
+    "jyutping.phrase.dict.yaml",
+    "jyutping.schema.yaml",
+    "yale.schema.yaml"
+   ]
+  },
+  "rime-ice": {
+   "repo": "iDvel/rime-ice",
+   "revision": "da1fbe602e38f26db846fa10120ee64c2b0324c0",
+   "revisionDate": "2026-10-05",
+   "license": "GPL-3.0",
+   "provides": [
+    "cn_dicts/41448.dict.yaml",
+    "cn_dicts/8105.dict.yaml",
+    "cn_dicts/base.dict.yaml",
+    "cn_dicts/ext.dict.yaml",
+    "cn_dicts/others.dict.yaml",
+    "cn_dicts/tencent.dict.yaml",
+    "custom_phrase.txt",
+    "default.yaml",
+    "double_pinyin.schema.yaml",
+    "double_pinyin_abc.schema.yaml",
+    "double_pinyin_flypy.schema.yaml",
+    "double_pinyin_jiajia.schema.yaml",
+    "double_pinyin_mspy.schema.yaml",
+    "double_pinyin_sogou.schema.yaml",
+    "double_pinyin_ziguang.schema.yaml",
+    "en_dicts/cn_en.txt",
+    "en_dicts/cn_en_abc.txt",
+    "en_dicts/cn_en_double_pinyin.txt",
+    "en_dicts/cn_en_flypy.txt",
+    "en_dicts/cn_en_jiajia.txt",
+    "en_dicts/cn_en_mspy.txt",
+    "en_dicts/cn_en_sogou.txt",
+    "en_dicts/cn_en_ziguang.txt",
+    "en_dicts/en.dict.yaml",
+    "en_dicts/en_ext.dict.yaml",
+    "lua/autocap_filter.lua",
+    "lua/calc_translator.lua",
+    "lua/cn_en_spacer.lua",
+    "lua/cold_word_drop/drop_words.lua",
+    "lua/cold_word_drop/filter.lua",
+    "lua/cold_word_drop/hide_words.lua",
+    "lua/cold_word_drop/logger.lua",
+    "lua/cold_word_drop/metatable.lua",
+    "lua/cold_word_drop/processor.lua",
+    "lua/cold_word_drop/reduce_freq_words.lua",
+    "lua/cold_word_drop/string.lua",
+    "lua/convert_ar_num_to_zh.lua",
+    "lua/corrector.lua",
+    "lua/date_translator.lua",
+    "lua/debuger.lua",
+    "lua/en_spacer.lua",
+    "lua/force_gc.lua",
+    "lua/is_in_user_dict.lua",
+    "lua/long_word_filter.lua",
+    "lua/lunar.db",
+    "lua/lunar.lua",
+    "lua/number_translator.lua",
+    "lua/pin_cand_filter.lua",
+    "lua/reduce_english_filter.lua",
+    "lua/search.lua",
+    "lua/select_character.lua",
+    "lua/t9_preedit.lua",
+    "lua/unicode.lua",
+    "lua/uuid.lua",
+    "lua/v_filter.lua",
+    "melt_eng.dict.yaml",
+    "melt_eng.schema.yaml",
+    "opencc/emoji.json",
+    "opencc/emoji.txt",
+    "opencc/others.txt",
+    "others/cn_en.txt",
+    "others/emoji-map.txt",
+    "radical_pinyin.dict.yaml",
+    "radical_pinyin.schema.yaml",
+    "rime_ice.dict.yaml",
+    "rime_ice.schema.yaml",
+    "squirrel.yaml",
+    "symbols_caps_v.yaml",
+    "symbols_v.yaml",
+    "t9.schema.yaml",
+    "weasel.yaml"
+   ]
+  },
+  "opencc": {
+   "type": "local",
+   "path": "Vendor/rime/SharedSupport",
+   "origin": "BYVoid/OpenCC data as shipped in rime/squirrel 1.1.2",
+   "version": "squirrel-1.1.2",
+   "license": "Apache-2.0",
+   "hint": "run scripts/fetch-rime.sh",
+   "provides": [
+    "opencc/HKVariants.ocd2",
+    "opencc/HKVariantsRev.ocd2",
+    "opencc/HKVariantsRevPhrases.ocd2",
+    "opencc/JPShinjitaiCharacters.ocd2",
+    "opencc/JPShinjitaiPhrases.ocd2",
+    "opencc/JPVariants.ocd2",
+    "opencc/JPVariantsRev.ocd2",
+    "opencc/STCharacters.ocd2",
+    "opencc/STPhrases.ocd2",
+    "opencc/TSCharacters.ocd2",
+    "opencc/TSPhrases.ocd2",
+    "opencc/TWPhrases.ocd2",
+    "opencc/TWPhrasesRev.ocd2",
+    "opencc/TWVariants.ocd2",
+    "opencc/TWVariantsRev.ocd2",
+    "opencc/TWVariantsRevPhrases.ocd2",
+    "opencc/hk2s.json",
+    "opencc/jp2t.json",
+    "opencc/s2hk.json",
+    "opencc/s2t.json",
+    "opencc/s2tw.json",
+    "opencc/s2twp.json",
+    "opencc/t2hk.json",
+    "opencc/t2jp.json",
+    "opencc/t2s.json",
+    "opencc/t2tw.json",
+    "opencc/tw2s.json",
+    "opencc/tw2sp.json"
+   ]
+  }
+ },
+ "packages": [
+  {
+   "id": "luna-pinyin",
+   "nameZH": "朙月拼音",
+   "nameEN": "Luna Pinyin",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "rime/rime-luna-pinyin",
+   "revision": "56b934b099dfbeab842320f13aa8b461a6ab3e42",
+   "revisionDate": "2026-07-12",
+   "schemas": [
+    "luna_pinyin",
+    "luna_pinyin_simp",
+    "luna_pinyin_tw",
+    "luna_pinyin_fluency",
+    "luna_quanpin"
+   ],
+   "license": "LGPL-3.0",
+   "probes": [
+    {
+     "schema": "luna_pinyin",
+     "keys": "nihao",
+     "expect": "你好"
+    },
+    {
+     "schema": "luna_pinyin_simp",
+     "keys": "zhongguo",
+     "expect": "中国"
+    }
+   ]
+  },
+  {
+   "id": "pinyin-simp",
+   "nameZH": "袖珍简化字拼音",
+   "nameEN": "Pinyin Simp",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "rime/rime-pinyin-simp",
+   "revision": "0c6861ef7420ee780270ca6d993d18d4101049d0",
+   "revisionDate": "2024-12-29",
+   "license": "Apache-2.0",
+   "probes": [
+    {
+     "schema": "pinyin_simp",
+     "keys": "nihao",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "terra-pinyin",
+   "nameZH": "地球拼音（带声调）",
+   "nameEN": "Terra Pinyin",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "rime/rime-terra-pinyin",
+   "revision": "723e51bc266cf9464530c1ddedb856aa18e3da34",
+   "revisionDate": "2026-09-18",
+   "license": "LGPL-3.0",
+   "probes": [
+    {
+     "schema": "terra_pinyin",
+     "keys": "nihao",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "rime-ice",
+   "nameZH": "雾凇拼音",
+   "nameEN": "Rime Ice",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "iDvel/rime-ice",
+   "revision": "da1fbe602e38f26db846fa10120ee64c2b0324c0",
+   "revisionDate": "2026-10-05",
+   "schemas": [
+    "rime_ice",
+    "double_pinyin",
+    "double_pinyin_flypy",
+    "double_pinyin_mspy",
+    "double_pinyin_sogou",
+    "double_pinyin_abc",
+    "double_pinyin_ziguang",
+    "double_pinyin_jiajia",
+    "t9"
+   ],
+   "license": "GPL-3.0",
+   "probes": [
+    {
+     "schema": "rime_ice",
+     "keys": "nihao",
+     "expect": "你好"
+    },
+    {
+     "schema": "double_pinyin_flypy",
+     "keys": "nihc",
+     "expect": "你好"
+    },
+    {
+     "schema": "double_pinyin",
+     "keys": "nihk",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "rime-frost",
+   "nameZH": "白霜拼音",
+   "nameEN": "Rime Frost",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "gaboolic/rime-frost",
+   "revision": "4a5457badafbdc733b09a350aeb3e8b076f025d8",
+   "revisionDate": "2026-10-05",
+   "schemas": [
+    "rime_frost",
+    "rime_frost_double_pinyin",
+    "rime_frost_double_pinyin_flypy",
+    "rime_frost_double_pinyin_mspy",
+    "rime_frost_double_pinyin_sogou",
+    "rime_frost_double_pinyin_abc",
+    "rime_frost_double_pinyin_ziguang",
+    "rime_frost_t9"
+   ],
+   "license": "GPL-3.0",
+   "probes": [
+    {
+     "schema": "rime_frost",
+     "keys": "nihao",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "wanxiang",
+   "nameZH": "万象拼音",
+   "nameEN": "Wanxiang Pinyin",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "amzxyz/rime-wanxiang",
+   "revision": "11f31d42f24295a6a5a2ebdcac92240f65b7ca75",
+   "revisionDate": "2026-10-06",
+   "schemas": [
+    "wanxiang"
+   ],
+   "license": "CC-BY-4.0",
+   "probes": [
+    {
+     "schema": "wanxiang",
+     "keys": "nihao",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "oh-my-rime",
+   "nameZH": "薄荷拼音",
+   "nameEN": "Oh My Rime (Mint)",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "Mintimate/oh-my-rime",
+   "revision": "0b1d78474f5c11bdca78593b525bc2186be6c111",
+   "revisionDate": "2026-09-29",
+   "schemas": [
+    "rime_mint",
+    "rime_mint_flypy",
+    "double_pinyin",
+    "double_pinyin_flypy",
+    "double_pinyin_mspy",
+    "double_pinyin_sogou",
+    "double_pinyin_abc",
+    "double_pinyin_ziguang",
+    "terra_pinyin",
+    "wubi86_jidian",
+    "wubi98_mint",
+    "t9"
+   ],
+   "license": "GPL-3.0",
+   "probes": [
+    {
+     "schema": "rime_mint",
+     "keys": "nihao",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "clover",
+   "nameZH": "四叶草拼音",
+   "nameEN": "Clover Pinyin",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "fkxxyz/rime-cloverpinyin",
+   "revision": "efdfb69688e832d875aad13679fa34ab235cbf54",
+   "revisionDate": "2023-03-26",
+   "root": "src",
+   "license": "LGPL-3.0",
+   "note": "Dictionaries are generated by the upstream build and published in its release archives."
+  },
+  {
+   "id": "aurora-pinyin",
+   "nameZH": "极光拼音",
+   "nameEN": "Aurora Pinyin",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "hosxy/rime-aurora-pinyin",
+   "revision": "122b46976401995cbafcfc748806985ff3a437a4",
+   "revisionDate": "2022-08-27",
+   "license": "Apache-2.0",
+   "probes": [
+    {
+     "schema": "aurora_pinyin",
+     "keys": "nihao",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "lufs-pinyin",
+   "nameZH": "LufsX 拼音",
+   "nameEN": "LufsX Pinyin",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "LufsX/rime",
+   "revision": "7494db85020f145e76b6098ff591b25d9e3c3eda",
+   "revisionDate": "2026-10-05",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "putonghua",
+   "nameZH": "有声调普通话拼音",
+   "nameEN": "Putonghua (toned)",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "ayaka14732/rime-putonghua",
+   "revision": "efd8729d089d7255ef8596bf56679ec6eaa9e0f8",
+   "revisionDate": "2020-09-16",
+   "license": "CC-BY-4.0"
+  },
+  {
+   "id": "rime-crane",
+   "nameZH": "凇鹤拼音",
+   "nameEN": "Rime Crane",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "kchen0x/rime-crane",
+   "revision": "71f3add6a39d58a8e8b35abc7ca9c998d766b274",
+   "revisionDate": "2026-09-10",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "snow-pinyin",
+   "nameZH": "冰雪拼音",
+   "nameEN": "Snow Pinyin",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "rimeinn/rime-snow-pinyin",
+   "revision": "9a7257c80a3eb623a89cc1be0aa82107cd819084",
+   "revisionDate": "2026-10-06",
+   "license": "GPL-3.0",
+   "probes": [
+    {
+     "schema": "snow_pinyin",
+     "keys": "nihao",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "melt-pinyin",
+   "nameZH": "融合拼音",
+   "nameEN": "Melt Pinyin",
+   "category": "phonetic",
+   "family": "quanpin",
+   "repo": "tumuyan/rime-melt",
+   "revision": "17fb3fa5e99a79daf8756b6daf78b65ecd1f3708",
+   "revisionDate": "2026-06-30",
+   "schemas": [
+    "melt_pinyin",
+    "melt_eng"
+   ],
+   "license": "Apache-2.0"
+  },
+  {
+   "id": "double-pinyin",
+   "nameZH": "双拼（自然码 · 智能ABC · 小鹤 · 微软 · 拼音加加）",
+   "nameEN": "Double Pinyin",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "rime/rime-double-pinyin",
+   "revision": "01a13287cbd27819be1c34fa1ddc1b3643d5001b",
+   "revisionDate": "2025-09-23",
+   "license": "GPL-3.0",
+   "probes": [
+    {
+     "schema": "double_pinyin",
+     "keys": "nihk",
+     "expect": "你好"
+    },
+    {
+     "schema": "double_pinyin_flypy",
+     "keys": "nihc",
+     "expect": "你好"
+    },
+    {
+     "schema": "double_pinyin_mspy",
+     "keys": "nihk",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "ossp-guan",
+   "nameZH": "冠双拼",
+   "nameEN": "OSSP Guan",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "sp-study-group/ossp-guan",
+   "revision": "b02c1de2736ff4f663a062257ae03a0a44eea73e",
+   "revisionDate": "2019-01-09",
+   "root": "Rime配置",
+   "license": "MIT"
+  },
+  {
+   "id": "ziguang-shuangpin",
+   "nameZH": "紫光双拼",
+   "nameEN": "Ziguang Shuangpin",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "waveform/ziguang_shuangpin",
+   "revision": "62b29f43a5230043404427aeae23f666bc1a2368",
+   "revisionDate": "2022-08-18",
+   "license": null
+  },
+  {
+   "id": "tone-double-pinyin",
+   "nameZH": "带声调双拼",
+   "nameEN": "Toned Double Pinyin",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "zaqzrh/Tone-double_pinyin",
+   "revision": "6ec055f10f84f080508b79917ff19d6e65a5d8c3",
+   "revisionDate": "2017-01-26",
+   "license": null
+  },
+  {
+   "id": "td-pinyin-flypy",
+   "nameZH": "带调小鹤双拼",
+   "nameEN": "Toned Flypy Double Pinyin",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "gkovacs/rime-td-pinyin-flypy",
+   "revision": "185520cd4e96276a89313f24d0568cdaed0ff82c",
+   "revisionDate": "2023-05-03",
+   "schemas": [
+    "td_pinyin_flypy"
+   ],
+   "license": null
+  },
+  {
+   "id": "triple-pinyin-lssp",
+   "nameZH": "李氏三拼",
+   "nameEN": "Li Triple Pinyin",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "arsenali/rime-triple-pinyin-lssp",
+   "revision": "709e308d582639d533abf0fe9651a69bb72ab799",
+   "revisionDate": "2026-09-19",
+   "license": "LGPL-3.0"
+  },
+  {
+   "id": "guobiao-quick",
+   "nameZH": "国标双拼 · 三拼（GB/T 34947）",
+   "nameEN": "Guobiao Double/Triple Spelling",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "baopaau/rime-guobiao-quick",
+   "revision": "1283ba5b6980b54348904be2b582f7cd4d101fd2",
+   "revisionDate": "2024-10-14",
+   "license": null
+  },
+  {
+   "id": "shuangpin-earth",
+   "nameZH": "地球双拼",
+   "nameEN": "Earth Shuangpin",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "macroxue/shuangpin",
+   "revision": "cd74b9505c6b4bf905466d6f7ecb6bcf10ab5caf",
+   "revisionDate": "2024-02-07",
+   "root": "earth地球",
+   "overlays": [
+    "mars火星"
+   ],
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "shuangpin-mars",
+   "nameZH": "火星双拼",
+   "nameEN": "Mars Shuangpin",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "macroxue/shuangpin",
+   "revision": "cd74b9505c6b4bf905466d6f7ecb6bcf10ab5caf",
+   "revisionDate": "2024-02-07",
+   "root": "mars火星",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "pindu-double-pinyin",
+   "nameZH": "拼读带调双拼",
+   "nameEN": "Pindu Toned Double Pinyin",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "zhanghaozhecn/rime-pindu-double-pinyin",
+   "revision": "e056295b10b543dde173eec19fe71917082ea6bc",
+   "revisionDate": "2026-08-10",
+   "license": "LicenseRef-attribution",
+   "redistribution": "open"
+  },
+  {
+   "id": "st-double-pinyin",
+   "nameZH": "ST 双拼",
+   "nameEN": "ST Double Pinyin",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "LS-Hower/st-double-pinyin",
+   "revision": "9ff6a1b277071128877a67a3ec69785aaddabe7f",
+   "revisionDate": "2023-06-18",
+   "license": null
+  },
+  {
+   "id": "shouwen",
+   "nameZH": "首文双拼",
+   "nameEN": "Shouwen Double Pinyin",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "arucil/rime-shouwen",
+   "revision": "67ca0f086892fb81429786c326f665382432bf75",
+   "revisionDate": "2026-08-12",
+   "root": "rime",
+   "schemas": [
+    "double_pinyin_shouwen"
+   ],
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "flying-cat",
+   "nameZH": "飞猫双拼",
+   "nameEN": "Flying Cat Shuangpin",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "zebats/flying-cat-rime",
+   "revision": "dbe34276e21c16cad4b3e489198d2dc0ae81f0eb",
+   "revisionDate": "2023-04-28",
+   "license": null
+  },
+  {
+   "id": "double-pinyin-abc-liangfen",
+   "nameZH": "智能ABC双拼 · 双拼两分",
+   "nameEN": "ABC Double Pinyin with Liangfen",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "saeziae/rime-double-pinyin",
+   "revision": "533707e58588a1a4d1be48e8dc97982029ccc314",
+   "revisionDate": "2024-02-24",
+   "license": null
+  },
+  {
+   "id": "lxsp",
+   "nameZH": "落萧双拼",
+   "nameEN": "Luoxiao Shuangpin",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "rimeinn/rime-lxsp",
+   "revision": "7fdd911ab3878ddd398f144ad7a2c67fd97edc32",
+   "revisionDate": "2024-03-19",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "bispel",
+   "nameZH": "雙拼（baopaau）",
+   "nameEN": "Bispell",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "baopaau/rime-bispel",
+   "revision": "cf4c44adb2501e8dccc4435249b23cc86c3ad725",
+   "revisionDate": "2020-12-05",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "hepy",
+   "nameZH": "小鹤双拼（hepy）",
+   "nameEN": "Flypy Double Pinyin (hepy)",
+   "category": "phonetic",
+   "family": "shuangpin",
+   "repo": "nlimpid/rime-hepy",
+   "revision": "432eb25d58b140558825a7d71ab75fd950a9c200",
+   "revisionDate": "2014-07-21",
+   "license": "GPL-2.0"
+  },
+  {
+   "id": "bopomofo",
+   "nameZH": "注音",
+   "nameEN": "Bopomofo",
+   "category": "phonetic",
+   "family": "zhuyin",
+   "repo": "rime/rime-bopomofo",
+   "revision": "6085c9a38a4a728047862b33d67eee18aa86f3b9",
+   "revisionDate": "2026-05-09",
+   "license": "LGPL-3.0",
+   "probes": [
+    {
+     "schema": "bopomofo",
+     "keys": "su3cl3",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "iridium-bpmf",
+   "nameZH": "銥注音",
+   "nameEN": "Iridium Bopomofo",
+   "category": "phonetic",
+   "family": "zhuyin",
+   "repo": "andy0130tw/iridium-bpmf",
+   "revision": "345ea14e504c82f9bd1fa6b3f5a356cc6f91a1a3",
+   "revisionDate": "2026-09-11",
+   "license": "MPL-2.0"
+  },
+  {
+   "id": "double-bopomo",
+   "nameZH": "雙碼注音",
+   "nameEN": "Double Bopomo",
+   "category": "phonetic",
+   "family": "zhuyin",
+   "repo": "imper0502/rime-double-bopomo",
+   "revision": "2a71fc880804884dd09f66526267acaf8c3f0868",
+   "revisionDate": "2025-07-11",
+   "schemas": [
+    "double_bopomo",
+    "abbreviated_bopomo"
+   ],
+   "license": "LGPL-3.0"
+  },
+  {
+   "id": "onion-bopomo",
+   "nameZH": "洋蔥注音",
+   "nameEN": "Onion Bopomofo",
+   "category": "phonetic",
+   "family": "zhuyin",
+   "repo": "oniondelta/Onion_Rime_Files",
+   "revision": "c1bdd633938205ffc8afba217e8f735c11a1ab3d",
+   "revisionDate": "2026-10-02",
+   "root": "rimefiles",
+   "schemas": [
+    "bopomo_onion",
+    "bopomo_onionplus"
+   ],
+   "license": null
+  },
+  {
+   "id": "bopomofo-eten26",
+   "nameZH": "倚天26鍵注音",
+   "nameEN": "Bopomofo Eten 26",
+   "category": "phonetic",
+   "family": "zhuyin",
+   "repo": "loustack17/Bopomofo_Eten26_Rime",
+   "revision": "d984f2ccdf41226baf6c151281122e973b5eae3f",
+   "revisionDate": "2026-02-23",
+   "license": "MIT"
+  },
+  {
+   "id": "bepemefeve",
+   "nameZH": "老國音注音",
+   "nameEN": "Old National Pronunciation",
+   "category": "phonetic",
+   "family": "zhuyin",
+   "repo": "baopaau/rime-bepemefeve",
+   "revision": "205bf7cfa170142283c892182c2cbca27d12fe8e",
+   "revisionDate": "2024-10-20",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "mps2",
+   "nameZH": "注音二式",
+   "nameEN": "MPS II",
+   "category": "phonetic",
+   "family": "romanization",
+   "repo": "baopaau/rime-mps2",
+   "revision": "fe6b9e9c24ec5888022db63e7ec22fd9d6c509b9",
+   "revisionDate": "2020-12-08",
+   "license": null
+  },
+  {
+   "id": "romatzyh",
+   "nameZH": "國語羅馬字",
+   "nameEN": "Gwoyeu Romatzyh",
+   "category": "phonetic",
+   "family": "romanization",
+   "repo": "fuzy112/rime-romatzyh",
+   "revision": "f790f262063a14428677b3539d37dbbd0e8401e1",
+   "revisionDate": "2025-06-07",
+   "license": null
+  },
+  {
+   "id": "tungdzih",
+   "nameZH": "通字羅馬字",
+   "nameEN": "Tungdzih",
+   "category": "phonetic",
+   "family": "romanization",
+   "repo": "baopaau/rime-tungdzih",
+   "revision": "67e7b2cc6ec03ba7c680104192ea48cb7ef36331",
+   "revisionDate": "2021-03-28",
+   "license": null
+  },
+  {
+   "id": "gorlor",
+   "nameZH": "三拼國羅",
+   "nameEN": "Xanpin Gorlor",
+   "category": "phonetic",
+   "family": "romanization",
+   "repo": "baopaau/rime-gorlor",
+   "revision": "b0a7ae3cbdd780dcab52893ee259ae29f445e1bf",
+   "revisionDate": "2020-11-27",
+   "license": null
+  },
+  {
+   "id": "yale-mandarin",
+   "nameZH": "國語耶魯拼音",
+   "nameEN": "Yale Mandarin",
+   "category": "phonetic",
+   "family": "romanization",
+   "repo": "baopaau/rime-yale-mandarin",
+   "revision": "754225b2876faaebed4ccab3b862da9b9f382200",
+   "revisionDate": "2021-03-11",
+   "license": null
+  },
+  {
+   "id": "pinyin-translating",
+   "nameZH": "拼音互譯",
+   "nameEN": "Pinyin Translating",
+   "category": "phonetic",
+   "family": "romanization",
+   "repo": "baopaau/rime-pinyin-translating",
+   "revision": "e17ffe0ecfd9bdd705d5a0d1f6bc4b53c2d8efe7",
+   "revisionDate": "2020-12-09",
+   "license": null
+  },
+  {
+   "id": "tyungrua",
+   "nameZH": "中華拼音",
+   "nameEN": "Tyungrua",
+   "category": "phonetic",
+   "family": "romanization",
+   "repo": "qpng/tyungrua",
+   "revision": "534c85223495c1f048dcb27ed4940b385bded4b2",
+   "revisionDate": "2021-01-30",
+   "license": null
+  },
+  {
+   "id": "lau-guoq-in",
+   "nameZH": "老國音",
+   "nameEN": "Lau Guoq In",
+   "category": "phonetic",
+   "family": "romanization",
+   "repo": "jacob-us/lau_guoq_in",
+   "revision": "0c58f937382dca2b4144ee85aa739b57da9b6b68",
+   "revisionDate": "2016-07-23",
+   "license": null
+  },
+  {
+   "id": "xintalng-pinyin",
+   "nameZH": "新唐拼音",
+   "nameEN": "Xintalng Pinyin",
+   "category": "phonetic",
+   "family": "romanization",
+   "repo": "tsauibusato/xintalng_pinyin",
+   "revision": "9b54fac33903ada4d0b9e1b4267ff177490f7b34",
+   "revisionDate": "2016-11-22",
+   "license": "Apache-2.0"
+  },
+  {
+   "id": "zhupin",
+   "nameZH": "注拼",
+   "nameEN": "Toned Zhupin",
+   "category": "phonetic",
+   "family": "romanization",
+   "repo": "mksinicus/rime-zhupin",
+   "revision": "0ecde61df547843e6b376fbae97ac141b2f69c62",
+   "revisionDate": "2025-08-19",
+   "license": "Unlicense"
+  },
+  {
+   "id": "combo-pinyin",
+   "nameZH": "宫保拼音",
+   "nameEN": "Combo Pinyin",
+   "category": "phonetic",
+   "family": "chord",
+   "repo": "rime/rime-combo-pinyin",
+   "revision": "25e07a1090ee2e9de59cd58a0b3b450dfa3bbc34",
+   "revisionDate": "2026-09-25",
+   "license": "GPL-3.0",
+   "note": "Chord scheme: needs key-release events, which the iOS keyboard does not send to imported schemes."
+  },
+  {
+   "id": "stenotype",
+   "nameZH": "打字速记法",
+   "nameEN": "Stenotype",
+   "category": "phonetic",
+   "family": "chord",
+   "repo": "rime/rime-stenotype",
+   "revision": "bef930831ffe97846fa484a81014ad3e465a25c1",
+   "revisionDate": "2025-10-09",
+   "license": "GPL-3.0",
+   "note": "Chord scheme: needs key-release events, which the iOS keyboard does not send to imported schemes."
+  },
+  {
+   "id": "combo-pinyin-mod",
+   "nameZH": "宫保拼音魔改",
+   "nameEN": "Combo Pinyin Mod",
+   "category": "phonetic",
+   "family": "chord",
+   "repo": "zhanghaozhecn/rime-combo-pinyin-mod",
+   "revision": "e338ac079408df7643e72fa5aded3e78c3381b2b",
+   "revisionDate": "2021-11-24",
+   "license": "GPL-3.0",
+   "note": "Chord scheme: needs key-release events, which the iOS keyboard does not send to imported schemes."
+  },
+  {
+   "id": "kongmingma",
+   "nameZH": "空明码并击",
+   "nameEN": "Kongmingma Chord",
+   "category": "phonetic",
+   "family": "chord",
+   "repo": "miounet/rime-kmm",
+   "revision": "349b52eb0c122d8785e837afc5b5673d315aba32",
+   "revisionDate": "2023-08-22",
+   "license": null,
+   "note": "Chord scheme: needs key-release events, which the iOS keyboard does not send to imported schemes."
+  },
+  {
+   "id": "yoyo",
+   "nameZH": "呦呦音形（并击）",
+   "nameEN": "Yoyo",
+   "category": "phonetic-shape",
+   "family": "chord",
+   "repo": "Rayalizing/yoyo",
+   "revision": "2f9dcc86f04558282c185b7c712630a311b8513b",
+   "revisionDate": "2026-08-13",
+   "root": "rime",
+   "license": null,
+   "note": "Already bundled with RIMES macOS as chord-extension data; upstream declares no license."
+  },
+  {
+   "id": "wubi",
+   "nameZH": "五笔字型 86",
+   "nameEN": "Wubi 86",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "rime/rime-wubi",
+   "revision": "152a0d3f3efe40cae216d1e3b338242446848d07",
+   "revisionDate": "2023-10-25",
+   "license": "LGPL-3.0",
+   "probes": [
+    {
+     "schema": "wubi86",
+     "keys": "wqvb",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "wubi86-jidian",
+   "nameZH": "极点五笔 86",
+   "nameEN": "Wubi 86 Jidian",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "KyleBing/rime-wubi86-jidian",
+   "revision": "513954b197907cb6c5892e6ca2c548c164f8caac",
+   "revisionDate": "2026-09-09",
+   "schemas": [
+    "wubi86_jidian",
+    "wubi86_jidian_pinyin",
+    "wubi86_jidian_trad",
+    "wubi86_jidian_trad_pinyin"
+   ],
+   "license": "Apache-2.0",
+   "probes": [
+    {
+     "schema": "wubi86_jidian",
+     "keys": "wqvb",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "wubi98",
+   "nameZH": "五笔 98",
+   "nameEN": "Wubi 98",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "lotem/rime-wubi98",
+   "revision": "0bc5b2b296f536d38ffe38381d37e5011da55e59",
+   "revisionDate": "2018-04-07",
+   "license": null,
+   "probes": [
+    {
+     "schema": "wubi98",
+     "keys": "wqvb",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "wubi98-yanhuacuo",
+   "nameZH": "98 五笔（码元提示）",
+   "nameEN": "Wubi 98 (yanhuacuo)",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "yanhuacuo/98wubi",
+   "revision": "7fa4a71f62af840c182a7a5417ba5090d0054bf8",
+   "revisionDate": "2025-07-10",
+   "license": "LGPL-3.0"
+  },
+  {
+   "id": "wubi98-arzyu",
+   "nameZH": "五笔 98（arzyu）",
+   "nameEN": "Wubi 98 (arzyu)",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "arzyu/rime-wubi98",
+   "revision": "8df81710956092ceaccbed2366b7cf1be8d593e9",
+   "revisionDate": "2024-09-23",
+   "license": null
+  },
+  {
+   "id": "wubi06",
+   "nameZH": "新世纪五笔",
+   "nameEN": "Wubi New Century",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "byujiang/wubi06_rime",
+   "revision": "fc1cedbb21cde3ca160ce291888fa70697720ab3",
+   "revisionDate": "2020-12-13",
+   "root": "dicts",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "wubixinshiji",
+   "nameZH": "新世纪五笔（GuoBinyong）",
+   "nameEN": "Wubi New Century (GuoBinyong)",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "GuoBinyong/wubixinshiji",
+   "revision": "09093429180d3a84b1002342d695e208c0d3c55d",
+   "revisionDate": "2022-08-31",
+   "license": null
+  },
+  {
+   "id": "wubi06-g178253",
+   "nameZH": "新世纪五笔（g178253）",
+   "nameEN": "Wubi New Century (g178253)",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "g178253/rime-wubi06",
+   "revision": "b10733bb001c0b38917577f51d78834bdc56a35f",
+   "revisionDate": "2019-06-13",
+   "license": "Apache-2.0"
+  },
+  {
+   "id": "wubi06-cnman",
+   "nameZH": "新世纪五笔 Unicode CJK",
+   "nameEN": "Wubi New Century Unicode CJK",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "CNMan/rime-data",
+   "revision": "dfc43d69a4e0c68c408bc3296f89a6359eb218ae",
+   "revisionDate": "2026-09-23",
+   "schemas": [
+    "wubi06_unicodecjk",
+    "wubi06_tygfhzb",
+    "wubi06_big5",
+    "wubi86_jishuang",
+    "wubi98_zhishan",
+    "wubi98_yuqiong"
+   ],
+   "license": null
+  },
+  {
+   "id": "092wb",
+   "nameZH": "092 五笔",
+   "nameEN": "Wubi 092",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "092wb/092wb",
+   "revision": "0892bd40abf32d427bd3bf91763b65d29d5ec624",
+   "revisionDate": "2026-06-25",
+   "license": null
+  },
+  {
+   "id": "wubi091",
+   "nameZH": "091 五笔",
+   "nameEN": "Wubi 091",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "owenyang0/Wubi091-iOS-iRime",
+   "revision": "537721a3842e41fad786a9dd25b29d72bfa998e1",
+   "revisionDate": "2022-10-20",
+   "schemas": [
+    "wubi091"
+   ],
+   "license": "Apache-2.0"
+  },
+  {
+   "id": "wubi091-aliez",
+   "nameZH": "091 五笔（点儿词库）",
+   "nameEN": "Wubi 091 (aLIEz)",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "aLIEz-QI/Rime-wubi091",
+   "revision": "ba6de819e5fa73ef998baccf4d723e96b8ec3a80",
+   "revisionDate": "2022-01-25",
+   "license": null
+  },
+  {
+   "id": "092r",
+   "nameZH": "09 五笔第二代",
+   "nameEN": "Wubi 092R",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "sypxf/092r",
+   "revision": "68850a6532c0fce3c7dc0469543eaa84d9744dfe",
+   "revisionDate": "2020-11-04",
+   "license": null
+  },
+  {
+   "id": "wubi86-super",
+   "nameZH": "五笔 86 超集",
+   "nameEN": "Wubi 86 Super",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "lxgw/wubi86-super",
+   "revision": "f294471463fd10841fa0d58666bb05333e23ff8a",
+   "revisionDate": "2022-06-19",
+   "license": null
+  },
+  {
+   "id": "keke-wubi",
+   "nameZH": "可可五笔（86 · 98 · 新世纪）",
+   "nameEN": "KeKe Wubi",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "KeKeWubi/Rime-KeKeWubi",
+   "revision": "1b11a997619b3aafb4b3808bdb9f0a9cd5438ee9",
+   "revisionDate": "2026-08-08",
+   "license": "MIT"
+  },
+  {
+   "id": "mishi-wubi",
+   "nameZH": "秘史五笔",
+   "nameEN": "Mishi Wubi",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "SkatingCN/rime-mishi-wubi",
+   "revision": "1c28645012a6e280763cdcab53d4aa4d65c0173f",
+   "revisionDate": "2026-09-20",
+   "schemas": [
+    "mishi_wubi",
+    "mishi_wubi_pinyin",
+    "mishi_wubi_trad",
+    "mishi_wubi_trad_pinyin"
+   ],
+   "license": "Apache-2.0"
+  },
+  {
+   "id": "wubi-kingzcheung",
+   "nameZH": "五笔 86 · 98（kingzcheung）",
+   "nameEN": "Wubi 86/98 (kingzcheung)",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "kingzcheung/rime-wubi",
+   "revision": "828d00ff863657108e5186ede135c9eae519c2a3",
+   "revisionDate": "2026-10-06",
+   "schemas": [
+    "wubi86",
+    "wubi86_pinyin",
+    "wubi86_trad",
+    "wubi98"
+   ],
+   "license": "Apache-2.0"
+  },
+  {
+   "id": "wubi-tables",
+   "nameZH": "极点 · QQ 五笔 86",
+   "nameEN": "Wubi Tables (missdeer)",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "missdeer/wubi-tables",
+   "revision": "ff0b3578a6addc316320406b099c60e6bd1b0c39",
+   "revisionDate": "2023-04-25",
+   "license": "Apache-2.0"
+  },
+  {
+   "id": "wubi86go",
+   "nameZH": "谷歌五笔 86",
+   "nameEN": "Google Wubi 86",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "hchunhui/rime-wubi86go",
+   "revision": "ebd6f9dfb45af4af443c8e5a63adec4bf7758a72",
+   "revisionDate": "2017-07-14",
+   "license": null
+  },
+  {
+   "id": "linguistic-wubi",
+   "nameZH": "学界大字符集五笔",
+   "nameEN": "Linguistic Wubi",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "lotem/rime-linguistic-wubi",
+   "revision": "9cdf11319b8cb3f862543db6654c886ac982c42a",
+   "revisionDate": "2018-04-07",
+   "license": null
+  },
+  {
+   "id": "guhuwubi",
+   "nameZH": "孤狐五笔",
+   "nameEN": "Guhu Wubi",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "lotem/rime-guhuwubi",
+   "revision": "8966dd54176706c89a3970567431d7d5205e0b5c",
+   "revisionDate": "2014-09-18",
+   "license": null
+  },
+  {
+   "id": "wubiluna",
+   "nameZH": "五笔朙月流",
+   "nameEN": "Wubiluna",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "allencch/wubiluna",
+   "revision": "d104ea469a4bc16c3f1ce13ce86df185dd077fcc",
+   "revisionDate": "2025-10-05",
+   "schemas": [
+    "wubiluna"
+   ],
+   "license": null
+  },
+  {
+   "id": "powerful86",
+   "nameZH": "powerful86 五笔",
+   "nameEN": "Powerful86 Wubi",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "condexpr01/rime-wubi86ex",
+   "revision": "4da9386db04cc36fa61967cbbc471bf4a1bf7a77",
+   "revisionDate": "2026-10-01",
+   "license": "CC-BY-4.0"
+  },
+  {
+   "id": "wubi-norman",
+   "nameZH": "五笔（Norman 布局）",
+   "nameEN": "Wubi for Norman layout",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "Verf/wubi-norman",
+   "revision": "e58d49f2c186b384f78af5d6bd489e056b22a3af",
+   "revisionDate": "2022-11-04",
+   "root": "rime",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "xinshijiwubi",
+   "nameZH": "新世纪五笔（Pioneer-Linzi）",
+   "nameEN": "Wubi New Century (Pioneer-Linzi)",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "Pioneer-Linzi/xinshijiwubi",
+   "revision": "d876328e735949a86c817c8fd9c51a86090c107f",
+   "revisionDate": "2022-04-07",
+   "schemas": [
+    "xinshijiwubi"
+   ],
+   "license": "LGPL-3.0"
+  },
+  {
+   "id": "wubi-xsj-aizigao",
+   "nameZH": "曦码新世纪五笔",
+   "nameEN": "Xime Wubi New Century",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "aizigao/Xime_wubi_xinshiji",
+   "revision": "4767a4531273c436b63e22412bf4a5c0dc5f839d",
+   "revisionDate": "2026-09-05",
+   "root": "rime",
+   "license": null
+  },
+  {
+   "id": "wubi98-kanskinson",
+   "nameZH": "五笔 98（Oxygen）",
+   "nameEN": "Wubi 98 (Oxygen)",
+   "category": "shape",
+   "family": "wubi",
+   "repo": "kanskinson/wubi98",
+   "revision": "ad84b81051fcb321e1df5622e8322316d97c79f3",
+   "revisionDate": "2021-02-13",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "cangjie",
+   "nameZH": "仓颉五代",
+   "nameEN": "Cangjie 5",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "rime/rime-cangjie",
+   "revision": "52d90a1b1312e74042b38c1cbc8142defbc53171",
+   "revisionDate": "2026-06-01",
+   "license": "LGPL-3.0",
+   "probes": [
+    {
+     "schema": "cangjie5",
+     "keys": "onf",
+     "expect": "你"
+    },
+    {
+     "schema": "cangjie5",
+     "keys": "vnd",
+     "expect": "好"
+    }
+   ]
+  },
+  {
+   "id": "quick",
+   "nameZH": "速成",
+   "nameEN": "Quick 5",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "rime/rime-quick",
+   "revision": "5dcdb9e353d314239e9c8cddc0f42d52da4837bb",
+   "revisionDate": "2026-07-17",
+   "license": "LGPL-3.0",
+   "probes": [
+    {
+     "schema": "quick5",
+     "keys": "of",
+     "expect": "你"
+    }
+   ]
+  },
+  {
+   "id": "scj",
+   "nameZH": "快速仓颉",
+   "nameEN": "Smart Cangjie 6",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "rime/rime-scj",
+   "revision": "cab5a0858765eff0553dd685a2d61d5536e9149c",
+   "revisionDate": "2019-01-20",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "cangjie3-plus",
+   "nameZH": "仓颉三代补完",
+   "nameEN": "Cangjie 3 Plus",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "Arthurmcarthur/Cangjie3-Plus",
+   "revision": "26a3e71f6328ab3aa0505304803bb8d8092ee785",
+   "revisionDate": "2026-09-10",
+   "root": "scripts/build_yaml/source_file",
+   "license": "MIT"
+  },
+  {
+   "id": "cangjie6",
+   "nameZH": "仓颉六代",
+   "nameEN": "Cangjie 6",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "rime-aca/rime-cangjie6",
+   "revision": "81d9f740435bb9d74656f92697b58e7f73ff0d90",
+   "revisionDate": "2025-03-31",
+   "license": null
+  },
+  {
+   "id": "cangjie6-leoyoon",
+   "nameZH": "蒼頡檢字法（六代）",
+   "nameEN": "Cangjie 6 (LEOYoon-Tsaw)",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "LEOYoon-Tsaw/Cangjie6",
+   "revision": "276e4d4aac4364653e6d4050958040d18563c52f",
+   "revisionDate": "2025-03-31",
+   "schemas": [
+    "cangjie6",
+    "cangjie6_express"
+   ],
+   "license": null
+  },
+  {
+   "id": "cangjie-integrated",
+   "nameZH": "仓颉整合（三 · 五 · 六代）",
+   "nameEN": "Cangjie Integrated",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "cangjie-system/rime-cangjie-integrated",
+   "revision": "dcfba770189078a2f7b347793c8e155c3c39275d",
+   "revisionDate": "2022-12-23",
+   "license": "MIT"
+  },
+  {
+   "id": "ms-quick",
+   "nameZH": "微软传统排位速成",
+   "nameEN": "MS Quick",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "philipposkhos/rime-ms-quick",
+   "revision": "0e26801d077860ff0dc55d1445a9f9026a00503a",
+   "revisionDate": "2026-09-28",
+   "license": null
+  },
+  {
+   "id": "simplex",
+   "nameZH": "速成（Yahoo 奇摩码表）",
+   "nameEN": "Simplex",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "PokeGuys/rime-simplex",
+   "revision": "25c59a1998d3f31f2cff22eab909319ecee1b4c3",
+   "revisionDate": "2020-07-15",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "quick5-eason",
+   "nameZH": "速成（Eason）",
+   "nameEN": "Quick 5 (Eason)",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "easonwong-de/RIME-Eason-Quick5",
+   "revision": "5bae83a76387d25b66f5a25aeabdbe807ec8fa53",
+   "revisionDate": "2026-10-01",
+   "license": "MIT"
+  },
+  {
+   "id": "newcj",
+   "nameZH": "大新仓颉",
+   "nameEN": "New Cangjie",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "Joey-Li/Newcj_rime",
+   "revision": "7202cdd5abc1caf011062b9fc9a7faec8139a4d4",
+   "revisionDate": "2019-06-23",
+   "schemas": [
+    "newcj"
+   ],
+   "license": null
+  },
+  {
+   "id": "newcj-white1033",
+   "nameZH": "大新仓颉（white1033）",
+   "nameEN": "New Cangjie (white1033)",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "white1033/rime-newcj",
+   "revision": "4d21438e99276e1d1d4198649897f4074ae8810f",
+   "revisionDate": "2022-06-26",
+   "license": null
+  },
+  {
+   "id": "cangjie-simp",
+   "nameZH": "仓颉 · 简化字",
+   "nameEN": "Cangjie Simplified",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "jlzhjp/rime-cangjie-simp",
+   "revision": "3058147d83845889eeea55be3f1762390c660eff",
+   "revisionDate": "2025-07-08",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "scjc",
+   "nameZH": "快樂倉頡",
+   "nameEN": "Happy Cangjie",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "edjvc/scjc",
+   "revision": "130d5a939f4aa6c19623f4eab1505f1a426bf248",
+   "revisionDate": "2026-08-25",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "whaleliu",
+   "nameZH": "鯨魚舞倉頡",
+   "nameEN": "Whaleliu Cangjie",
+   "category": "shape",
+   "family": "cangjie",
+   "repo": "shewer/whaleliu",
+   "revision": "53334210b6b9665c03e53ead11bbae878b5cff38",
+   "revisionDate": "2022-04-03",
+   "license": null
+  },
+  {
+   "id": "zhengma",
+   "nameZH": "郑码",
+   "nameEN": "Zhengma",
+   "category": "shape",
+   "family": "zhengma",
+   "repo": "acevery/rime-zhengma",
+   "revision": "9afcf57f007ab7bc04f644be086cd940db5511d3",
+   "revisionDate": "2017-12-28",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "zhengma-lotem",
+   "nameZH": "郑码（lotem）",
+   "nameEN": "Zhengma (lotem)",
+   "category": "shape",
+   "family": "zhengma",
+   "repo": "lotem/rime-zhengma",
+   "revision": "bc5873cba2bd5d507d481cc1dec57401d4f9d4c9",
+   "revisionDate": "2019-04-03",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "zhengma-gongmu",
+   "nameZH": "标准郑码",
+   "nameEN": "Zhengma (GongMu)",
+   "category": "shape",
+   "family": "zhengma",
+   "repo": "GongMu/rime-zhengma",
+   "revision": "6199d993ab3041ff43607889a3f2c3d306a1f41d",
+   "revisionDate": "2017-01-12",
+   "license": null
+  },
+  {
+   "id": "zhengma-openvingen",
+   "nameZH": "郑码（安静 · 极点超集 · 单字 · 巨集）",
+   "nameEN": "Zhengma (Openvingen)",
+   "category": "shape",
+   "family": "zhengma",
+   "repo": "Openvingen/rime-zhengma",
+   "revision": "9466bb53cebefb73242b8af3c7360d2cab2013a4",
+   "revisionDate": "2022-10-31",
+   "schemas": [
+    "zhengma",
+    "zmb",
+    "zmbig",
+    "zmjd"
+   ],
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "zhengma-hans",
+   "nameZH": "郑码简体",
+   "nameEN": "Zhengma Hans",
+   "category": "shape",
+   "family": "zhengma",
+   "repo": "vfreex/rime-zhengma",
+   "revision": "6f48be4562f526f13e0a09fcb712573e588fbce2",
+   "revisionDate": "2020-03-31",
+   "root": "zhengma-hans",
+   "license": "MIT"
+  },
+  {
+   "id": "zhengma-hant",
+   "nameZH": "郑码繁体",
+   "nameEN": "Zhengma Hant",
+   "category": "shape",
+   "family": "zhengma",
+   "repo": "vfreex/rime-zhengma",
+   "revision": "6f48be4562f526f13e0a09fcb712573e588fbce2",
+   "revisionDate": "2020-03-31",
+   "root": "zhengma-hant",
+   "license": "MIT"
+  },
+  {
+   "id": "uggx",
+   "nameZH": "郑码（uggx）",
+   "nameEN": "Zhengma (uggx)",
+   "category": "shape",
+   "family": "zhengma",
+   "repo": "X1aomu/rime-uggx",
+   "revision": "264bd8fc71c96faaec08b27d954cc6e087f7ea35",
+   "revisionDate": "2023-03-06",
+   "license": null
+  },
+  {
+   "id": "zhengma-chen32768",
+   "nameZH": "郑码（chen32768）",
+   "nameEN": "Zhengma (chen32768)",
+   "category": "shape",
+   "family": "zhengma",
+   "repo": "chen32768/zhengma_for_rime",
+   "revision": "57a246ecdfa74bad7900d39ad26b26791455f256",
+   "revisionDate": "2023-06-15",
+   "schemas": [
+    "zhengma",
+    "zhengma_pinyin",
+    "zhengma_trad"
+   ],
+   "license": "Apache-2.0"
+  },
+  {
+   "id": "smzm",
+   "nameZH": "三码郑码",
+   "nameEN": "Three-code Zhengma",
+   "category": "shape",
+   "family": "zhengma",
+   "repo": "yiwan001/smzm",
+   "revision": "4719f9da6be5cb9df255fff172cfd89c481282ff",
+   "revisionDate": "2025-06-26",
+   "schemas": [
+    "smzm",
+    "smzmcore"
+   ],
+   "license": null
+  },
+  {
+   "id": "zm66",
+   "nameZH": "郑码 6.6",
+   "nameEN": "Zhengma 6.6",
+   "category": "shape",
+   "family": "zhengma",
+   "repo": "qdzhang/rime-zm",
+   "revision": "b19d14b0eaba7c632f24fbd30e29876e0d2db010",
+   "revisionDate": "2026-06-25",
+   "schemas": [
+    "zm66"
+   ],
+   "license": null
+  },
+  {
+   "id": "stroke",
+   "nameZH": "五笔画",
+   "nameEN": "Stroke",
+   "category": "shape",
+   "family": "stroke",
+   "repo": "rime/rime-stroke",
+   "revision": "1e8fff9b9494ddec23b0cbc526bcfd8171a6fd48",
+   "revisionDate": "2026-08-26",
+   "license": "LGPL-3.0",
+   "probes": [
+    {
+     "schema": "stroke",
+     "keys": "h",
+     "expect": "一"
+    }
+   ]
+  },
+  {
+   "id": "array",
+   "nameZH": "行列 30",
+   "nameEN": "Array 30",
+   "category": "shape",
+   "family": "array",
+   "repo": "rime/rime-array",
+   "revision": "557dbe38381de174fe96e53e9bf8c863a275307c",
+   "revisionDate": "2024-04-26",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "array30-ex",
+   "nameZH": "行列 30 修改版",
+   "nameEN": "Array 30 Ex",
+   "category": "shape",
+   "family": "array",
+   "repo": "Reniastyc/RIME_array30_ex",
+   "revision": "034d89a94f93262c87a3a234fd98e55c9a7867cf",
+   "revisionDate": "2021-02-03",
+   "license": null
+  },
+  {
+   "id": "dayi",
+   "nameZH": "大易",
+   "nameEN": "Dayi",
+   "category": "shape",
+   "family": "dayi",
+   "repo": "chiahsien/RimeDayi",
+   "revision": "6d9754a97fbe01cd4739693b5a224b2ab66fd5c4",
+   "revisionDate": "2015-09-30",
+   "license": null
+  },
+  {
+   "id": "liur",
+   "nameZH": "嘸蝦米",
+   "nameEN": "Boshiamy (Liur)",
+   "category": "shape",
+   "family": "boshiamy",
+   "repo": "ryanwuson/rime-liur",
+   "revision": "c0b417c020832f38e90327f4e18924bce09375bf",
+   "revisionDate": "2026-08-21",
+   "root": "configs",
+   "overlays": [
+    ""
+   ],
+   "schemas": [
+    "liur"
+   ],
+   "license": null,
+   "redistribution": "proprietary",
+   "note": "嘸蝦米 is a commercial input method; its code table is proprietary. Catalogued for reference only."
+  },
+  {
+   "id": "xuma",
+   "nameZH": "徐码",
+   "nameEN": "Xuma",
+   "category": "shape",
+   "family": "xuma",
+   "repo": "Ace-Who/rime-xuma",
+   "revision": "1005a58dc3b23888c293648d6aa9a88f3f81804e",
+   "revisionDate": "2022-02-17",
+   "root": "schema",
+   "license": null
+  },
+  {
+   "id": "xuma-forfudan",
+   "nameZH": "徐码（forfudan）",
+   "nameEN": "Xuma (forfudan)",
+   "category": "shape",
+   "family": "xuma",
+   "repo": "forfudan/xuma",
+   "revision": "5ec930582ff46c562508f5747250a69dee229bbf",
+   "revisionDate": "2025-12-24",
+   "root": "schema",
+   "license": null
+  },
+  {
+   "id": "yuhao-star",
+   "nameZH": "宇浩 · 星陈",
+   "nameEN": "Yuhao Star",
+   "category": "shape",
+   "family": "yuhao",
+   "repo": "forfudan/yuhao-ime-release",
+   "revision": "5b6b5c5a0f36c23a7e5155a96e16812947ec7433",
+   "revisionDate": "2026-08-04",
+   "root": "yustar/beta/schema",
+   "license": "CC-BY-NC-ND-4.0",
+   "redistribution": "restricted",
+   "note": "The repository holds schemas only; dictionaries are published in upstream release archives."
+  },
+  {
+   "id": "yuhao-light",
+   "nameZH": "宇浩 · 光华",
+   "nameEN": "Yuhao Light",
+   "category": "shape",
+   "family": "yuhao",
+   "repo": "forfudan/yuhao-ime-release",
+   "revision": "5b6b5c5a0f36c23a7e5155a96e16812947ec7433",
+   "revisionDate": "2026-08-04",
+   "root": "yulight/beta/schema",
+   "license": "CC-BY-NC-ND-4.0",
+   "redistribution": "restricted",
+   "note": "The repository holds schemas only; dictionaries are published in upstream release archives."
+  },
+  {
+   "id": "yuhao-joy",
+   "nameZH": "宇浩 · 卿云",
+   "nameEN": "Yuhao Joy",
+   "category": "shape",
+   "family": "yuhao",
+   "repo": "forfudan/yuhao-ime-release",
+   "revision": "5b6b5c5a0f36c23a7e5155a96e16812947ec7433",
+   "revisionDate": "2026-08-04",
+   "root": "yujoy/beta/schema",
+   "license": "CC-BY-NC-ND-4.0",
+   "redistribution": "restricted",
+   "note": "The repository holds schemas only; dictionaries are published in upstream release archives."
+  },
+  {
+   "id": "yuhao-ming",
+   "nameZH": "宇浩 · 日月",
+   "nameEN": "Yuhao Ming",
+   "category": "shape",
+   "family": "yuhao",
+   "repo": "forfudan/yuhao-ime-release",
+   "revision": "5b6b5c5a0f36c23a7e5155a96e16812947ec7433",
+   "revisionDate": "2026-08-04",
+   "root": "yuming/beta/schema",
+   "license": "CC-BY-NC-ND-4.0",
+   "redistribution": "restricted",
+   "note": "The repository holds schemas only; dictionaries are published in upstream release archives."
+  },
+  {
+   "id": "yuhao-ling",
+   "nameZH": "宇浩 · 灵明",
+   "nameEN": "Yuhao Ling",
+   "category": "shape",
+   "family": "yuhao",
+   "repo": "forfudan/yuhao-ime-release",
+   "revision": "5b6b5c5a0f36c23a7e5155a96e16812947ec7433",
+   "revisionDate": "2026-08-04",
+   "root": "yuling/beta/schema",
+   "license": "CC-BY-NC-ND-4.0",
+   "redistribution": "restricted",
+   "note": "The repository holds schemas only; dictionaries are published in upstream release archives."
+  },
+  {
+   "id": "yustar-ywxt",
+   "nameZH": "宇浩星陈（ywxt）",
+   "nameEN": "Yustar (ywxt)",
+   "category": "shape",
+   "family": "yuhao",
+   "repo": "ywxt/rime-yustar",
+   "revision": "a5f00f82bdebf9ea010bdb854fb94e88eb82d440",
+   "revisionDate": "2024-11-19",
+   "license": "MIT"
+  },
+  {
+   "id": "leopard",
+   "nameZH": "豹码",
+   "nameEN": "Leopard",
+   "category": "shape",
+   "family": "yuhao",
+   "repo": "hertz-hwang/yuhao-leopard",
+   "revision": "7fc336dd44854dea26007a8a62e1e1b54fe17631",
+   "revisionDate": "2025-04-20",
+   "license": null
+  },
+  {
+   "id": "smyh",
+   "nameZH": "吉旦餅（三码宇浩）",
+   "nameEN": "Smyh",
+   "category": "shape",
+   "family": "yuhao",
+   "repo": "lost-melody/rime-smyh",
+   "revision": "f95709bed8f1872d3912894d9c70220eb0cfbfb1",
+   "revisionDate": "2024-10-18",
+   "root": "template",
+   "license": "CC-BY-NC-ND-4.0",
+   "redistribution": "restricted"
+  },
+  {
+   "id": "tiger",
+   "nameZH": "虎码",
+   "nameEN": "Tiger Code",
+   "category": "shape",
+   "family": "tiger",
+   "repo": "humaIME/huma",
+   "revision": "421380f156172356c63ea3855f588c55dfe268ed",
+   "revisionDate": "2024-04-08",
+   "root": "rime",
+   "license": null
+  },
+  {
+   "id": "huma-ywxt",
+   "nameZH": "虎碼（ywxt）",
+   "nameEN": "Tiger Code (ywxt)",
+   "category": "shape",
+   "family": "tiger",
+   "repo": "ywxt/rime-huma",
+   "revision": "6657afe00b250f83a38f7de14c85336fb747de6d",
+   "revisionDate": "2026-05-21",
+   "license": "MIT"
+  },
+  {
+   "id": "tiger-fcxxxz",
+   "nameZH": "虎码（fcxxxz）",
+   "nameEN": "Tiger Code (fcxxxz)",
+   "category": "shape",
+   "family": "tiger",
+   "repo": "fcxxxz/rime-tiger",
+   "revision": "2c9f9dfb4a882e1a99b08a359d859e7d2b110538",
+   "revisionDate": "2026-08-13",
+   "schemas": [
+    "tiger",
+    "tigress"
+   ],
+   "license": null
+  },
+  {
+   "id": "tiger-matrix",
+   "nameZH": "虎码九键无重码",
+   "nameEN": "Tiger Matrix",
+   "category": "shape",
+   "family": "tiger",
+   "repo": "Rayalizing/TigerMatrix",
+   "revision": "355540b62fa0a42274a69f892c7c4ee92f34879d",
+   "revisionDate": "2024-12-02",
+   "root": "Rime",
+   "license": null
+  },
+  {
+   "id": "sijiao",
+   "nameZH": "四角号码",
+   "nameEN": "Four Corner",
+   "category": "shape",
+   "family": "sijiao",
+   "repo": "happyDom/trimeSJHM",
+   "revision": "cd4c1445f10f8780a7affa280947e5590121d974",
+   "revisionDate": "2026-01-11",
+   "schemas": [
+    "sjhm"
+   ],
+   "license": "MIT"
+  },
+  {
+   "id": "one-hand",
+   "nameZH": "单手笔顺",
+   "nameEN": "One-hand Stroke",
+   "category": "shape",
+   "family": "stroke",
+   "repo": "YQ-YSY/one-hand_Rime",
+   "revision": "a5502cf6793c3815d030dd104e1844ed0a1e6410",
+   "revisionDate": "2025-11-27",
+   "root": "配置文件",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "etch",
+   "nameZH": "刻蚀笔画",
+   "nameEN": "Etch Stroke",
+   "category": "shape",
+   "family": "stroke",
+   "repo": "OkazakiYumemi/rime-etch",
+   "revision": "a24049f715b3f2dac0a81fa7d86bde390bd580a4",
+   "revisionDate": "2026-04-12",
+   "license": null
+  },
+  {
+   "id": "stroke-bg5cgq",
+   "nameZH": "笔画（百度式）",
+   "nameEN": "Stroke (BG5CGQ)",
+   "category": "shape",
+   "family": "stroke",
+   "repo": "zny05/BG5CGQ-Stroke-Rime",
+   "revision": "181f10fb85c621cdf6ea69012b3ff3bf22e55f28",
+   "revisionDate": "2026-08-27",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "fun4stroke",
+   "nameZH": "放肆笔画",
+   "nameEN": "Fun4 Stroke",
+   "category": "shape",
+   "family": "stroke",
+   "repo": "imkunzo/fun4stroke",
+   "revision": "e3bc18c3c5ed99f81ade816e12ed2d170c2fd775",
+   "revisionDate": "2020-06-04",
+   "license": null
+  },
+  {
+   "id": "stroke-kanskinson",
+   "nameZH": "笔画（Oxygen）",
+   "nameEN": "Stroke (Oxygen)",
+   "category": "shape",
+   "family": "stroke",
+   "repo": "kanskinson/stroke",
+   "revision": "4dd25ce5b1925593f06610e47f2b63b2485b4799",
+   "revisionDate": "2021-01-30",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "sunman",
+   "nameZH": "山人全息码",
+   "nameEN": "Sunman",
+   "category": "shape",
+   "family": "shanren",
+   "repo": "ywxt/rime-sunman",
+   "revision": "bac356e98d1bea40cf76ea74612f1ff152c36eca",
+   "revisionDate": "2021-10-07",
+   "license": null
+  },
+  {
+   "id": "shanren3",
+   "nameZH": "山人全息码 3",
+   "nameEN": "Shanren 3",
+   "category": "shape",
+   "family": "shanren",
+   "repo": "arpcn/rime-shanren3",
+   "revision": "94c6b855db1e1df85f4677357f9a9b4711314adc",
+   "revisionDate": "2025-07-01",
+   "schemas": [
+    "shanren3",
+    "sunman"
+   ],
+   "license": null
+  },
+  {
+   "id": "shanrenma-lts",
+   "nameZH": "山人码 LTS",
+   "nameEN": "ShanRenMa LTS",
+   "category": "shape",
+   "family": "shanren",
+   "repo": "siuze/ShanRenMaLTS",
+   "revision": "559d5b7fb54d6dd575506e1fa6f5225c3cd35c77",
+   "revisionDate": "2025-03-01",
+   "root": "src/release",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "ghcm",
+   "nameZH": "矧码",
+   "nameEN": "Shenma",
+   "category": "shape",
+   "family": "other",
+   "repo": "raines1220/ghcm",
+   "revision": "52d578f402c0a0aed39e0e738833876c21e3c05f",
+   "revisionDate": "2020-12-15",
+   "license": "Apache-2.0"
+  },
+  {
+   "id": "xxm",
+   "nameZH": "小兮码",
+   "nameEN": "Xiaoxi Code",
+   "category": "shape",
+   "family": "other",
+   "repo": "rimeinn/rime-xxm",
+   "revision": "020b3640a01b7eec1347e48bb9efada3e10e000b",
+   "revisionDate": "2024-04-05",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "yima",
+   "nameZH": "逸码",
+   "nameEN": "Yima",
+   "category": "shape",
+   "family": "other",
+   "repo": "lost-melody/rime-yima",
+   "revision": "f39ecb5ee49ff496afba7007ff5df1876cd5b804",
+   "revisionDate": "2023-03-03",
+   "root": "output",
+   "license": null
+  },
+  {
+   "id": "yi",
+   "nameZH": "逸码（lakent）",
+   "nameEN": "Yi",
+   "category": "shape",
+   "family": "other",
+   "repo": "lakent/rime-yi",
+   "revision": "55a2e914d9229db54cdf1ad1b604c2d13635bece",
+   "revisionDate": "2024-12-23",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "xfsm",
+   "nameZH": "西风瘦码",
+   "nameEN": "Xifeng Shouma",
+   "category": "shape",
+   "family": "other",
+   "repo": "ethantang1024/rime-xfsm",
+   "revision": "3902e65feade7515c8fc2ffa854b9834a5da1999",
+   "revisionDate": "2020-03-09",
+   "license": "LGPL-3.0"
+  },
+  {
+   "id": "xtlb",
+   "nameZH": "小兔两笔",
+   "nameEN": "Xiaotu Liangbi",
+   "category": "shape",
+   "family": "erbi",
+   "repo": "zekexiao/xtlb-rime",
+   "revision": "6adf62b27355797f4b3134a8417272cf813b47b9",
+   "revisionDate": "2024-03-13",
+   "license": null
+  },
+  {
+   "id": "xklb",
+   "nameZH": "星空两笔单字",
+   "nameEN": "Xingkong Liangbi",
+   "category": "shape",
+   "family": "erbi",
+   "repo": "Drgiceake/xklbDR",
+   "revision": "7884a6e0b493c03af45b883e9befe6c4faf59167",
+   "revisionDate": "2019-08-24",
+   "license": null
+  },
+  {
+   "id": "xkyb",
+   "nameZH": "星空一笔",
+   "nameEN": "Xingkong Yibi",
+   "category": "shape",
+   "family": "other",
+   "repo": "dzyht/rime_xkyb",
+   "revision": "595cea46c417789f838495877d4ebc205bb9c11d",
+   "revisionDate": "2018-07-22",
+   "root": "rime",
+   "license": null
+  },
+  {
+   "id": "bingchan",
+   "nameZH": "冰蟾全息码",
+   "nameEN": "Bingchan",
+   "category": "shape",
+   "family": "other",
+   "repo": "chengen12/rime-bingchanquanxi",
+   "revision": "4909bea7e345c368f8becc27ba3b5f0584e3bb6d",
+   "revisionDate": "2017-06-06",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "yuma",
+   "nameZH": "聿码",
+   "nameEN": "Yuma",
+   "category": "shape",
+   "family": "other",
+   "repo": "JXUCam/yuma",
+   "revision": "02d9f2fd60b8416e872c0eed61475c470e4c03ef",
+   "revisionDate": "2025-06-19",
+   "license": null
+  },
+  {
+   "id": "liangfen",
+   "nameZH": "两分",
+   "nameEN": "Liangfen",
+   "category": "shape",
+   "family": "chaizi",
+   "repo": "szc126/rime-liangfen",
+   "revision": "9d87fc2d38eaeaeb239a9070b9e617d8663174cc",
+   "revisionDate": "2026-08-02",
+   "license": null
+  },
+  {
+   "id": "radical-pinyin",
+   "nameZH": "部件拆字",
+   "nameEN": "Radical Pinyin",
+   "category": "shape",
+   "family": "chaizi",
+   "repo": "mirtlecn/rime-radical-pinyin",
+   "revision": "87e73d7182916f3db9dbc0b6a4d18a78a775b298",
+   "revisionDate": "2026-06-18",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "c42-cqkm",
+   "nameZH": "快码双拼 42",
+   "nameEN": "Cqkm 42",
+   "category": "shape",
+   "family": "other",
+   "repo": "s5unty/xstr-demo",
+   "revision": "ac1bc27a3b2af753ffdea86f982fe0d7bf6db4b1",
+   "revisionDate": "2026-02-12",
+   "root": "xstr",
+   "license": null
+  },
+  {
+   "id": "flypy",
+   "nameZH": "小鹤音形",
+   "nameEN": "Flypy",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "cubercsl/rime-flypy",
+   "revision": "9ee464765e325dfd4b04926028d79d60882e653e",
+   "revisionDate": "2026-08-25",
+   "license": null
+  },
+  {
+   "id": "xhup",
+   "nameZH": "小鹤音形（xhup）",
+   "nameEN": "Flypy (xhup)",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "brglng/rime-xhup",
+   "revision": "54a180f553e27937d0d77d080c0b8f0c14b0d99e",
+   "revisionDate": "2019-06-13",
+   "license": null
+  },
+  {
+   "id": "flypy-jqtmviyu",
+   "nameZH": "小鹤音形（jqtmviyu）",
+   "nameEN": "Flypy (jqtmviyu)",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "jqtmviyu/flypy",
+   "revision": "7b7408273c948cd51c81405645716ee8b1a2383d",
+   "revisionDate": "2026-03-31",
+   "license": null
+  },
+  {
+   "id": "openfly",
+   "nameZH": "开源小鹤",
+   "nameEN": "Openfly",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "amorphobia/openfly",
+   "revision": "f0982a96291c1d221753cf5a049778fd88ce45e2",
+   "revisionDate": "2024-09-15",
+   "license": "MIT"
+  },
+  {
+   "id": "fast-xhup",
+   "nameZH": "飞鹤快拼（小鹤双拼 + 鹤形辅助）",
+   "nameEN": "Fast Xhup",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "boomker/rime-fast-xhup",
+   "revision": "97d452608e346e460b866b0bf16a2c96a3000d94",
+   "revisionDate": "2026-10-06",
+   "schemas": [
+    "flypy_xhfast",
+    "flyhe_fast"
+   ],
+   "license": "LGPL-3.0"
+  },
+  {
+   "id": "flypy-zrmfast",
+   "nameZH": "小鹤双拼 + 自然码辅助",
+   "nameEN": "Flypy Zrmfast",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "functoreality/rime-flypy-zrmfast",
+   "revision": "d4e1bcd6be385ea86a82cd8847a37c5ae1709407",
+   "revisionDate": "2026-09-28",
+   "schemas": [
+    "flypy_zrmfast"
+   ],
+   "license": "LGPL-3.0"
+  },
+  {
+   "id": "xhup-ryan00zou",
+   "nameZH": "小鹤音形（ryan00zou）",
+   "nameEN": "Flypy (ryan00zou)",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "ryan00zou/rime-xhup",
+   "revision": "f2a2be50a9577b738ed56f7a3d20af945838e7ff",
+   "revisionDate": "2026-10-06",
+   "license": null
+  },
+  {
+   "id": "hesingle",
+   "nameZH": "小鹤音形 · 单字流",
+   "nameEN": "Hesingle",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "OscarXWei/hesingle",
+   "revision": "070cc42533b9b0d3546f3a4e8adecba9a902fa34",
+   "revisionDate": "2023-10-17",
+   "root": "hesingle",
+   "license": null
+  },
+  {
+   "id": "heyx",
+   "nameZH": "小鹤双拼加形",
+   "nameEN": "Heyx",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "liming2013/rime-flypy-xhup",
+   "revision": "a98170791d80eac556c3a0db06dc9da4a8f4c3cb",
+   "revisionDate": "2016-12-02",
+   "schemas": [
+    "heyx"
+   ],
+   "license": null
+  },
+  {
+   "id": "flypyquick5",
+   "nameZH": "小鶴速成音形",
+   "nameEN": "Flypy Quick5",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "JeffChien/rime-flypyquick5",
+   "revision": "ac8a9e5f7d4c0f28efb64f198c26f7ce395c2319",
+   "revisionDate": "2023-08-13",
+   "license": "MIT"
+  },
+  {
+   "id": "xhsj",
+   "nameZH": "小鹤四角",
+   "nameEN": "Xiaohe Sijiao",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "Schummacher/XHSJ",
+   "revision": "a289f9a297e772c41e6c7e4a827568e22283ce04",
+   "revisionDate": "2022-02-01",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "fly-km",
+   "nameZH": "小鹤双拼 + 超强快码",
+   "nameEN": "Fly KM",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "IwakuraRein/rime-fly-km",
+   "revision": "e86bd3e89ef7b7a28605dc5c946166231c49f829",
+   "revisionDate": "2024-04-12",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "flypy-tiger",
+   "nameZH": "小鹤双拼 + 虎码辅助",
+   "nameEN": "Flypy Tiger",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "sullevy/rime-flypy-tiger",
+   "revision": "df1bdd5dca76566a933583d582a864a21b901686",
+   "revisionDate": "2024-04-26",
+   "schemas": [
+    "flypy_tiger"
+   ],
+   "license": "MIT"
+  },
+  {
+   "id": "flutterpy",
+   "nameZH": "小鹤音形魔改",
+   "nameEN": "Flutterpy",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "geezmolycos/flutterpy",
+   "revision": "77b5fe83efc951e8caa758014ea3b4baceac43fa",
+   "revisionDate": "2022-12-24",
+   "license": null
+  },
+  {
+   "id": "jdhe",
+   "nameZH": "简单鹤",
+   "nameEN": "Jiandan He",
+   "category": "phonetic-shape",
+   "family": "flypy",
+   "repo": "rimeinn/rime-JDhe",
+   "revision": "89e7ba5dc93cb5add6c985e54f23c79f7bb3e640",
+   "revisionDate": "2026-09-29",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "zrm",
+   "nameZH": "自然码 + 辅助码",
+   "nameEN": "Ziranma with Aux Codes",
+   "category": "phonetic-shape",
+   "family": "zrm",
+   "repo": "bigshans/rime-zrm",
+   "revision": "4ef9a1d595cdf01c9c32f0655f165dc62d15d8dd",
+   "revisionDate": "2025-11-05",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "zrm2000",
+   "nameZH": "自然码 2000",
+   "nameEN": "Ziranma 2000",
+   "category": "phonetic-shape",
+   "family": "zrm",
+   "repo": "vitszeng/rime-zrm2000",
+   "revision": "b1033b5e02a99b2a7b14af6bc98c78d1c2bca913",
+   "revisionDate": "2023-08-09",
+   "license": null
+  },
+  {
+   "id": "nature-code",
+   "nameZH": "自然码（精简）",
+   "nameEN": "Nature Code",
+   "category": "phonetic-shape",
+   "family": "zrm",
+   "repo": "dfxyz/rime-nature-code",
+   "revision": "088c1360e88e8cf5994d8b78fd2f33250c4c5d73",
+   "revisionDate": "2025-03-13",
+   "license": null
+  },
+  {
+   "id": "ziranma-flyx",
+   "nameZH": "自然码 + 鹤形",
+   "nameEN": "Ziranma Flyx",
+   "category": "phonetic-shape",
+   "family": "zrm",
+   "repo": "daya-prac/ziranma_flyx_for_Rime",
+   "revision": "903ee3c18203b59ea0e58da09d6d7b842eb9413c",
+   "revisionDate": "2015-07-22",
+   "license": null
+  },
+  {
+   "id": "zrlong",
+   "nameZH": "自然龙",
+   "nameEN": "Ziran Long",
+   "category": "phonetic-shape",
+   "family": "zrm",
+   "repo": "rimeinn/rime-zrlong",
+   "revision": "cc728ae25e88d0076bfdc0898d2bdc1a836cb7c2",
+   "revisionDate": "2026-10-01",
+   "license": "CC-BY-4.0"
+  },
+  {
+   "id": "cat-zrm",
+   "nameZH": "自然码双拼 + 虎码 · 二笔辅助并击",
+   "nameEN": "Cat Zrm Parallel",
+   "category": "phonetic-shape",
+   "family": "zrm",
+   "repo": "rimeinn/cat-zrm-parallel-input",
+   "revision": "4753952c9cc8d148ae7a063d85cb2f95689ed01d",
+   "revisionDate": "2025-04-01",
+   "license": "CC-BY-4.0"
+  },
+  {
+   "id": "ranwu",
+   "nameZH": "燃舞音形",
+   "nameEN": "Ranwu",
+   "category": "phonetic-shape",
+   "family": "zrm",
+   "repo": "condexpr01/rime-ranwu",
+   "revision": "5efbdfab1df7b5bf4bfeb080abe6b3684f29f1ea",
+   "revisionDate": "2026-10-01",
+   "license": "CC-BY-4.0"
+  },
+  {
+   "id": "keytao",
+   "nameZH": "星空键道 6",
+   "nameEN": "Keytao 6",
+   "category": "phonetic-shape",
+   "family": "jiandao",
+   "repo": "xkinput/KeyTao",
+   "revision": "2ff9e2c0164fcd9939e6f754b01e702247763f8b",
+   "revisionDate": "2026-10-04",
+   "root": "rime",
+   "overlays": [
+    "schema/desktop"
+   ],
+   "schemas": [
+    "keytao",
+    "keytao-dz",
+    "keytao-cx",
+    "keytao-bj"
+   ],
+   "license": null
+  },
+  {
+   "id": "keydo",
+   "nameZH": "键道 · 我流",
+   "nameEN": "Keydo",
+   "category": "phonetic-shape",
+   "family": "jiandao",
+   "repo": "pingshunhuangalex/rime-keydo",
+   "revision": "6c3ad9de7c67be93d9eaac08e1a41b236f0f01b8",
+   "revisionDate": "2026-10-04",
+   "root": "schema",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "jiandao",
+   "nameZH": "键道（amorphobia）",
+   "nameEN": "Jiandao",
+   "category": "phonetic-shape",
+   "family": "jiandao",
+   "repo": "amorphobia/rime-jiandao",
+   "revision": "57d4e53d9b03adf2fa94eaa83d007f59c64e22cb",
+   "revisionDate": "2026-09-18",
+   "root": "schema",
+   "license": "AGPL-3.0"
+  },
+  {
+   "id": "xmjd6",
+   "nameZH": "星猫键道 6",
+   "nameEN": "Xingmao Jiandao 6",
+   "category": "phonetic-shape",
+   "family": "jiandao",
+   "repo": "hugh7007/xmjd6-rere",
+   "revision": "02289f29e40cf4cc994f9b8018e618bd1da6294d",
+   "revisionDate": "2026-10-06",
+   "schemas": [
+    "xmjd6"
+   ],
+   "license": null,
+   "note": "The importer's require scan reads the string literal \"require\" in lua/xmjd6/xmjd6_jisuanqi.lua as a module reference.",
+   "probes": [
+    {
+     "schema": "xmjd6",
+     "keys": "nkhz",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "txjx",
+   "nameZH": "天行键",
+   "nameEN": "Tianxing Jian",
+   "category": "phonetic-shape",
+   "family": "jiandao",
+   "repo": "wzxmer/rime-txjx",
+   "revision": "a8769140e4d74342123c1dd7fc67e8e433b0c87d",
+   "revisionDate": "2026-08-30",
+   "schemas": [
+    "txjx"
+   ],
+   "license": "MIT"
+  },
+  {
+   "id": "jd27",
+   "nameZH": "键道 27",
+   "nameEN": "Jiandao 27",
+   "category": "phonetic-shape",
+   "family": "jiandao",
+   "repo": "xkjd27/rime_jd27",
+   "revision": "40c5169389c3405b633e2d3712b9d2f368a41862",
+   "revisionDate": "2021-06-29",
+   "root": "rime",
+   "license": null
+  },
+  {
+   "id": "jd27c",
+   "nameZH": "键道 27C",
+   "nameEN": "Jiandao 27C",
+   "category": "phonetic-shape",
+   "family": "jiandao",
+   "repo": "xkjd27/rime_jd27c",
+   "revision": "b4aece18f102079cfa96939127ed6ce071eb514a",
+   "revisionDate": "2026-06-14",
+   "root": "rime",
+   "license": null
+  },
+  {
+   "id": "rmjd",
+   "nameZH": "星空键道 3",
+   "nameEN": "Jiandao 3",
+   "category": "phonetic-shape",
+   "family": "jiandao",
+   "repo": "Nmli/rmjd",
+   "revision": "8cf541bff2b5f90f3980105667b48b05efade59c",
+   "revisionDate": "2017-11-25",
+   "root": "键道音笔3.0.Rime包.Android/rime",
+   "license": "LGPL-3.0"
+  },
+  {
+   "id": "xkjd6-lyserenity",
+   "nameZH": "星空键道 6 纯词库",
+   "nameEN": "Xkjd6 (lyserenity)",
+   "category": "phonetic-shape",
+   "family": "jiandao",
+   "repo": "lyserenity/rime_xkjd",
+   "revision": "29e3a7b432b49ae6d0bf558ee5ef873e024ef822",
+   "revisionDate": "2020-09-18",
+   "root": "rime",
+   "license": null
+  },
+  {
+   "id": "xkyd",
+   "nameZH": "星空一道",
+   "nameEN": "Xingkong Yidao",
+   "category": "phonetic-shape",
+   "family": "jiandao",
+   "repo": "dzyht/rime_xkyd",
+   "revision": "a3787f7921bd2b20b7929b40a7b2dc5629b4437f",
+   "revisionDate": "2018-04-30",
+   "license": null
+  },
+  {
+   "id": "sbxlm",
+   "nameZH": "声笔系列",
+   "nameEN": "Shengbi (sbxlm)",
+   "category": "phonetic-shape",
+   "family": "sbxlm",
+   "repo": "sbsrf/sbsrf",
+   "revision": "5569f4e86eac459a3b02bbafe768f2d969ed1745",
+   "revisionDate": "2026-10-05",
+   "root": "sbxlm",
+   "schemas": [
+    "sbjm",
+    "sbfd",
+    "sbzr",
+    "sbxh",
+    "sbpy",
+    "sbfm"
+   ],
+   "license": "BSD-3-Clause",
+   "note": "Upstream ships its own librime build; behaviour on stock librime is not guaranteed."
+  },
+  {
+   "id": "sbxh-smart",
+   "nameZH": "声笔小鹤（通用版）",
+   "nameEN": "Shengbi Xiaohe Smart",
+   "category": "phonetic-shape",
+   "family": "sbxlm",
+   "repo": "ufo169/rime-sbxh_smart",
+   "revision": "27acd5eb5f4b1e7ccbfc90961020754de861d2f1",
+   "revisionDate": "2023-07-03",
+   "schemas": [
+    "sbxh_smart"
+   ],
+   "license": null
+  },
+  {
+   "id": "quad",
+   "nameZH": "四格声笔",
+   "nameEN": "Quad",
+   "category": "phonetic-shape",
+   "family": "sbxlm",
+   "repo": "amorphobia/rime-quad",
+   "revision": "d7a6f3260781bf200759da50fbecd6bc64ef1ca7",
+   "revisionDate": "2022-04-06",
+   "license": null
+  },
+  {
+   "id": "moran",
+   "nameZH": "魔然",
+   "nameEN": "Moran",
+   "category": "phonetic-shape",
+   "family": "moran",
+   "repo": "rimeinn/rime-moran",
+   "revision": "d18bbde31382d5cb8010a63708878286c80a6176",
+   "revisionDate": "2026-09-30",
+   "schemas": [
+    "moran",
+    "moran_fixed",
+    "moran_sentence",
+    "moran_aux"
+   ],
+   "license": "GPL-3.0",
+   "redistribution": "open",
+   "probes": [
+    {
+     "schema": "moran",
+     "keys": "nihk",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "mohu",
+   "nameZH": "魔虎音形",
+   "nameEN": "Mohu",
+   "category": "phonetic-shape",
+   "family": "moran",
+   "repo": "fcxxxz/rime-mohu",
+   "revision": "c0299587986e22a046820e9e4f60bc8725c24616",
+   "revisionDate": "2026-10-03",
+   "license": "GPL-3.0",
+   "redistribution": "open"
+  },
+  {
+   "id": "moqi",
+   "nameZH": "墨奇音形",
+   "nameEN": "Moqi",
+   "category": "phonetic-shape",
+   "family": "moqi",
+   "repo": "gaboolic/rime-shuangpin-fuzhuma",
+   "revision": "c7c6de782c14c27541f7a8ce12be900f1f046f43",
+   "revisionDate": "2026-09-22",
+   "schemas": [
+    "moqi_wan_flypymo",
+    "moqi_wan_zrm",
+    "moqi_wan_flypy",
+    "moqi_single_xh"
+   ],
+   "license": "MIT"
+  },
+  {
+   "id": "wubi-sentence",
+   "nameZH": "墨奇五笔 · 虎码整句",
+   "nameEN": "Moqi Wubi Sentence",
+   "category": "phonetic-shape",
+   "family": "moqi",
+   "repo": "gaboolic/rime-wubi-sentence",
+   "revision": "edb9437d18d7d45239fd8f8303ddd836efa69749",
+   "revisionDate": "2026-07-02",
+   "schemas": [
+    "wubi86",
+    "wubi98",
+    "tiger"
+   ],
+   "license": "MIT"
+  },
+  {
+   "id": "longxiang",
+   "nameZH": "龙象般若",
+   "nameEN": "Longxiang",
+   "category": "phonetic-shape",
+   "family": "moqi",
+   "repo": "LastFlydragon/rime-moqi-huma",
+   "revision": "c9fd614be775d461ed266f904b3b307524ba71b2",
+   "revisionDate": "2024-10-30",
+   "license": "MIT"
+  },
+  {
+   "id": "inkdragon",
+   "nameZH": "墨龙",
+   "nameEN": "Inkdragon",
+   "category": "phonetic-shape",
+   "family": "moqi",
+   "repo": "LastFlydragon/rime-inkdragon",
+   "revision": "18d7f593f6beece7aea501641081151c078edee3",
+   "revisionDate": "2025-01-04",
+   "license": "MIT"
+  },
+  {
+   "id": "wxzhh",
+   "nameZH": "万象虎码整句",
+   "nameEN": "Wanxiang Tiger Sentence",
+   "category": "phonetic-shape",
+   "family": "other",
+   "repo": "zhhwux/wxzhh",
+   "revision": "e2490995e5e83d4b17a276be74281a9ab30718ee",
+   "revisionDate": "2026-05-06",
+   "license": null
+  },
+  {
+   "id": "lufly",
+   "nameZH": "小鹭音形",
+   "nameEN": "Lufly",
+   "category": "phonetic-shape",
+   "family": "other",
+   "repo": "ledao/lufly-im",
+   "revision": "5568d19d1c2667e14cd59c794f1b02f8da5fbcd0",
+   "revisionDate": "2026-10-06",
+   "root": "rime_xiaolu_shuangpin_xiaolu_xing",
+   "license": "Apache-2.0"
+  },
+  {
+   "id": "zzdyx",
+   "nameZH": "哲哲豆音形",
+   "nameEN": "Zhezhedou Yinxing",
+   "category": "phonetic-shape",
+   "family": "other",
+   "repo": "whjiang/zzdyx_rime",
+   "revision": "41ef6c6459cc63ae8f833812d1c96ab82c5b5b88",
+   "revisionDate": "2019-02-16",
+   "license": "Apache-2.0"
+  },
+  {
+   "id": "cqeb",
+   "nameZH": "超强二笔 · 音形 · 快码",
+   "nameEN": "Chaoqiang Erbi",
+   "category": "phonetic-shape",
+   "family": "erbi",
+   "repo": "whjiang/cqeb",
+   "revision": "6bacc1c4ba1c7c9fe25b31731761bff7167436ef",
+   "revisionDate": "2022-09-13",
+   "schemas": [
+    "cqlb",
+    "cqyx",
+    "cqkm"
+   ],
+   "license": null
+  },
+  {
+   "id": "yym",
+   "nameZH": "音笔二码顶",
+   "nameEN": "Yinbi Two-code",
+   "category": "phonetic-shape",
+   "family": "other",
+   "repo": "artlessgarden/yym",
+   "revision": "d4663820eacad1eebd6729d759b926570ea37573",
+   "revisionDate": "2025-08-20",
+   "license": null
+  },
+  {
+   "id": "joyschema",
+   "nameZH": "Joy 音形",
+   "nameEN": "JoySchema",
+   "category": "phonetic-shape",
+   "family": "other",
+   "repo": "Lantaio/Rime-schema-JoySchema",
+   "revision": "05a3a077ad8481304ef52a30d042db47399c57f8",
+   "revisionDate": "2024-09-22",
+   "license": "GPL-3.0",
+   "redistribution": "open"
+  },
+  {
+   "id": "daniu",
+   "nameZH": "大牛双拼 + 小牛形码",
+   "nameEN": "Daniu Xiaoniu",
+   "category": "phonetic-shape",
+   "family": "other",
+   "repo": "levelel/daniu-xiaoniu-for-rime",
+   "revision": "a5bf6ff544f0dc96db55856f282e5fba3b96c19c",
+   "revisionDate": "2025-04-17",
+   "license": null
+  },
+  {
+   "id": "elaine",
+   "nameZH": "蘭",
+   "nameEN": "Elaine",
+   "category": "phonetic-shape",
+   "family": "other",
+   "repo": "kitty-panics/rime-elaine",
+   "revision": "bbb0f68e3188a902cafe773d39026155be494eab",
+   "revisionDate": "2022-07-26",
+   "license": null
+  },
+  {
+   "id": "jieshu",
+   "nameZH": "解书音形",
+   "nameEN": "Jieshu",
+   "category": "phonetic-shape",
+   "family": "other",
+   "repo": "Amatiri/Elucidative-Chinese-IME",
+   "revision": "bb6a8826c0c61af65b4c1f098cfe0c686bc9dadc",
+   "revisionDate": "2026-10-06",
+   "root": "migrate_to_rime",
+   "license": "MIT"
+  },
+  {
+   "id": "cantonese",
+   "nameZH": "粵語拼音",
+   "nameEN": "Cantonese (Jyutping)",
+   "category": "dialect",
+   "family": "yue",
+   "repo": "rime/rime-cantonese",
+   "revision": "259f0e48bba840c3a2e0d117539e96937f3d89bc",
+   "revisionDate": "2026-08-13",
+   "license": "CC-BY-4.0",
+   "probes": [
+    {
+     "schema": "jyut6ping3",
+     "keys": "neihou",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "jyutping",
+   "nameZH": "粵拼（舊版）",
+   "nameEN": "Jyutping (legacy)",
+   "category": "dialect",
+   "family": "yue",
+   "repo": "rime/rime-jyutping",
+   "revision": "ee5e72b2b50a6708162a0402b91f257323bf852b",
+   "revisionDate": "2025-12-30",
+   "license": "LGPL-3.0",
+   "probes": [
+    {
+     "schema": "jyutping",
+     "keys": "neihou",
+     "expect": "你好"
+    }
+   ]
+  },
+  {
+   "id": "wugniu",
+   "nameZH": "吳語 · 上海話",
+   "nameEN": "Wugniu (Shanghainese)",
+   "category": "dialect",
+   "family": "wu",
+   "repo": "rime/rime-wugniu",
+   "revision": "2818f4812af3b6f11fc0248fa8918966a3312d2c",
+   "revisionDate": "2026-06-18",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "soutzoe",
+   "nameZH": "蘇州吳語",
+   "nameEN": "Soutzoe",
+   "category": "dialect",
+   "family": "wu",
+   "repo": "rime/rime-soutzoe",
+   "revision": "beeaeca72d8e17dfd1e9af58680439e9012987dc",
+   "revisionDate": "2019-01-20",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "middle-chinese",
+   "nameZH": "中古漢語三拼 · 全拼",
+   "nameEN": "Middle Chinese",
+   "category": "dialect",
+   "family": "historical",
+   "repo": "rime/rime-middle-chinese",
+   "revision": "582e144e525525ac2b6c2498097d7c7919e84174",
+   "revisionDate": "2021-09-26",
+   "license": "GPL-3.0"
+  },
+  {
+   "id": "tupa",
+   "nameZH": "切韻拼音",
+   "nameEN": "TUPA",
+   "category": "dialect",
+   "family": "historical",
+   "repo": "nk2028/rime-tupa",
+   "revision": "a15ab186dffa932649a3025a34f5b0ae102900a9",
+   "revisionDate": "2026-02-12",
+   "license": "MIT"
+  },
+  {
+   "id": "teochew",
+   "nameZH": "潮州話",
+   "nameEN": "Teochew",
+   "category": "dialect",
+   "family": "min",
+   "repo": "OpenTeochew/rime-teochew",
+   "revision": "7c80a292fee4001e28ca4f539c23924ab3fc3924",
+   "revisionDate": "2026-07-05",
+   "license": "Apache-2.0"
+  },
+  {
+   "id": "hokkien",
+   "nameZH": "福建話（白話字 · 台羅 · 閩拼）",
+   "nameEN": "Hokkien",
+   "category": "dialect",
+   "family": "min",
+   "repo": "hokkien-writing/rime-hokkien",
+   "revision": "e52e8bf337f161097cd3798c0173ba4e39b44396",
+   "revisionDate": "2026-05-04",
+   "license": "Apache-2.0"
+  },
+  {
+   "id": "moetaigi",
+   "nameZH": "萌台語注音",
+   "nameEN": "Moe Taigi",
+   "category": "dialect",
+   "family": "min",
+   "repo": "whyjz/rime-moetaigi",
+   "revision": "57c52c5e5859b839351fb8e1172981e3d42f70c1",
+   "revisionDate": "2022-07-15",
+   "root": "rime-moetaigi",
+   "license": "CC0-1.0"
+  },
+  {
+   "id": "taigi-tps",
+   "nameZH": "台語方音",
+   "nameEN": "Taigi TPS",
+   "category": "dialect",
+   "family": "min",
+   "repo": "YuRen-tw/rime-taigi-tps",
+   "revision": "ffa76b465ef2f4442622c38189b63653ff438de3",
+   "revisionDate": "2021-05-16",
+   "license": null
+  },
+  {
+   "id": "lomaji",
+   "nameZH": "閩南語羅馬字",
+   "nameEN": "Lomaji",
+   "category": "dialect",
+   "family": "min",
+   "repo": "unsioer/rime-lomaji",
+   "revision": "9d5d684f2b1e847ef476af53474a5d6df619a39f",
+   "revisionDate": "2025-03-15",
+   "license": null
+  },
+  {
+   "id": "loengfan",
+   "nameZH": "粵語兩分",
+   "nameEN": "Loengfan",
+   "category": "dialect",
+   "family": "yue",
+   "repo": "CanCLID/rime-loengfan",
+   "revision": "987ac95b02f957e8764a2f45222a4006c188ed50",
+   "revisionDate": "2022-03-03",
+   "license": "CC-BY-4.0"
+  },
+  {
+   "id": "gukwan",
+   "nameZH": "菊韻粵語",
+   "nameEN": "Gukwan",
+   "category": "dialect",
+   "family": "yue",
+   "repo": "HoengSaan/rime-gukwan",
+   "revision": "e9d3e8f12980fce065651cb49b225ca457b9970b",
+   "revisionDate": "2026-07-23",
+   "schemas": [
+    "gukwan"
+   ],
+   "license": "CC-BY-NC-SA-4.0",
+   "redistribution": "restricted"
+  },
+  {
+   "id": "leimaau-jyutping",
+   "nameZH": "Leimaau 粵拼",
+   "nameEN": "Leimaau Jyutping",
+   "category": "dialect",
+   "family": "yue",
+   "repo": "leimaau/leimaau_jyutping",
+   "revision": "167bd2718df67fad27173b7555f43acb231a639a",
+   "revisionDate": "2024-04-08",
+   "license": "MIT"
+  },
+  {
+   "id": "jyutsp",
+   "nameZH": "粵語雙拼",
+   "nameEN": "Jyutsp",
+   "category": "dialect",
+   "family": "yue",
+   "repo": "MrCorn0-0/jyutsp",
+   "revision": "6d5f06675988d76e948a493296978f0aec0a2651",
+   "revisionDate": "2021-05-05",
+   "schemas": [
+    "jyutsp"
+   ],
+   "license": null
+  },
+  {
+   "id": "double-jyutping",
+   "nameZH": "粤语双拼（gkovacs）",
+   "nameEN": "Double Jyutping",
+   "category": "dialect",
+   "family": "yue",
+   "repo": "gkovacs/rime-double-jyutping",
+   "revision": "ea27211af5b42e182f19617833848f0f145f1b70",
+   "revisionDate": "2023-10-21",
+   "license": null
+  },
+  {
+   "id": "combo-jyutping",
+   "nameZH": "宮保粵拼",
+   "nameEN": "Combo Jyutping",
+   "category": "dialect",
+   "family": "yue",
+   "repo": "tanxpyox/rime-combo-jyutping",
+   "revision": "a6459c914282a117e85a5babc3ed0020d119a32a",
+   "revisionDate": "2024-03-28",
+   "license": "GPL-3.0",
+   "note": "Chord scheme: needs key-release events, which the iOS keyboard does not send to imported schemes."
+  },
+  {
+   "id": "jyutping-compact",
+   "nameZH": "袖珍粵拼",
+   "nameEN": "Jyutping Compact",
+   "category": "dialect",
+   "family": "yue",
+   "repo": "rime-aca/rime-jyutping-compact",
+   "revision": "9f45b2a89c39a7f7404499a67cd19a20a02f9f18",
+   "revisionDate": "2017-01-22",
+   "license": null
+  },
+  {
+   "id": "jyutgaan",
+   "nameZH": "粵語簡拼",
+   "nameEN": "Jyutgaan",
+   "category": "dialect",
+   "family": "yue",
+   "repo": "redchenjs/rime-jyutgaan",
+   "revision": "d05a6a5eed5e02b16f29ef2de83efd74adf91430",
+   "revisionDate": "2020-08-15",
+   "license": "CC-BY-4.0"
+  },
+  {
+   "id": "wenzhounese",
+   "nameZH": "溫州話",
+   "nameEN": "Wenzhounese",
+   "category": "dialect",
+   "family": "wu",
+   "repo": "ZWolken/rime-wenzhounese",
+   "revision": "9c51d5984176e6b338075548012e784a7d590fda",
+   "revisionDate": "2023-08-30",
+   "license": "AGPL-3.0"
+  },
+  {
+   "id": "nguphing",
+   "nameZH": "標準吳語",
+   "nameEN": "Nguphing",
+   "category": "dialect",
+   "family": "wu",
+   "repo": "saeziae/rime_nguphing",
+   "revision": "07d833c3e4d033527d7176e4a9cee8a4f3503bba",
+   "revisionDate": "2026-01-24",
+   "license": "AGPL-3.0"
+  },
+  {
+   "id": "shanghainese",
+   "nameZH": "非吳拼上海話",
+   "nameEN": "Shanghainese",
+   "category": "dialect",
+   "family": "wu",
+   "repo": "shinzoqchiuq/rime-shanghainese",
+   "revision": "4ee54228cc864abb5ccdf8485af7afc78fb55ef7",
+   "revisionDate": "2025-09-05",
+   "license": "LGPL-3.0"
+  },
+  {
+   "id": "zhung",
+   "nameZH": "中原官話",
+   "nameEN": "Zhung",
+   "category": "dialect",
+   "family": "mandarin",
+   "repo": "lotem/rime-zhung",
+   "revision": "15eeda3af783eccbd925d1cd81ee8358b247b359",
+   "revisionDate": "2026-09-18",
+   "license": null
+  },
+  {
+   "id": "harbin",
+   "nameZH": "哈爾濱話",
+   "nameEN": "Harbin",
+   "category": "dialect",
+   "family": "mandarin",
+   "repo": "ShyuehyuFeng/Harbin-Rime",
+   "revision": "c3be5986675c7e0d46230bac2b73fa1a5c8313da",
+   "revisionDate": "2026-09-15",
+   "license": "MIT"
+  },
+  {
+   "id": "easy-en",
+   "nameZH": "Easy English",
+   "nameEN": "Easy English",
+   "category": "auxiliary",
+   "family": "english",
+   "repo": "BlindingDark/rime-easy-en",
+   "revision": "54a4a07289412efc54134092c0d945f895a71ed3",
+   "revisionDate": "2025-02-28",
+   "license": "LGPL-3.0",
+   "note": "Its Lua filter requires the native wordninja module, which upstream does not ship and iOS cannot load.",
+   "probes": [
+    {
+     "schema": "easy_en",
+     "keys": "hello",
+     "expect": "hello"
+    }
+   ]
+  },
+  {
+   "id": "dialect-oc-msoeg",
+   "nameZH": "上古漢語（MSOEG）",
+   "nameEN": "OC_msoeg",
+   "category": "dialect",
+   "family": "historical",
+   "group": "上古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/上古漢語/上古漢語（MSOEG）",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-oc-zhoufagao",
+   "nameZH": "上古漢語（周法高）",
+   "nameEN": "OC_zhoufagao",
+   "category": "dialect",
+   "family": "historical",
+   "group": "上古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/上古漢語/上古漢語（周法高）",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-oc-starostinlo",
+   "nameZH": "上古漢語（斯塔羅斯金）",
+   "nameEN": "OC_starostinLO",
+   "category": "dialect",
+   "family": "historical",
+   "group": "上古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/上古漢語/上古漢語（斯塔羅斯金）",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-oc-lifanggui",
+   "nameZH": "上古漢語（李方桂）",
+   "nameEN": "OC_lifanggui",
+   "category": "dialect",
+   "family": "historical",
+   "group": "上古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/上古漢語/上古漢語（李方桂）",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-oc-wangli",
+   "nameZH": "上古漢語（王力）",
+   "nameEN": "OC_wangli",
+   "category": "dialect",
+   "family": "historical",
+   "group": "上古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/上古漢語/上古漢語（王力）",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-oc-baxter-sagart",
+   "nameZH": "上古漢語（白-沙2014）",
+   "nameEN": "OC_baxter-sagart",
+   "category": "dialect",
+   "family": "historical",
+   "group": "上古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/上古漢語/上古漢語（白-沙2014）",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-oc-baxter1992",
+   "nameZH": "上古漢語（白一平1992）",
+   "nameEN": "OC_baxter1992",
+   "category": "dialect",
+   "family": "historical",
+   "group": "上古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/上古漢語/上古漢語（白一平1992）",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-oc-nulll",
+   "nameZH": "上古漢語（知乎新派）",
+   "nameEN": "OC_nulll",
+   "category": "dialect",
+   "family": "historical",
+   "group": "上古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/上古漢語/上古漢語（知乎新派）",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-oc-schuessleroc",
+   "nameZH": "上古漢語（許思萊）",
+   "nameEN": "OC_schuesslerOC",
+   "category": "dialect",
+   "family": "historical",
+   "group": "上古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/上古漢語/上古漢語（許思萊）",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-oc-zhengzhang",
+   "nameZH": "上古漢語（鄭張尚芳）",
+   "nameEN": "OC_zhengzhang",
+   "category": "dialect",
+   "family": "historical",
+   "group": "上古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/上古漢語/上古漢語（鄭張尚芳）",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-oc-jinlixin",
+   "nameZH": "上古漢語（金理新）",
+   "nameEN": "OC_jinlixin",
+   "category": "dialect",
+   "family": "historical",
+   "group": "上古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/上古漢語/上古漢語（金理新）",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-dkzp",
+   "nameZH": "鄭張尚芳上古音",
+   "nameEN": "dkzp",
+   "category": "dialect",
+   "family": "historical",
+   "group": "上古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/上古漢語/鄭張尚芳上古音",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-triungkoxsampheng",
+   "nameZH": "biopolyhedron中古音",
+   "nameEN": "triungkoxsampheng",
+   "category": "dialect",
+   "family": "historical",
+   "group": "中古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/中古漢語/biopolyhedron中古音",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-tupa",
+   "nameZH": "切韻拼音",
+   "nameEN": "tupa",
+   "category": "dialect",
+   "family": "historical",
+   "group": "中古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/中古漢語/切韻拼音",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-guangtong",
+   "nameZH": "柳漫中古音",
+   "nameEN": "guangtong",
+   "category": "dialect",
+   "family": "historical",
+   "group": "中古漢語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/中古漢語/柳漫中古音",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-naamning-bingwaa",
+   "nameZH": "南寧平話",
+   "nameEN": "naamning_bingwaa",
+   "category": "dialect",
+   "family": "ping",
+   "group": "南部平話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/南部平話/南寧平話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-yahwe-zaonhe",
+   "nameZH": "上海話",
+   "nameEN": "yahwe_zaonhe",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/上海話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-wugniu-kazoe",
+   "nameZH": "嘉善話",
+   "nameEN": "wugniu_kazoe",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/嘉善話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-wugniu-kashin",
+   "nameZH": "嘉興話",
+   "nameEN": "wugniu_kashin",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/嘉興話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-wugniu-gnincieu",
+   "nameZH": "寧波話",
+   "nameEN": "wugniu_gnincieu",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/寧波話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-hangtseinese",
+   "nameZH": "杭州話",
+   "nameEN": "hangtseinese",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/杭州話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-wugniu-sonkaon",
+   "nameZH": "松江話",
+   "nameEN": "wugniu_sonkaon",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/松江話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-wugniu-donshian",
+   "nameZH": "桐鄉話",
+   "nameEN": "wugniu_donshian",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/桐鄉話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-ay-ncld",
+   "nameZH": "樂清話",
+   "nameEN": "ay_ncld",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/樂清話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-pcngng",
+   "nameZH": "標準吳語",
+   "nameEN": "pcngng",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/標準吳語",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-wugniu-ionko",
+   "nameZH": "永嘉話",
+   "nameEN": "wugniu_ionko",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/永嘉話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-wugniu-haegnin",
+   "nameZH": "海寧話",
+   "nameEN": "wugniu_haegnin",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/海寧話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-wugniu-haeye",
+   "nameZH": "海鹽話",
+   "nameEN": "wugniu_haeye",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/海鹽話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-iuciou",
+   "nameZH": "溫州話",
+   "nameEN": "iuciou",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/溫州話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-wugniu-soutseu",
+   "nameZH": "蘇州話",
+   "nameEN": "wugniu_soutseu",
+   "category": "dialect",
+   "family": "wu",
+   "group": "吳語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/吳語/蘇州話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-yihdjoouhuah",
+   "nameZH": "棗莊話",
+   "nameEN": "yihdjoouhuah",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/中原官話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/中原官話/棗莊話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-lakyang",
+   "nameZH": "洛陽話",
+   "nameEN": "lakyang",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/中原官話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/中原官話/洛陽話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-zhung",
+   "nameZH": "鄭州話",
+   "nameEN": "zhung",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/中原官話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/中原官話/鄭州話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-langjin",
+   "nameZH": "南京話",
+   "nameEN": "langjin",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/江淮官話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/江淮官話/南京話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-ntw",
+   "nameZH": "南通話",
+   "nameEN": "ntw",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/江淮官話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/江淮官話/南通話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-huaipinquiizi",
+   "nameZH": "淮安話",
+   "nameEN": "huaipinquiizi",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/江淮官話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/江淮官話/淮安話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-taerv",
+   "nameZH": "通泰話",
+   "nameEN": "taerv",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/江淮官話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/江淮官話/通泰話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-shupin-tongyin",
+   "nameZH": "四川話通音",
+   "nameEN": "shupin_tongyin",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/西南官話/四川話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/西南官話/四川話/四川話通音",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-shupin-libin",
+   "nameZH": "宜賓話",
+   "nameEN": "shupin_libin",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/西南官話/四川話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/西南官話/四川話/宜賓話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-shupin-cendu",
+   "nameZH": "成都話",
+   "nameEN": "shupin_cendu",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/西南官話/四川話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/西南官話/四川話/成都話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-shupin-zigong",
+   "nameZH": "自貢話",
+   "nameEN": "shupin_zigong",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/西南官話/四川話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/西南官話/四川話/自貢話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-shupin-guiyang",
+   "nameZH": "貴陽話",
+   "nameEN": "shupin_guiyang",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/西南官話/四川話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/西南官話/四川話/貴陽話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-shupin-congqin",
+   "nameZH": "重慶話",
+   "nameEN": "shupin_congqin",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/西南官話/四川話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/西南官話/四川話/重慶話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-yunciu",
+   "nameZH": "永州官話",
+   "nameEN": "yunciu",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/西南官話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/西南官話/永州官話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-wuhan",
+   "nameZH": "武漢話",
+   "nameEN": "wuhan",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/西南官話/湖北話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/西南官話/湖北話/武漢話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-huanggang",
+   "nameZH": "黃岡鄂城話",
+   "nameEN": "huanggang",
+   "category": "dialect",
+   "family": "mandarin",
+   "group": "官話/西南官話/湖北話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/官話/西南官話/湖北話/黃岡鄂城話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-tai4bu1shang1",
+   "nameZH": "大埔話",
+   "nameEN": "tai4bu1shang1",
+   "category": "dialect",
+   "family": "hakka",
+   "group": "客家話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/客家話/大埔話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-hakka",
+   "nameZH": "客家話綜合口音",
+   "nameEN": "hakka",
+   "category": "dialect",
+   "family": "hakka",
+   "group": "客家話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/客家話/客家話綜合口音",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-hakka-meixian",
+   "nameZH": "梅縣話",
+   "nameEN": "hakka_meixian",
+   "category": "dialect",
+   "family": "hakka",
+   "group": "客家話",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/客家話/梅縣話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-jieny",
+   "nameZH": "嘉樂泉話",
+   "nameEN": "jieny",
+   "category": "dialect",
+   "family": "jin",
+   "group": "晉語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/晉語/嘉樂泉話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-fengyo",
+   "nameZH": "汾陽話",
+   "nameEN": "fengyo",
+   "category": "dialect",
+   "family": "jin",
+   "group": "晉語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/晉語/汾陽話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-haitrou",
+   "nameZH": "芮城話",
+   "nameEN": "haitrou",
+   "category": "dialect",
+   "family": "jin",
+   "group": "晉語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/晉語/芮城話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-sautungva",
+   "nameZH": "邵東話",
+   "nameEN": "sautungva",
+   "category": "dialect",
+   "family": "xiang",
+   "group": "湘語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/湘語/邵東話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-naamning-baakwaa",
+   "nameZH": "南寧白話",
+   "nameEN": "naamning_baakwaa",
+   "category": "dialect",
+   "family": "yue",
+   "group": "粵語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/粵語/南寧白話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-hoisiang",
+   "nameZH": "台山台城話",
+   "nameEN": "hoisiang",
+   "category": "dialect",
+   "family": "yue",
+   "group": "粵語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/粵語/台山台城話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-gene",
+   "nameZH": "台山話",
+   "nameEN": "gene",
+   "category": "dialect",
+   "family": "yue",
+   "group": "粵語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/粵語/台山話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-srenning-eausancunglau",
+   "nameZH": "台山話（斗山、沖蔞口音）",
+   "nameEN": "SRenNing_EauSanCungLau",
+   "category": "dialect",
+   "family": "yue",
+   "group": "粵語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/粵語/台山話（斗山、沖蔞口音）",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-jyutping",
+   "nameZH": "廣州話",
+   "nameEN": "jyutping",
+   "category": "dialect",
+   "family": "yue",
+   "group": "粵語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/粵語/廣州話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-ngzjau-jyutping",
+   "nameZH": "梧州話",
+   "nameEN": "NgZjau_JyutPing",
+   "category": "dialect",
+   "family": "yue",
+   "group": "粵語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/粵語/梧州話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-hamzau-jyutping",
+   "nameZH": "欽州話",
+   "nameEN": "hamzau_jyutping",
+   "category": "dialect",
+   "family": "yue",
+   "group": "粵語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/粵語/欽州話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-gaulau-jyutping-dangjun",
+   "nameZH": "藤縣話",
+   "nameEN": "gaulau_jyutping_dangjun",
+   "category": "dialect",
+   "family": "yue",
+   "group": "粵語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/粵語/藤縣話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-gvaizauvan",
+   "nameZH": "貴港話",
+   "nameEN": "gvaizauvan",
+   "category": "dialect",
+   "family": "yue",
+   "group": "粵語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/粵語/貴港話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-pouleng",
+   "nameZH": "莆田話",
+   "nameEN": "Pouleng",
+   "category": "dialect",
+   "family": "min",
+   "group": "莆仙語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/莆仙語/莆田話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-gannyu-fenni",
+   "nameZH": "分宜話",
+   "nameEN": "gannyu_fenni",
+   "category": "dialect",
+   "family": "gan",
+   "group": "贛語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/贛語/分宜話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-gannyu-lancong",
+   "nameZH": "南昌話",
+   "nameEN": "gannyu_lancong",
+   "category": "dialect",
+   "family": "gan",
+   "group": "贛語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/贛語/南昌話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-fudiufa",
+   "nameZH": "撫州話",
+   "nameEN": "fudiufa",
+   "category": "dialect",
+   "family": "gan",
+   "group": "贛語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/贛語/撫州話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-gannyu-fungcen",
+   "nameZH": "豐城話",
+   "nameEN": "gannyu_fungcen",
+   "category": "dialect",
+   "family": "gan",
+   "group": "贛語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/贛語/豐城話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-lmc",
+   "nameZH": "建寧府方言",
+   "nameEN": "lmc",
+   "category": "dialect",
+   "family": "min",
+   "group": "閩北語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/閩北語/建寧府方言",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-blg-ha",
+   "nameZH": "廈門話",
+   "nameEN": "blg_ha",
+   "category": "dialect",
+   "family": "min",
+   "group": "閩南語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/閩南語/廈門話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-gekion",
+   "nameZH": "揭陽話",
+   "nameEN": "gekion",
+   "category": "dialect",
+   "family": "min",
+   "group": "閩南語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/閩南語/揭陽話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-suantau",
+   "nameZH": "汕頭話",
+   "nameEN": "suantau",
+   "category": "dialect",
+   "family": "min",
+   "group": "閩南語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/閩南語/汕頭話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-blg-tsuan",
+   "nameZH": "泉州話",
+   "nameEN": "blg_tsuan",
+   "category": "dialect",
+   "family": "min",
+   "group": "閩南語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/閩南語/泉州話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-blg-tsiang",
+   "nameZH": "漳州話",
+   "nameEN": "blg_tsiang",
+   "category": "dialect",
+   "family": "min",
+   "group": "閩南語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/閩南語/漳州話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-dieziu",
+   "nameZH": "潮州話",
+   "nameEN": "dieziu",
+   "category": "dialect",
+   "family": "min",
+   "group": "閩南語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/閩南語/潮州話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-dioion",
+   "nameZH": "潮陽話",
+   "nameEN": "dioion",
+   "category": "dialect",
+   "family": "min",
+   "group": "閩南語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/閩南語/潮陽話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-tenghai",
+   "nameZH": "澄海話",
+   "nameEN": "tenghai",
+   "category": "dialect",
+   "family": "min",
+   "group": "閩南語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/閩南語/澄海話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-blg-tai",
+   "nameZH": "臺灣閩南語",
+   "nameEN": "blg_tai",
+   "category": "dialect",
+   "family": "min",
+   "group": "閩南語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/閩南語/臺灣閩南語",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-riaupeng",
+   "nameZH": "饒平話",
+   "nameEN": "riaupeng",
+   "category": "dialect",
+   "family": "min",
+   "group": "閩南語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/閩南語/饒平話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  },
+  {
+   "id": "dialect-ciklinbekin",
+   "nameZH": "福州話",
+   "nameEN": "ciklinbekin",
+   "category": "dialect",
+   "family": "min",
+   "group": "閩東語",
+   "repo": "laubonghaudoi/Chinese_Rime",
+   "revision": "3c6471a7067e2b2e2e9951ab8fac3a9b99b60a67",
+   "revisionDate": "2026-09-21",
+   "root": "download/閩東語/福州話",
+   "license": "CC-BY-4.0",
+   "note": "Taken from the laubonghaudoi/Chinese_Rime collection, which redistributes each scheme under CC-BY-4.0; see its README for the original author."
+  }
+ ]
+}
