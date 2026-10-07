@@ -80,3 +80,15 @@ function Invoke-LegacyRegistrar([string]$Package,$Entry,[string]$Operation){
     & (Join-Path $Package "$($Entry.architecture)\RimesRegistrar.exe") $Operation --dll $Entry.dll
     if($LASTEXITCODE){throw "Legacy registration $Operation failed"}
 }
+function Get-RimesActiveVersion([string]$Root) {
+    # Recovery path for a lost state.json: return the newest version directory that
+    # still verifies against PACKAGE.json, so ownership checks are not relaxed.
+    $versions=[IO.Path]::GetFullPath((Join-Path $Root 'versions')).TrimEnd('\')
+    if(-not (Test-Path -LiteralPath $versions)){return $null}
+    foreach($directory in @(Get-ChildItem -LiteralPath $versions -Directory | Sort-Object Name -Descending)){
+        if(-not (Test-Path -LiteralPath (Join-Path $directory.FullName 'PACKAGE.json'))){continue}
+        try{Read-VerifiedPackage $directory.FullName | Out-Null}catch{continue}
+        return $directory.FullName
+    }
+    return $null
+}

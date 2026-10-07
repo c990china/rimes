@@ -63,6 +63,15 @@ try{
  Run-Script 'uninstall' "$Package\Uninstall.ps1"
  foreach($arch in @('x64','x86')){Invoke-Registrar $Package $arch 'verify-absent'}
  Record 'both-architectures-unregistered'
+ # Regression: a lost state.json must not leave the TSF registration behind.
+ # Rename it to simulate loss; no installed file is deleted.
+ Run-Script 'install-before-state-loss' "$Package\Install.ps1" @('-AllowPendingRestart')
+ Run-Script 'verify-before-state-loss' "$Package\Verify.ps1"
+ Rename-Item -LiteralPath "$root\state.json" -NewName 'state.json.lost' -Force
+ Run-Script 'uninstall-without-state-json' "$Package\Uninstall.ps1"
+ foreach($arch in @('x64','x86')){Invoke-Registrar $Package $arch 'verify-absent'}
+ Record 'uninstall-recovers-when-state-json-missing'
+ Remove-Item -LiteralPath "$root\state.json.lost" -Force
  foreach($entry in $legacy){Invoke-LegacyRegistrar $Package $entry 'register'}
  $runKey='HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
  if($null -ne $startup){Set-ItemProperty -LiteralPath $runKey -Name RimesBroker -Value $startup}else{Remove-ItemProperty -LiteralPath $runKey -Name RimesBroker -ErrorAction SilentlyContinue}

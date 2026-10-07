@@ -16,7 +16,7 @@ Windows 11 x64；包括 x64/x86 TSF 和一个 x64 Broker。1.0.0 采用未签名
 - 升级：运行新版本的 EXE。使用独立版本目录；注册失败尝试恢复旧版本。
 - 验证：运行 `Verify.ps1`。核对两架构注册、文件清单、版本和提交。
 - 回退：运行 `Rollback.ps1`，恢复 state.json 中记录的前一版。回退同样检查占用。迁移自旧的未打包安装时，恢复 `legacy-recovery.json` 记录的原始 DLL 路径与启动设置。
-- 卸载：运行 `Uninstall.ps1`。注销两架构，删除自启动；保留版本文件和 `uninstalled-state.json` 供恢复。
+- 卸载：运行 `Uninstall.ps1`。注销两架构，删除自启动；保留版本文件和 `uninstalled-state.json` 供恢复。若 `state.json` 丢失（被手工清理、被安全软件隔离或安装中断），脚本改用 `versions` 下最新的完整版本目录继续注销；若不存在完整版本，则抛出可执行的修复指引，而不是未处理异常。
 - 用户词库：`%APPDATA%\RIMES`；设置：`%LOCALAPPDATA%\RIMES\settings.json`。升级、回退、默认卸载均保留词库、设置和凭据。
 
 初次部署完整词库可能较慢。诊断只包含版本、路径、错误类型和阶段，不包含 Buffer 正文、API 密钥或响应正文。不要把用户词库、设置和凭据放入问题报告。
