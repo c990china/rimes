@@ -101,6 +101,75 @@ final class RimeSchemeImportTests: XCTestCase {
         XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "不安全预设路径"))
     }
 
+    func testRimeIceSubdirectoryDictionariesAndReadOnlyMixedPhrasesArePreserved() throws {
+        var files = fixture
+        files["demo.schema.yaml"] = Data((schema + "\ncn_en:\n  dictionary: ''\n  user_dict: en_dicts/cn_en\n  db_class: stabledb\n").utf8)
+        files["demo.dict.yaml"] = Data("---\nname: demo\nimport_tables: [cn_dicts/base]\n...\n".utf8)
+        files["cn_dicts/base.dict.yaml"] = Data("---\nname: base\n...\n雾凇\twu song\n".utf8)
+        files["en_dicts/cn_en.txt"] = Data("哆啦A梦\tdo la a meng\n".utf8)
+        let review = try RimeSchemeImportService.inspect(data: archive(files), sourceName: "雾凇目录结构")
+        XCTAssertEqual(review.schemes[0].blockingIssues, [])
+        let destination = temporaryDirectory(); defer { try? FileManager.default.removeItem(at: destination) }
+        let staged = try RimeSchemeImportService.stage(review: review, selectedSchemaIDs: ["demo"], destinationRoot: destination)
+        for path in ["cn_dicts/base.dict.yaml", "en_dicts/cn_en.txt"] {
+            XCTAssertEqual(try Data(contentsOf: staged.rootURL.appendingPathComponent(path)), files[path], path)
+        }
+        files.removeValue(forKey: "cn_dicts/base.dict.yaml")
+        let incomplete = try RimeSchemeImportService.inspect(data: archive(files), sourceName: "缺失子词典")
+        XCTAssertTrue(incomplete.schemes[0].blockingIssues.contains { $0.contains("cn_dicts/base.dict.yaml") })
+    }
+
+    func testSubdirectoryUserDictionaryRequiresPackagedReadOnlyTableIncludingEffectivePatch() throws {
+        let auxiliary = "\ncn_en:\n  dictionary: ''\n  user_dict: en_dicts/cn_en\n  db_class: stabledb\n"
+        var files = fixture
+        files["demo.schema.yaml"] = Data((schema + auxiliary).utf8)
+        XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "未随包提供"))
+        files["en_dicts/cn_en.txt"] = Data("混合\thun he\n".utf8)
+        for database in ["tabledb", "userdb", "plain_userdb"] {
+            files["demo.schema.yaml"] = Data((schema + auxiliary.replacingOccurrences(of: "stabledb", with: database)).utf8)
+            XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "写入型路径"), database)
+        }
+        files["demo.schema.yaml"] = Data((schema + auxiliary).utf8)
+        files["demo.custom.yaml"] = Data("patch: {cn_en/db_class: tabledb}\n".utf8)
+        XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "补丁改变数据库类型"))
+        files["demo.custom.yaml"] = Data("patch: {'/cn_en/db_class': tabledb}\n".utf8)
+        XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "绝对配置键路径改变数据库类型"))
+        files["demo.custom.yaml"] = Data("patch: {cn_en: {dictionary: '', user_dict: en_dicts/cn_en}}\n".utf8)
+        XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "整个命名空间补丁丢失只读类型"))
+        files["demo.custom.yaml"] = Data("patch: {cn_en/db_class/=: tabledb}\n".utf8)
+        XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "显式替换数据库类型"))
+        files["demo.custom.yaml"] = Data("patch: {cn_en/db_class/+: malicious}\n".utf8)
+        XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "追加数据库类型"))
+        files["demo.custom.yaml"] = Data("patch: {cn_en/user_dict/+: /../../outside}\n".utf8)
+        XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "补丁追加路径逃逸"))
+        files.removeValue(forKey: "demo.custom.yaml")
+        files["demo.schema.yaml"] = Data((schema + auxiliary.replacingOccurrences(of: "stabledb", with: "tabledb") + "'cn_en/db_class': stabledb\n").utf8)
+        XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "普通 YAML 平铺键不能覆盖真实类型"))
+        files["demo.schema.yaml"] = Data((schema + auxiliary.replacingOccurrences(of: "stabledb", with: "tabledb")).utf8)
+        files["demo.custom.yaml"] = Data("patch: {cn_en/+: {'/db_class': stabledb}}\n".utf8)
+        XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "合并树中的字面路径键不能覆盖真实类型"))
+        files["demo.schema.yaml"] = Data((schema + auxiliary.replacingOccurrences(of: "user_dict: en_dicts/cn_en", with: "user_dict: custom_phrase")).utf8)
+        files["demo.custom.yaml"] = Data("patch: {cn_en/user_dict: en_dicts/cn_en}\n".utf8)
+        XCTAssertNoThrow(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "补丁继承只读类型"))
+    }
+
+    func testDictionaryAndReadOnlyUserDictionaryPathsStillRejectTraversalAndAbsoluteNames() throws {
+        for path in ["/private/outside", "../outside", "cn_dicts/../../outside", "cn_dicts/./base", "cn_dicts//base", "cn_dicts/base/", "C:/outside", "C:\\outside"] {
+            var files = fixture
+            files["demo.dict.yaml"] = Data("---\nname: demo\nimport_tables: ['\(path)']\n...\n".utf8)
+            XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "不安全子词典"), path)
+            files = fixture
+            files["demo.schema.yaml"] = Data((schema + "\ncn_en:\n  user_dict: '\(path)'\n  db_class: stabledb\n").utf8)
+            XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "不安全只读词典"), path)
+        }
+    }
+
+    func testEmptyUserDictionaryKeepsNativeRootLocalNameSemantics() throws {
+        var files = fixture
+        files["demo.schema.yaml"] = Data((schema + "\nauxiliary: {dictionary: '', user_dict: '', db_class: userdb}\n").utf8)
+        XCTAssertNoThrow(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "空用户词典名称"))
+    }
+
     func testRejectsTraversalLinkEncryptionAndCompressionBomb() throws {
         var files = fixture; files["../escape.txt"] = Data("escape".utf8)
         XCTAssertThrowsError(try RimeSchemeImportService.inspect(data: archive(files), sourceName: "路径逃逸"))

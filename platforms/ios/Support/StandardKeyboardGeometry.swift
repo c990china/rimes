@@ -1,4 +1,5 @@
 import UIKit
+import RimesCore
 
 enum StandardKeyControl: String, CaseIterable {
     case space, backspace, enter, shift, numbers, language, emoji, buffer
@@ -12,7 +13,8 @@ struct StandardKeyboardGeometry {
     var height: CGFloat
     static func height(landscape: Bool) -> CGFloat { landscape ? 143 : 206 }
 
-    static func make(width: CGFloat, mode: StandardKeyboardMode, landscape: Bool) -> Self {
+    /// `chinese` swaps the number and symbol rows for the marks Chinese input types.
+    static func make(width: CGFloat, mode: StandardKeyboardMode, landscape: Bool, chinese: Bool = false) -> Self {
         let height = height(landscape: landscape), gap: CGFloat = landscape ? 5 : 6
         let rowGap: CGFloat = landscape ? 5 : 10, rowHeight = (height - rowGap * 3) / 4
         let width = max(1, width)
@@ -39,8 +41,7 @@ struct StandardKeyboardGeometry {
         }
         let unit = (width - 9 * gap) / 10
         let rows: [String] = mode == .qwerty ? ["qwertyuiop", "asdfghjkl", "zxcvbnm"]
-            : mode == .numeric ? ["1234567890", "-/:;()$&@\"", ".,?!'"]
-            : ["[]{}#%^*+=", "_\\|~<>€£¥•", ".,?!'"]
+            : PunctuationLayout.rows(symbols: mode == .symbols, chinese: chinese)
         for (row, letters) in rows.enumerated() {
             let occupied = CGFloat(letters.count) * unit + CGFloat(letters.count - 1) * gap
             let start = (width - occupied) / 2

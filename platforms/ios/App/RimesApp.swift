@@ -53,7 +53,7 @@ struct HomeView: View {
                     NavigationLink { ChordProfilesView() } label: { Label(L("滑动并击与键位", "Slide chords & mappings"), systemImage: "hand.draw") }
                     NavigationLink { KeyboardAppearanceView() } label: { Label(L("键盘布局与换肤", "Keyboard layout & skins"), systemImage: "keyboard") }
                     NavigationLink { RimeSchemesView() } label: { Label(L("Rime 方案包与导入", "Rime schemes & import"), systemImage: "shippingbox") }
-                    NavigationLink { TranslationSetupView() } label: { Label(L("苹果翻译语言包", "Apple translation languages"), systemImage: "translate") }
+                    NavigationLink { TranslationSetupView() } label: { Label(L("Apple 本地翻译语言包", "Apple translation languages"), systemImage: "translate") }
                     NavigationLink { OfficialPluginsView() } label: { Label(L("官方插件", "Official plugins"), systemImage: "puzzlepiece.extension") }
                     NavigationLink { ProvidersView() } label: { Label(L("AI 服务", "AI services"), systemImage: "sparkles") }
                     NavigationLink { PoemLibraryView() } label: { Label(L("AI 作诗：句式与词卡", "AI Poem: patterns & word cards"), systemImage: "text.book.closed") }
@@ -135,7 +135,12 @@ struct ProvidersView: View {
                     .swipeActions { Button(role:.destructive) { do { try KeychainStore().delete(p.id); model.value.providers.removeAll { $0.id == p.id }; if model.value.selectedProvider == p.id { model.value.selectedProvider = nil }; model.save() } catch { model.error = error.localizedDescription } } label: { Label("Delete",systemImage:"trash") } }
                 }
                 Button { editing = ProviderConfiguration() } label: { Label(L("添加服务", "Add service"),systemImage:"plus") }
-            } footer: { Text(L("使用自己的 API Key。支持 HTTPS OpenAI 兼容 Chat Completions 接口。Key 仅保存在本设备 Keychain。", "Bring your own API key. Supports HTTPS OpenAI-compatible Chat Completions. Keys stay in this device's Keychain.")) }
+            } footer: {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(L("已选 AI 服务用于快问快答、AI 润色、AI 作诗和 AI 字符画。Apple 本地翻译使用本机语言包，单独在“Apple 本地翻译语言包”中准备。", "The selected AI service powers Quick Q&A, AI Polish, AI Poem and AI Text Art. Apple on-device translation uses language packs prepared separately under Apple translation languages."))
+                    Text(L("使用自己的 API Key。支持 HTTPS OpenAI 兼容 Chat Completions 接口。Key 仅保存在本设备 Keychain。", "Bring your own API key. Supports HTTPS OpenAI-compatible Chat Completions. Keys stay in this device's Keychain."))
+                }
+            }
         }.navigationTitle(L("AI 服务", "AI services"))
         .sheet(item:$editing) { ProviderEditor(provider:$0).environmentObject(model) }
     }
@@ -152,7 +157,7 @@ struct ProviderEditor: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(L("连接信息", "Connection")) {
+                Section {
                     TextField(L("名称", "Name"),text:$provider.name)
                     TextField("https://api.example.com/v1",text:$provider.baseURL).keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled().onChange(of:provider.baseURL) { _,_ in consent = false }
                     SecureField("API Key",text:$key).textInputAutocapitalization(.never).autocorrectionDisabled()
@@ -163,6 +168,8 @@ struct ProviderEditor: View {
                     }.disabled(probing || key.isEmpty || (try? provider.endpoint("models")) == nil)
                     Text(L("查询模型列表会将 API Key 发送到上方地址，不发送 Buffer 文本。查询失败不影响手动填写和保存。", "Fetching models sends the API key to the address above, without Buffer text. You can enter and save a model ID even if lookup fails.")).font(.caption).foregroundStyle(.secondary)
                     if !models.isEmpty { Picker("Models",selection:$provider.model) { Text(provider.model).tag(provider.model); ForEach(models.filter { $0 != provider.model },id:\.self) { Text($0).tag($0) } } }
+                } header: { Text(L("连接信息", "Connection")) } footer: {
+                    Text(L("保存并选用后，在键盘选择快问快答、AI 润色、AI 作诗或 AI 字符画，输入内容并点 ▶ 执行。请先为 RIMES 开启完全访问。Apple 本地翻译始终使用本机语言包。", "After Save & select, choose Quick Q&A, AI Polish, AI Poem or AI Text Art in the keyboard, enter text and tap ▶ to run. Enable Full Access for RIMES first. Apple on-device translation uses the device's language packs."))
                 }
                 Section(L("发送许可", "Sending permission")) {
                     Text(provider.consentIdentity.isEmpty ? L("填写有效地址后显示接收方", "Enter a valid endpoint to see the recipient") : provider.consentIdentity).font(.caption).textSelection(.enabled)
@@ -359,7 +366,7 @@ struct PrivacyView: View {
             Section(L("本机输入", "On-device typing")) { Text(L("词频只保存在设备。无账户、遥测或输入正文日志。Buffer 草稿不会落盘；键盘会话结束时清除。", "Learning stays on your device. No account, telemetry or text logs. Buffer drafts are not saved to disk and are cleared when the keyboard session ends.")) }
             Section(L("统计图片", "Stats images")) { Text(L("图片在本机生成，只含汇总统计，不含输入正文。保存时只申请相册添加权限，不读取你的照片；App 同时保留最新一张主动保存的卡片，不参与备份，可在卡片页面删除。相册中的副本请在照片 App 中删除。", "Images are generated on-device with aggregate statistics, without typed text. Saving requests add-only access and never reads your photos. The app keeps the latest explicitly saved card, excluded from backup and deletable on its page. Delete Photos copies in the Photos app.")) }
             Section("AI") { Text(L("只发送你主动提交的 Buffer 文本到你配置并同意的服务；API Key 保存在仅限本设备的 Keychain 中。请求不会跟随重定向。", "Only explicitly submitted Buffer text goes to your configured, consented service. API keys stay in this device's Keychain. Requests never follow redirects.")) }
-            Section(L("苹果翻译", "Apple translation")) { Text(L("翻译在设备上使用已下载的苹果语言模型。下载语言包可能需要联网；翻译不可用时不会自动改用 AI 服务。", "Translation uses downloaded Apple language models on your device. Preparing languages may need a network connection. Unavailable translations never fall back to an AI service automatically.")) }
+            Section(L("Apple 本地翻译", "Apple on-device translation")) { Text(L("翻译在设备上使用已下载的 Apple 语言模型。下载语言包可能需要联网；翻译不可用时不会自动改用 AI 服务。", "Translation uses downloaded Apple language models on your device. Preparing languages may need a network connection. Unavailable translations never fall back to an AI service automatically.")) }
             Section {
                 Link(L("隐私政策", "Privacy policy"), destination: URL(string: "https://scholay.github.io/rimes/ios/privacy/")!)
                 Link(L("使用帮助与联系", "Help & contact"), destination: URL(string: "https://scholay.github.io/rimes/ios/support/")!)

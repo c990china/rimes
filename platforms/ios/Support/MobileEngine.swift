@@ -68,6 +68,10 @@ final class MobileEngine: InputEngine {
     }
     func candidate(_ index: Int) -> EngineSnapshot { snapshot(bridge?.selectCandidate(UInt(index))) }
     func clear() { bridge?.clear(); rawSnapshot = .init(); candidateReadings = []; provenance.reset() }
+    func suspend() {
+        bridge?.suspend()
+        rawSnapshot = .init(); candidateReadings = []; provenance.reset(); lastError = ""
+    }
     private func snapshot(_ value: [AnyHashable: Any]?) -> EngineSnapshot {
         lastError = value?["error"] as? String ?? ""
         candidateReadings = value?["readings"] as? [String] ?? []

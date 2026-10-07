@@ -23,7 +23,9 @@ public final class KeyboardLayout {
     }
     private KeyboardLayout() {}
     public static int height(boolean landscape) { return landscape?143:206; }
-    public static List<Key> keys(float width,boolean landscape,Mode mode) {
+    public static List<Key> keys(float width,boolean landscape,Mode mode) { return keys(width,landscape,mode,false); }
+    /** Chinese input swaps the number and symbol rows for the marks they type; other modes ignore it. */
+    public static List<Key> keys(float width,boolean landscape,Mode mode,boolean chinese) {
         if(width<=0) throw new IllegalArgumentException("Keyboard width must be positive");
         List<Key> result=new ArrayList<>(); float row=height(landscape)/4f;
         float gap=landscape?5:6,rowGap=landscape?5:10,capHeight=(height(landscape)-3*rowGap)/4f;
@@ -47,8 +49,7 @@ public final class KeyboardLayout {
                 for(int i=0;i<EMOJIS.length;i++) letter(result,EMOJIS[i],i%10,i/10,unit,row,capUnit,capHeight,gap,rowGap);
             } else {
                 String[] rows=mode==Mode.QWERTY?new String[]{"qwertyuiop","asdfghjkl","zxcvbnm"}
-                        :mode==Mode.NUMERIC?new String[]{"1234567890","-/:;()$&@\"",".,?!'"}
-                        :new String[]{"[]{}#%^*+=","_\\|~<>€£¥•",".,?!'"};
+                        :PunctuationLayout.rows(mode==Mode.SYMBOLS,chinese);
                 for(int r=0;r<3;r++) {
                     String letters=rows[r]; float start=(10-letters.length())/2f;
                     for(int i=0;i<letters.length();i++) letter(result,letters.substring(i,i+1),start+i,r,unit,row,capUnit,capHeight,gap,rowGap);

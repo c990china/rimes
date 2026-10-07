@@ -6,6 +6,79 @@ import RimesCore
 @MainActor final class KeyboardReturnTests: XCTestCase {
     private enum Layout: CaseIterable { case qwerty, nineKey, custom, orthogonal, split }
 
+    func testAIConsentStaysInsideKeyboardAndOnlyExplicitAgreementSends() throws {
+        for layout in Layout.allCases {
+            let (window, keyboard) = host(layout); defer { window.isHidden = true }
+            keyboard.developmentAIFullAccess = true
+            keyboard.developmentAIProvider(.init(name: "Test service", baseURL: "https://example.com/v1", model: "test"))
+            keyboard.developmentPlugin(.polish, source: "Only this Buffer text")
+            var requests: [String] = []
+            keyboard.developmentAuthorizedAIRequest = { text, _, _ in requests.append(text) }
+            window.layoutIfNeeded()
+            let height = keyboard.view.bounds.height
+            tap(keyboard.developmentPluginControls.run); window.layoutIfNeeded()
+            XCTAssertNil(keyboard.presentedViewController)
+            let panel = try XCTUnwrap(keyboard.developmentPanel)
+            XCTAssertEqual(keyboard.view.bounds.height, height)
+            XCTAssertTrue(requests.isEmpty)
+            try XCTUnwrap(panel.chips.first { $0.item.id == "cancel" }).sendActions(for: .touchUpInside)
+            XCTAssertNil(keyboard.developmentPanel)
+            XCTAssertEqual(keyboard.developmentBufferSource.text, "Only this Buffer text")
+            XCTAssertTrue(requests.isEmpty)
+            tap(keyboard.developmentPluginControls.run)
+            try XCTUnwrap(keyboard.developmentPanel?.chips.first { $0.item.id == "agree" }).sendActions(for: .touchUpInside)
+            XCTAssertNil(keyboard.developmentPanel)
+            XCTAssertEqual(requests, ["Only this Buffer text"])
+        }
+    }
+
+    func testAIConsentRejectsChangedTextProviderFieldPluginAndLifecycle() throws {
+        for mutation in 0..<6 {
+            let (window, keyboard) = host(.qwerty); defer { window.isHidden = true }
+            keyboard.developmentAIFullAccess = true
+            keyboard.developmentAIProvider(.init(name: "Test service", baseURL: "https://example.com/v1", model: "test"))
+            keyboard.developmentPlugin(.polish, source: "Original")
+            var sends = 0
+            keyboard.developmentAuthorizedAIRequest = { _, _, _ in sends += 1 }
+            tap(keyboard.developmentPluginControls.run)
+            let staleAgree = try XCTUnwrap(keyboard.developmentPanel?.chips.first { $0.item.id == "agree" })
+            switch mutation {
+            case 0: keyboard.developmentType("new")
+            case 1: keyboard.developmentAIProvider(.init(name: "Other service", baseURL: "https://other.example/v1", model: "test"))
+            case 2: keyboard.layoutProxy.documentIdentifier = UUID(); keyboard.textDidChange(nil)
+            case 3: keyboard.developmentPlugin(.ask, source: "Original")
+            case 4: try keyboard.developmentRevokePlugin(.polish)
+            default: keyboard.developmentHostResigned()
+            }
+            staleAgree.sendActions(for: .touchUpInside)
+            XCTAssertEqual(sends, 0, "Stale consent must never authorize changed context: \(mutation)")
+            XCTAssertNil(keyboard.presentedViewController)
+            XCTAssertNil(keyboard.developmentPanel)
+        }
+    }
+
+    func testRetiredAIConsentCannotAuthorizeAReplacementPrompt() throws {
+        for mutation in 0..<3 {
+            let (window, keyboard) = host(.qwerty); defer { window.isHidden = true }
+            keyboard.developmentAIFullAccess = true
+            keyboard.developmentAIProvider(.init(name: "Test service", baseURL: "https://example.com/v1", model: "test"))
+            keyboard.developmentPlugin(.polish, source: "Original")
+            var requests: [String] = []
+            keyboard.developmentAuthorizedAIRequest = { text, _, _ in requests.append(text) }
+            tap(keyboard.developmentPluginControls.run)
+            let staleAgree = try XCTUnwrap(keyboard.developmentPanel?.chips.first { $0.item.id == "agree" })
+            if mutation == 0 { keyboard.developmentClosePanel() }
+            if mutation == 1 { keyboard.developmentPlugin(.polish, source: "Replacement") }
+            tap(keyboard.developmentPluginControls.run)
+            let newAgree = try XCTUnwrap(keyboard.developmentPanel?.chips.first { $0.item.id == "agree" })
+            XCTAssertFalse(staleAgree === newAgree)
+            staleAgree.sendActions(for: .touchUpInside)
+            XCTAssertTrue(requests.isEmpty)
+            newAgree.sendActions(for: .touchUpInside)
+            XCTAssertEqual(requests, [mutation == 1 ? "Replacement" : "Original"])
+        }
+    }
+
     func testHapticPressIsImmediateAndIndependentOfAudio() {
         let feedback = KeyboardFeedback()
         var time: TimeInterval = 1

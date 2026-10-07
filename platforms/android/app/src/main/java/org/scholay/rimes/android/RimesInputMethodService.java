@@ -29,6 +29,7 @@ import org.scholay.rimes.core.PluginSession;
 import org.scholay.rimes.core.RimeEngine;
 import org.scholay.rimes.core.KeyboardLayout;
 import org.scholay.rimes.core.NineKeyPinyin;
+import org.scholay.rimes.core.PunctuationLayout;
 import org.scholay.rimes.core.ChordGesture;
 import org.scholay.rimes.core.ChordLayout;
 
@@ -81,11 +82,12 @@ public final class RimesInputMethodService extends InputMethodService {
     private KeyboardTheme theme=KeyboardTheme.ALL[0];
     private String layout="qwerty";
     private boolean symbols,emoji,appearanceOpen,spellingOpen,punctuationOpen;
+    /** No key has been typed since the number page opened from letters. */
+    private boolean numberPageFresh;
     private int spellingPage;
     private NineKeyPinyin spellings=new NineKeyPinyin(java.util.Collections.emptyList());
     private List<String> spellingChoices=java.util.Collections.emptyList();
-    private static final String[] MARKS={",",".","?","!","、",":",";","'"};
-    private static final String[] MARK_LABELS={"，","。","？","！","、","：","；","'"};
+    private static final int CANDIDATE_SLOTS=Math.max(9,PunctuationLayout.STRIP.size());
     private TextView preedit;
     private HorizontalScrollView candidateScroll;
     private ChordPreview chordReadout;
@@ -149,7 +151,7 @@ public final class RimesInputMethodService extends InputMethodService {
         numeric=kind==InputType.TYPE_CLASS_NUMBER || kind==InputType.TYPE_CLASS_PHONE || kind==InputType.TYPE_CLASS_DATETIME;
         directOnly=numeric || isPassword(info) || kind!=InputType.TYPE_CLASS_TEXT;
         privateField=!allowsBuffer(info);
-        uppercase=false; symbols=false; emoji=false; appearanceOpen=false; spellingOpen=false; punctuationOpen=false;
+        uppercase=false; symbols=false; emoji=false; appearanceOpen=false; spellingOpen=false; punctuationOpen=false; numberPageFresh=false;
         selection=info.initialSelEnd; selectionStart=info.initialSelStart;
         buffer.beginTarget(target!=null && allowsBuffer(info));
         resetEngine(); rebuildKeys(); render();
@@ -215,6 +217,8 @@ public final class RimesInputMethodService extends InputMethodService {
     }
     private boolean nineKeyEngine() { return layout.equals("nineKey") && schema.equals("rimes_pinyin"); }
     private boolean nineKeyVisible() { return ready && nineKeyEngine() && !directOnly && !english && !numeric && !emoji && !uppercase; }
+    /** Chinese input shows Chinese marks on the number and symbol pages. */
+    private boolean chinesePages() { return !english && !directOnly; }
     private void preferenceChanged(SharedPreferences changed,String key) {
         if(destroyed || changingSettingsPair) return;
         KeyboardSettings.Snapshot saved=settings.snapshot();
@@ -346,6 +350,23 @@ public final class RimesInputMethodService extends InputMethodService {
             RimeEngine.Snapshot after=engine.processKey(session,text.codePointAt(0));
             if(!after.handled && after.commit.isEmpty()) return new Result(after,text,false,0);
             return Result.state(after);
+        });
+    }
+    /** A mark from the nine-key strip confirms the first candidates, then follows them in one commit. */
+    private void punctuate(String mark) {
+        if(!ready) { type(mark); return; }
+        if(!ownsTarget()) return;
+        invalidatePlugin();
+        dispatch(() -> {
+            RimeEngine.Snapshot after=state();
+            if(!after.composing()) return new Result(RimeEngine.Snapshot.EMPTY,mark,false,0);
+            StringBuilder committed=new StringBuilder();
+            for(int step=0;step<32 && after.composing() && !after.candidates.isEmpty();step++) {
+                after=engine.selectCandidate(session,after.pageStart); committed.append(after.commit);
+            }
+            // Code without a candidate settles as raw code, like Return.
+            if(after.composing()) { committed.append(after.raw); engine.clearComposition(session); after=RimeEngine.Snapshot.EMPTY; }
+            return new Result(after,committed.append(mark).toString(),true,0);
         });
     }
     private boolean deliver(String text,boolean block) {
@@ -506,7 +527,7 @@ public final class RimesInputMethodService extends InputMethodService {
         settleAndSwitch(() -> { english=!english; uppercase=false; spellingOpen=false; punctuationOpen=false; });
     }
     private void toggleNumbers() {
-        settleAndSwitch(() -> { numeric=!numeric; symbols=false; emoji=false; spellingOpen=false; punctuationOpen=false; });
+        settleAndSwitch(() -> { numeric=!numeric; numberPageFresh=numeric; symbols=false; emoji=false; spellingOpen=false; punctuationOpen=false; });
     }
     private KeyboardLayout.Mode visibleMode() {
         return emoji?KeyboardLayout.Mode.EMOJI:numeric?(symbols?KeyboardLayout.Mode.SYMBOLS:KeyboardLayout.Mode.NUMERIC)
@@ -563,26 +584,32 @@ public final class RimesInputMethodService extends InputMethodService {
         }
         @Override public boolean selected(KeyboardLayout.Key key) {
             return key.action==KeyboardLayout.Action.SHIFT && uppercase || key.action==KeyboardLayout.Action.SPELLING && spellingOpen
+                    || key.action==KeyboardLayout.Action.PUNCTUATION && punctuationOpen
                     || key.action==KeyboardLayout.Action.RETURN && returnSelected();
         }
         @Override public void press(KeyboardLayout.Key key) {
+            if(punctuationOpen && key.action!=KeyboardLayout.Action.PUNCTUATION) { punctuationOpen=false; render(); }
             switch(key.action) {
                 case TEXT:
                     String text=uppercase && !numeric && !emoji?key.text.toUpperCase(Locale.ROOT):key.text;
-                    if(numeric && !english && !directOnly) for(int i=0;i<MARKS.length;i++) if(text.equals(MARKS[i])) { text=MARK_LABELS[i]; break; }
-                    type(text); break;
+                    // Opening 123 just for a sentence mark is a one-shot visit; digits and other marks stay.
+                    boolean oneShot=numeric && numberPageFresh && chinesePages() && retained.isEmpty() && PunctuationLayout.returnsToLetters(text);
+                    numberPageFresh=false;
+                    type(text);
+                    if(oneShot) { numeric=false; symbols=false; render(); }
+                    break;
                 case SHIFT: settleAndSwitch(() -> uppercase=!uppercase); break;
                 case DELETE: delete(); break;
                 case RETURN: enter(); break;
                 case NUMBERS:
                     if(emoji) settleAndSwitch(() -> { emoji=false; numeric=false; }); else toggleNumbers(); break;
-                case SYMBOLS: settleAndSwitch(() -> { symbols=!symbols || !numeric; numeric=true; emoji=false; }); break;
+                case SYMBOLS: settleAndSwitch(() -> { symbols=!symbols || !numeric; numberPageFresh|=!numeric; numeric=true; emoji=false; }); break;
                 case LANGUAGE: toggleLanguage(); break;
                 case EMOJI: settleAndSwitch(() -> { emoji=!emoji; numeric=false; }); break;
                 case SPACE: type(" "); break;
                 case SPELLING: spellingOpen=!spellingOpen; punctuationOpen=false; spellingPage=0; render(); break;
                 case SEPARATOR: type("'"); break;
-                case PUNCTUATION: punctuationOpen=!punctuationOpen; spellingOpen=false; render(); break;
+                case PUNCTUATION: punctuationOpen=!punctuationOpen; spellingOpen=false; if(punctuationOpen) candidateScroll.scrollTo(0,0); render(); break;
                 default: throw new IllegalStateException();
             }
         }
@@ -657,7 +684,7 @@ public final class RimesInputMethodService extends InputMethodService {
             public void onPluginTap(String id) { selectPlugin(id); }
             public void onPluginLongPress(String id) { openPluginSettings(id); }
         }); center.addView(pluginShortcuts,new FrameLayout.LayoutParams(-1,-1)); chordReadout=new ChordPreview(this); center.addView(chordReadout,new FrameLayout.LayoutParams(-1,-1)); candidates.clear();
-        for(int i=0;i<9;i++) {
+        for(int i=0;i<CANDIDATE_SLOTS;i++) {
             final int index=i; KeyButton candidate=button(strip,"",() -> candidateTapped(index),0);
             candidate.setLayoutParams(new LinearLayout.LayoutParams(-2,-1)); candidate.fontStyle(false,20,false); candidate.plain(true);
             candidate.setMinWidth(dp(32)); candidate.setMinimumWidth(dp(32)); candidate.setPadding(dp(6),0,dp(6),0);
@@ -786,11 +813,11 @@ public final class RimesInputMethodService extends InputMethodService {
     private void gapLeft(View view,int gap) { ((LinearLayout.LayoutParams)view.getLayoutParams()).leftMargin=dp(gap); }
     private void gapRight(View view,int gap) { ((LinearLayout.LayoutParams)view.getLayoutParams()).rightMargin=dp(gap); }
     private boolean landscape() { return getResources().getConfiguration().orientation==Configuration.ORIENTATION_LANDSCAPE; }
-    private void rebuildKeys() { if(keys!=null) keys.render(visibleMode(),theme); }
+    private void rebuildKeys() { if(keys!=null) keys.render(visibleMode(),chinesePages(),theme); }
     private void candidateTapped(int index) {
         if(!chordPreview.isEmpty()) return;
         if(punctuationOpen) {
-            if(index<MARKS.length) { punctuationOpen=false; type(MARKS[index]); }
+            if(index<PunctuationLayout.STRIP.size()) { punctuationOpen=false; punctuate(PunctuationLayout.STRIP.get(index)); }
         } else if(snapshot.composing()) select(index);
     }
     private void candidatePage(boolean forward) {
@@ -819,14 +846,14 @@ public final class RimesInputMethodService extends InputMethodService {
         candidateScroll.setVisibility(heldPreview==null && !idle?View.VISIBLE:View.GONE); chordReadout.setVisibility(heldPreview==null?View.GONE:View.VISIBLE);
         chordReadout.render(heldPreview,theme,landscape());
         boolean marks=punctuationOpen;
-        int count=directOnly?0:!chordPreview.isEmpty()?1:marks?MARKS.length:snapshot.candidates.size();
-        for(int i=0;i<9;i++) {
+        int count=directOnly?0:!chordPreview.isEmpty()?1:marks?PunctuationLayout.STRIP.size():snapshot.candidates.size();
+        for(int i=0;i<candidates.size();i++) {
             Button item=candidates.get(i); boolean exists=i<count;
             item.setVisibility(exists?View.VISIBLE:View.GONE);
             if(exists) {
-                String value=!chordPreview.isEmpty()?chordPreview:marks?(english || numeric || emoji?MARKS[i]:MARK_LABELS[i]):snapshot.candidates.get(i);
+                String value=!chordPreview.isEmpty()?chordPreview:marks?PunctuationLayout.STRIP.get(i):snapshot.candidates.get(i);
                 setText(item,value);
-                item.setContentDescription(marks?MARKS[i]:"候选"+(i+1)+" "+value);
+                item.setContentDescription(marks?value:"候选"+(i+1)+" "+value);
             }
             item.setEnabled(exists && pending==0 && chordPreview.isEmpty());
         }
@@ -875,7 +902,7 @@ public final class RimesInputMethodService extends InputMethodService {
         if(chord && panelOpen) surfaceHeight+=landscape()?35:41;
         int desiredHeight=Math.round(surfaceHeight*getResources().getDisplayMetrics().density);
         if(surfaceContainer.getLayoutParams().height!=desiredHeight) { surfaceContainer.getLayoutParams().height=desiredHeight; surfaceContainer.requestLayout(); }
-        keys.render(visibleMode(),theme); keys.setVisibility(panelOpen || chord?View.GONE:View.VISIBLE);
+        keys.render(visibleMode(),chinesePages(),theme); keys.setVisibility(panelOpen || chord?View.GONE:View.VISIBLE);
         chords.render("splitOrthogonal".equals(layout),!english && !uppercase,uppercase,theme); chords.setVisibility(panelOpen || !chord?View.GONE:View.VISIBLE);
         chordFooter.setVisibility(!panelOpen && chord?View.VISIBLE:View.GONE);
         ((LinearLayout.LayoutParams)surfaceContainer.getLayoutParams()).bottomMargin=chord && !panelOpen?dp(1):0;

@@ -135,6 +135,100 @@ import RimesCore
         XCTAssertEqual(saved.layout, .nineKey); XCTAssertEqual(saved.skin, .rimes); XCTAssertNotNil(saved.revision)
         XCTAssertEqual(try Data(contentsOf: root.appendingPathComponent("keyboard-layouts-v1.json")), before)
     }
+    func testChineseNumberAndSymbolPagesShowTheMarksTheyType() throws {
+        for width: CGFloat in [310, 383, 842] {
+            for mode in [StandardKeyboardMode.numeric, .symbols] {
+                let geometry = StandardKeyboardGeometry.make(width: width, mode: mode, landscape: width > 600, chinese: true)
+                XCTAssertEqual(geometry.keys.map(\.text), PunctuationLayout.rows(symbols: mode == .symbols, chinese: true).flatMap { $0.map(String.init) })
+                XCTAssertEqual(geometry.keys.map(\.label), geometry.keys.map(\.text))
+                let frames = geometry.keys.map(\.frame) + Array(geometry.controls.values)
+                for (i, frame) in frames.enumerated() {
+                    XCTAssertGreaterThan(frame.width, 20)
+                    XCTAssertGreaterThanOrEqual(frame.minX, -0.01)
+                    XCTAssertLessThanOrEqual(frame.maxX, width + 0.01)
+                    for other in frames.dropFirst(i + 1) { XCTAssertFalse(frame.intersects(other)) }
+                }
+            }
+        }
+        for mode in [StandardKeyboardMode.qwerty, .nineKey] {
+            XCTAssertEqual(StandardKeyboardGeometry.make(width: 393, mode: mode, landscape: false, chinese: true).keys.map(\.text),
+                           StandardKeyboardGeometry.make(width: 393, mode: mode, landscape: false).keys.map(\.text))
+        }
+        let (window, keyboard) = host(); defer { window.isHidden = true }
+        keyboard.developmentOrdinaryAppearance(layout: .qwerty); keyboard.developmentChoose(.pinyin)
+        keyboard.developmentNumeric(); window.layoutIfNeeded()
+        var frames = keyboard.layoutViews.keys.developmentKeyFrames
+        XCTAssertNotNil(frames["，"]); XCTAssertNotNil(frames["“"]); XCTAssertNil(frames[","])
+        // English keeps the half-width page, without leaving it.
+        keyboard.developmentLanguage(); window.layoutIfNeeded()
+        frames = keyboard.layoutViews.keys.developmentKeyFrames
+        XCTAssertNotNil(frames[","]); XCTAssertNil(frames["，"])
+        XCTAssertEqual(keyboard.layoutViews.keys.standardMode, .numeric)
+    }
+    func testSentenceMarkTypedFirstOnTheNumberPageReturnsToLetters() throws {
+        for layout in [OrdinaryKeyboardLayout.qwerty, .nineKey] {
+            let (window, keyboard) = host(); defer { window.isHidden = true }
+            keyboard.developmentOrdinaryAppearance(layout: layout); keyboard.developmentChoose(.pinyin)
+            let letters: StandardKeyboardMode = layout == .nineKey ? .nineKey : .qwerty
+            let keys = keyboard.layoutViews.keys
+            keyboard.developmentNumeric(); XCTAssertEqual(keys.standardMode, .numeric)
+            keyboard.developmentType("，")
+            XCTAssertEqual(keyboard.layoutProxy.native.text, "，"); XCTAssertEqual(keys.standardMode, letters)
+            XCTAssertTrue(keyboard.developmentRaw.isEmpty)
+            // Digits keep the page, and so does a mark that follows them.
+            keyboard.developmentNumeric(); keyboard.developmentType("3"); keyboard.developmentType("。")
+            XCTAssertEqual(keyboard.layoutProxy.native.text, "，3。"); XCTAssertEqual(keys.standardMode, .numeric)
+            keyboard.developmentNumeric(); XCTAssertEqual(keys.standardMode, letters)
+            // A mark that opens a pair stays for its partner.
+            keyboard.developmentNumeric(); keyboard.developmentType("“"); keyboard.developmentType("”")
+            XCTAssertEqual(keyboard.layoutProxy.native.text, "，3。“”"); XCTAssertEqual(keys.standardMode, .numeric)
+            keyboard.developmentNumeric()
+            // Looking at the symbol page first does not use up the visit.
+            let symbols = try XCTUnwrap(keyboard.developmentStandardFunctions[.symbols] as? UIControl)
+            keyboard.developmentNumeric(); symbols.sendActions(for: .touchUpInside); XCTAssertEqual(keys.standardMode, .symbols)
+            symbols.sendActions(for: .touchUpInside); XCTAssertEqual(keys.standardMode, .numeric)
+            keyboard.developmentType("？")
+            XCTAssertEqual(keyboard.layoutProxy.native.text, "，3。“”？"); XCTAssertEqual(keys.standardMode, letters)
+        }
+        // English punctuation never leaves the page by itself.
+        let (window, keyboard) = host(); defer { window.isHidden = true }
+        keyboard.developmentOrdinaryAppearance(layout: .qwerty); keyboard.developmentChoose(.pinyin)
+        keyboard.developmentLanguage(); keyboard.developmentNumeric(); keyboard.developmentType(",")
+        XCTAssertEqual(keyboard.layoutProxy.native.text, ","); XCTAssertEqual(keyboard.layoutViews.keys.standardMode, .numeric)
+    }
+    func testNineKeyPunctuationKeyOffersMarksInTheCandidateRow() async throws {
+        for buffered in [false, true] {
+            let (window, keyboard) = host(); defer { window.isHidden = true }
+            keyboard.developmentOrdinaryAppearance(layout: .nineKey); keyboard.developmentChoose(.pinyin)
+            if buffered { keyboard.developmentBuffer("") }
+            let key = try XCTUnwrap(keyboard.developmentStandardFunctions[.punctuation] as? UIControl)
+            let strip = keyboard.layoutViews.candidates
+            func marks() -> [String] { strip.buttons.compactMap(\.currentTitle) }
+            func text() -> String { buffered ? keyboard.developmentBufferSource.text : keyboard.layoutProxy.native.text }
+            XCTAssertFalse(keyboard.developmentShortcuts.isHidden)
+            key.sendActions(for: .touchUpInside)
+            XCTAssertEqual(marks(), PunctuationLayout.strip)
+            XCTAssertTrue(key.isSelected); XCTAssertTrue(keyboard.developmentShortcuts.isHidden)
+            strip.buttons[4].sendActions(for: .touchUpInside)
+            XCTAssertEqual(text(), "、"); XCTAssertTrue(marks().isEmpty); XCTAssertFalse(key.isSelected)
+            XCTAssertEqual(keyboard.layoutViews.keys.standardMode, .nineKey)
+            // While composing, a mark first confirms the top candidate.
+            keyboard.developmentType("64426")
+            let top = try XCTUnwrap(strip.buttons.first?.currentTitle)
+            key.sendActions(for: .touchUpInside); XCTAssertEqual(marks(), PunctuationLayout.strip)
+            strip.buttons[0].sendActions(for: .touchUpInside)
+            await keyboard.developmentWaitForDelivery()
+            XCTAssertEqual(text(), "、" + top + "，"); XCTAssertTrue(keyboard.developmentRaw.isEmpty)
+            // Any typing key puts the strip away without typing a mark.
+            key.sendActions(for: .touchUpInside); XCTAssertTrue(key.isSelected)
+            keyboard.layoutViews.keys.onTypingPress?()
+            XCTAssertFalse(key.isSelected); XCTAssertTrue(marks().isEmpty)
+            // So does leaving the nine-key letters.
+            key.sendActions(for: .touchUpInside); keyboard.developmentNumeric()
+            XCTAssertFalse(key.isSelected); XCTAssertTrue(marks().isEmpty)
+            XCTAssertEqual(text(), "、" + top + "，")
+        }
+    }
     private func host() -> (UIWindow, KeyboardViewController) {
         let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 393, height: 900))
         let parent = UIViewController(); window.rootViewController = parent; window.makeKeyAndVisible()

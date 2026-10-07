@@ -7,8 +7,8 @@ import static org.junit.Assert.*;
 public class KeyboardLayoutTest {
     @Test public void everyModeFitsWithoutOverlappingAtPhoneAndTabletWidths() {
         for(int width:new int[]{280,320,360,411,600,840,1200}) for(boolean landscape:new boolean[]{false,true})
-            for(KeyboardLayout.Mode mode:KeyboardLayout.Mode.values()) {
-                List<KeyboardLayout.Key> keys=KeyboardLayout.keys(width,landscape,mode);
+            for(KeyboardLayout.Mode mode:KeyboardLayout.Mode.values()) for(boolean chinese:new boolean[]{false,true}) {
+                List<KeyboardLayout.Key> keys=KeyboardLayout.keys(width,landscape,mode,chinese);
                 for(int i=0;i<keys.size();i++) {
                     KeyboardLayout.Key a=keys.get(i);
                     assertTrue(a.x>=0 && a.y>=0 && a.width>0 && a.height>=KeyboardLayout.height(landscape)/4f);
@@ -65,6 +65,41 @@ public class KeyboardLayoutTest {
         List<KeyboardLayout.Key> wide=KeyboardLayout.keys(840,true,KeyboardLayout.Mode.NINE_KEY);
         assertEquals(32,wide.get(0).visualHeight,0.01);
         assertEquals(69,find(wide,KeyboardLayout.Action.RETURN).visualHeight,0.01);
+    }
+    private static String text(List<KeyboardLayout.Key> keys) {
+        StringBuilder text=new StringBuilder();
+        for(KeyboardLayout.Key key:keys) if(key.action==KeyboardLayout.Action.TEXT) text.append(key.text);
+        return text.toString();
+    }
+    @Test public void chineseInputShowsTheMarksItTypesOnNumberAndSymbolPages() {
+        assertEquals("1234567890-/:;()$&@\".,?!'",text(KeyboardLayout.keys(392,false,KeyboardLayout.Mode.NUMERIC)));
+        assertEquals("1234567890-/：；（）￥@“”。，、？！.",text(KeyboardLayout.keys(392,false,KeyboardLayout.Mode.NUMERIC,true)));
+        assertEquals("【】｛｝#%^*+=_—\\｜～《》$&·…‘’「」〈〉",text(KeyboardLayout.keys(392,false,KeyboardLayout.Mode.SYMBOLS,true)));
+        // Letters, nine-key and emoji do not depend on the language.
+        for(KeyboardLayout.Mode mode:new KeyboardLayout.Mode[]{KeyboardLayout.Mode.QWERTY,KeyboardLayout.Mode.NINE_KEY,KeyboardLayout.Mode.EMOJI})
+            assertEquals(text(KeyboardLayout.keys(392,false,mode)),text(KeyboardLayout.keys(392,false,mode,true)));
+        // Longer third rows stay centred between the side keys at the letter-key width.
+        List<KeyboardLayout.Key> symbols=KeyboardLayout.keys(392,false,KeyboardLayout.Mode.SYMBOLS,true);
+        KeyboardLayout.Key first=symbols.get(20),last=symbols.get(26),page=find(symbols,KeyboardLayout.Action.SYMBOLS),delete=find(symbols,KeyboardLayout.Action.DELETE);
+        assertEquals("…",first.text); assertEquals("〉",last.text);
+        assertEquals(39.2,first.width,0.01); assertEquals(58.8,first.x,0.01);
+        assertTrue(first.visualX>page.visualX+page.visualWidth && last.visualX+last.visualWidth<delete.visualX);
+    }
+    @Test public void tableMatchesTheFixtureSharedWithIos() throws Exception {
+        java.util.Map<String,String[]> shared=new java.util.HashMap<>();
+        for(String row:java.nio.file.Files.readAllLines(java.nio.file.Path.of("../../../Shared/Tests/RimesCoreTests/Fixtures/punctuation-layout.tsv"))) {
+            String[] fields=row.split("\t"); shared.put(fields[0],java.util.Arrays.copyOfRange(fields,1,fields.length));
+        }
+        assertEquals(6,shared.size());
+        assertArrayEquals(shared.get("numeric"),PunctuationLayout.rows(false,false));
+        assertArrayEquals(shared.get("symbols"),PunctuationLayout.rows(true,false));
+        assertArrayEquals(shared.get("numeric.zh"),PunctuationLayout.rows(false,true));
+        assertArrayEquals(shared.get("symbols.zh"),PunctuationLayout.rows(true,true));
+        assertEquals(shared.get("strip")[0],String.join("",PunctuationLayout.STRIP));
+        StringBuilder sentence=new StringBuilder();
+        for(String mark:PunctuationLayout.STRIP) if(PunctuationLayout.returnsToLetters(mark)) sentence.append(mark);
+        assertEquals(shared.get("sentence")[0],sentence.toString());
+        for(String other:new String[]{"1",".",",","“","（","…","-","","，。"}) assertFalse(other,PunctuationLayout.returnsToLetters(other));
     }
     private static KeyboardLayout.Key find(List<KeyboardLayout.Key> keys,KeyboardLayout.Action action) {
         return keys.stream().filter(key -> key.action==action).findFirst().orElseThrow();

@@ -17,15 +17,18 @@ final class KeyboardSurface extends ViewGroup {
         void press(KeyboardLayout.Key key);
     }
     private KeyboardLayout.Mode mode;
+    private boolean chinese;
     private List<KeyboardLayout.Key> frames;
     private final Handler handler;
     private KeyboardTheme theme=KeyboardTheme.ALL[0];
     KeyboardSurface(Context context,Handler handler) { super(context); this.handler=handler; setLayoutDirection(LAYOUT_DIRECTION_LTR); }
-    void render(KeyboardLayout.Mode mode,KeyboardTheme theme) {
+    void render(KeyboardLayout.Mode mode,boolean chinese,KeyboardTheme theme) {
         this.theme=theme;
-        if(this.mode!=mode) {
-            this.mode=mode; removeAllViews();
-            frames=KeyboardLayout.keys(400,landscape(),mode);
+        // Only the number and symbol pages differ by language; other pages keep their views.
+        chinese&=mode==KeyboardLayout.Mode.NUMERIC || mode==KeyboardLayout.Mode.SYMBOLS;
+        if(this.mode!=mode || this.chinese!=chinese) {
+            this.mode=mode; this.chinese=chinese; removeAllViews();
+            frames=KeyboardLayout.keys(400,landscape(),mode,chinese);
             for(KeyboardLayout.Key key:frames) {
                 KeyButton button=new KeyButton(getContext());
                 button.setOnClickListener(v -> handler.press(key)); addView(button);
@@ -55,7 +58,7 @@ final class KeyboardSurface extends ViewGroup {
         int height=Math.round(KeyboardLayout.height(landscape())*density);
         setMeasuredDimension(width,resolveSize(height,heightSpec));
         if(mode==null) return;
-        frames=KeyboardLayout.keys(Math.max(1,width/density),landscape(),mode);
+        frames=KeyboardLayout.keys(Math.max(1,width/density),landscape(),mode,chinese);
         for(int i=0;i<frames.size();i++) {
             KeyboardLayout.Key key=frames.get(i);
             int w=Math.round((key.x+key.width)*density)-Math.round(key.x*density);

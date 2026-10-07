@@ -32,6 +32,8 @@ final class KeySurface: UIView {
     var usesCustomLayout: Bool { customLayout != nil && !chordMode && !numeric && !emojiMode }
     var standardMode: StandardKeyboardMode? { didSet { if oldValue != standardMode { cancel(); touchIDs.removeAll(); setNeedsLayout() } } }
     var standardFunctionViews: [StandardKeyControl: UIView] = [:]
+    /// Chinese input shows Chinese marks on the standard number and symbol pages.
+    var chineseNumberPages = false { didSet { if oldValue != chineseNumberPages { cancel(); touchIDs.removeAll(); setNeedsLayout() } } }
     var usesStandardLayout: Bool { standardMode != nil && !chordMode && !emojiMode }
     var usesManagedLayout: Bool { usesCustomLayout || usesStandardLayout }
     var theme: StatusSkin = .rhino {
@@ -156,7 +158,7 @@ final class KeySurface: UIView {
                 else if let button = customFunctionViews[item.key.action] { button.frame = frame; button.isHidden = false }
             }
         } else if usesStandardLayout, let standardMode {
-            let geometry = StandardKeyboardGeometry.make(width: bounds.width, mode: standardMode, landscape: bounds.width > 590)
+            let geometry = StandardKeyboardGeometry.make(width: bounds.width, mode: standardMode, landscape: bounds.width > 590, chinese: chineseNumberPages)
             boxes = geometry.keys.map { ($0.text, $0.frame) }
             labels = Dictionary(uniqueKeysWithValues: geometry.keys.map { ($0.text, $0.label) })
             standardFunctionViews.values.forEach { $0.isHidden = true }
@@ -217,7 +219,9 @@ final class KeySurface: UIView {
             let value = labels[key] ?? key.uppercased()
             let nativeFont = !chordMode && skin == .system
             let size: CGFloat = standardMode == .nineKey ? 20 : nativeFont ? 24 : 21
-            let font = nativeFont ? UIFont.systemFont(ofSize: size) : UIFont.monospacedSystemFont(ofSize: size, weight: .medium)
+            let mark = chineseNumberPages && value.unicodeScalars.contains { $0.value > 0x7F }
+            let font = mark ? UIFont.chineseMarks(ofSize: size, weight: nativeFont ? .regular : .medium)
+                : nativeFont ? UIFont.systemFont(ofSize: size) : UIFont.monospacedSystemFont(ofSize: size, weight: .medium)
             let fittedFont = font.withSize(min(size, max(1, floor(size * cap.height / font.lineHeight)), max(1, floor(size * (cap.width - 2) / max(1, value.size(withAttributes: [.font: font]).width)))))
             let attr: [NSAttributedString.Key: Any] = [.font: fittedFont, .foregroundColor: active ? theme.palette.accentInk : theme.palette.ink]
             let textSize = value.size(withAttributes: attr)
@@ -364,6 +368,13 @@ final class KeySurface: UIView {
     }
     #endif
 
+}
+extension UIFont {
+    /// The system font draws curly quotes, dashes and ellipses in their Latin shapes, where an
+    /// opening quote is hard to tell from a closing one. Chinese marks use the full-width forms.
+    static func chineseMarks(ofSize size: CGFloat, weight: UIFont.Weight = .regular) -> UIFont {
+        UIFont(name: weight == .medium ? "PingFangSC-Medium" : "PingFangSC-Regular", size: size) ?? .systemFont(ofSize: size, weight: weight)
+    }
 }
 private final class UtilityKeycapButton: KeycapButton {
     var onAccessibilityActivate: (() -> Bool)?
