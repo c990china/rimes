@@ -35,6 +35,9 @@ public final class InputContractInstrumentation extends Instrumentation {
             }
             removeMonitor(monitor); check(host!=null,"validation host launch within 15 seconds");
             waitForIdleSync(); report("START contract");
+            // OEMs can deny an implicit show after an instrumentation process restart.
+            // Begin every contract with a real editor touch so IME ownership is observable.
+            touchHostField();
             if("closure-fields".equals(arguments.getString("mode"))) closureFields();
             else if("delete-video".equals(arguments.getString("mode"))) deleteVideoContract();
             else if("closure-punctuation".equals(arguments.getString("mode"))) closurePunctuation();
@@ -704,7 +707,7 @@ public final class InputContractInstrumentation extends Instrumentation {
     private void chooseChord(boolean split) { tap("键位布局"); tap(split?"布局 分体并击":"布局 正交并击"); tap("键位布局"); waitButton("D"); }
     /** New community feedback contract; existing modes retain their independent assertions. */
     private void communityContract() throws Exception {
-        touchHostField(); focusAny(host.first); layout("26"); pinyin();
+        focusAny(host.first); layout("26"); pinyin();
         int start=assertions;
         type("nihao"); waitButton("你好"); touch("，"); expect(host.first,"你好，","footer comma confirms current Chinese before punctuation");
         type("nihao"); waitButton("你好"); touch("。"); expect(host.first,"你好，你好。","footer period confirms current Chinese before punctuation");
@@ -836,7 +839,7 @@ public final class InputContractInstrumentation extends Instrumentation {
     }
     /** Raw InputDispatcher streams exercise native split clicks on the actual ordinary IME. */
     private void closureThumbs() {
-        touchHostField(); focusAny(host.first); layout("26"); pinyin(); tap("中");
+        focusAny(host.first); layout("26"); pinyin(); tap("中");
         android.graphics.Rect q=bounds("q"),p=bounds("p"),delete=bounds("Delete");
         for(boolean rightFirst:new boolean[]{false,true}) {
             runOnMainSync(() -> host.first.setText(""));
